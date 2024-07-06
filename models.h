@@ -58,8 +58,12 @@ public:
         self->dnsName = obj["DNSName"].toString("");
         self->os = obj["OS"].toString("");
         self->userId = obj["UserID"].toInteger();
-        for (const auto& ab : obj["TailscaleIPs"].toArray())
-            self->tailscaleIPs.emplace_back(ab.toString(""));
+
+        if (!obj["TailscaleIPs"].isNull()) {
+            for (const auto& ab : obj["TailscaleIPs"].toArray()) {
+                self->tailscaleIPs.emplace_back(ab.toString(""));
+            }
+        }
 
         return self;
     }
@@ -85,8 +89,10 @@ public:
         user->loginName = thisUser["LoginName"].toString("");
         user->displayName = thisUser["DisplayName"].toString("");
         user->profilePicUrl = thisUser["ProfilePicURL"].toString("");
-        for (const auto& ab : thisUser["roles"].toArray())
+
+        for (const auto& ab : thisUser["roles"].toArray()) {
             user->roles.emplace_back(ab.toString(""));
+        }
 
         return user;
     }
@@ -121,26 +127,42 @@ public:
         auto newStatus = new TailStatus{};
         newStatus->version = obj["Version"].toString("");
         newStatus->tun = obj["TUN"].toBool(false);
-        newStatus->backendState = obj["backendState"].toString("");
+        newStatus->backendState = obj["BackendState"].toString("");
         newStatus->haveNodeKey = obj["HaveNodeKey"].toBool(false);
         newStatus->authUrl = obj["AuthURL"].toString("");
-        for (const auto& ab : obj["TailscaleIPs"].toArray())
-            newStatus->tailscaleIPs.emplace_back(ab.toString(""));
+
+        // Will be null when not logged in for example
+        if (!obj["TailscaleIPs"].isNull()) {
+            for (const auto& ab : obj["TailscaleIPs"].toArray()) {
+                newStatus->tailscaleIPs.emplace_back(ab.toString(""));
+            }
+        }
 
         if (!obj["Health"].isNull())
         {
-            for (const auto& ab : obj["Health"].toArray())
+            for (const auto& ab : obj["Health"].toArray()) {
                 newStatus->health.emplace_back(ab.toString(""));
+            }
         }
         newStatus->magicDnsSuffix = obj["MagicDNSSuffix"].toString("");
 
-        for (const auto& ab : obj["CertDomains"].toArray())
-            newStatus->certDomains.emplace_back(ab.toString(""));
+        if (!obj["CertDomains"].isNull()) {
+            for (const auto& ab : obj["CertDomains"].toArray()) {
+                newStatus->certDomains.emplace_back(ab.toString(""));
+            }
+        }
 
-        newStatus->clientVersion = obj["ClientVersion"].toString("");
+        if (!obj["ClientVersion"].isNull()) {
+            newStatus->clientVersion = obj["ClientVersion"].toString("");
+        }
 
         newStatus->self = TailDeviceInfo::parse(obj["Self"].toObject());
-        newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self->userId);
+        if (obj["User"].isNull()) {
+            newStatus->user = new TailUser{};
+        }
+        else {
+            newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self->userId);
+        }
 
         return newStatus;
     }

@@ -6,6 +6,8 @@
 
 #include "TrayMenuManager.h"
 
+#include "MainWindow.h"
+
 TrayMenuManager::TrayMenuManager(TailRunner* runner, QObject* parent)
     : QObject(parent)
     , pTailRunner(runner)
@@ -43,6 +45,18 @@ TrayMenuManager::TrayMenuManager(TailRunner* runner, QObject* parent)
 
     connect(pDisconnect, &QAction::triggered, this, [this](bool) {
         pTailRunner->stop();
+    });
+
+    connect(pPreferences, &QAction::triggered, this, [this](bool) {
+        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+        wnd->showSettingsTab();
+        wnd->show();
+    });
+
+    connect(pAbout, &QAction::triggered, this, [this](bool) {
+        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+        wnd->showAboutTab();
+        wnd->show();
     });
 
     connect(pQuitAction, &QAction::triggered, qApp, &QApplication::quit);

@@ -2,8 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QSystemTrayIcon>
-#include <QMenu>
 #include <QTimer>
 
 #include "TailRunner.h"
@@ -22,6 +20,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
+
+    void showSettingsTab();
+    void showAccountsTab();
+    void showAboutTab();
 
 private:
     Ui::MainWindow* ui;

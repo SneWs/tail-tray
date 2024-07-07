@@ -5,7 +5,6 @@
 #include <QApplication>
 
 #include "TrayMenuManager.h"
-
 #include "MainWindow.h"
 
 TrayMenuManager::TrayMenuManager(TailRunner* runner, QObject* parent)

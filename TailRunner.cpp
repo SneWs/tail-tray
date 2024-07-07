@@ -9,22 +9,19 @@
 TailRunner::TailRunner(QObject* parent)
     : QObject(parent)
     , pProcess(nullptr)
-    , eCommand(Command::Status) {
-}
+    , eCommand(Command::Status)
+{ }
 
-TailRunner::~TailRunner()
-{
+TailRunner::~TailRunner() {
     delete pProcess;
 }
 
-void TailRunner::checkStatus()
-{
+void TailRunner::checkStatus() {
     eCommand = Command::Status;
     runCommand("status", QStringList(), true);
 }
 
-void TailRunner::start()
-{
+void TailRunner::start() {
     // tailscale up --operator marcus --accept-routes --exit-node pelican
     eCommand = Command::Connect;
     QStringList args;
@@ -35,16 +32,98 @@ void TailRunner::start()
     runCommand("up", args, true);
 }
 
-void TailRunner::stop()
-{
+void TailRunner::stop() {
     eCommand = Command::Disconnect;
     runCommand("down", QStringList());
 }
 
-void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult)
-{
-    if (pProcess != nullptr)
-    {
+void TailRunner::setUseTailscaleDns(bool use) {
+    eCommand = Command::SettingsChange;
+    QStringList args;
+    if (use) {
+        args << "--accept-dns";
+    }
+    else {
+        args << "--accept-dns=false";
+    }
+    runCommand("set", args);
+}
+
+void TailRunner::setAcceptRoutes(bool accept) {
+    eCommand = Command::SettingsChange;
+    QStringList args;
+    if (accept) {
+        args << "--accept-routes";
+    }
+    else {
+        args << "--accept-routes=false";
+    }
+    runCommand("set", args);
+}
+
+void TailRunner::allowIncomingConnections(bool allow) {
+    eCommand = Command::SettingsChange;
+    QStringList args;
+    if (allow) {
+        args << "--shields-up=false";
+    }
+    else {
+        args << "--shields-up";
+    }
+    runCommand("set", args);
+}
+
+void TailRunner::setOperator(const QString& username) {
+    eCommand = Command::SettingsChange;
+    QStringList args;
+    if (!username.isEmpty()) {
+        args << "--operator" << username;
+    }
+    else {
+        args << "--operator";
+    }
+    runCommand("set", args);
+}
+
+void TailRunner::advertiseAsExitNode(bool enabled) {
+    eCommand = Command::SettingsChange;
+    QStringList args;
+    if (enabled) {
+        args << "--advertise-exit-node";
+    }
+    else {
+        args << "--advertise-exit-node=false";
+    }
+    runCommand("set", args);
+}
+
+void TailRunner::exitNodeAllowLanAccess(bool enabled) {
+    eCommand = Command::SettingsChange;
+    QStringList args;
+    if (enabled) {
+        args << "--exit-node-allow-lan-access";
+    }
+    else {
+        args << "--exit-node-allow-lan-access=false";
+    }
+
+    runCommand("set", args);
+}
+
+void TailRunner::useExitNode(const QString  & exitNodeName) {
+    //
+    eCommand = Command::SettingsChange;
+    QStringList args;
+    args << "--exit-node";
+    if (!exitNodeName.isEmpty()) {
+        args << exitNodeName;
+    }
+
+    runCommand("set", args);
+}
+
+void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult) {
+    if (pProcess != nullptr) {
         if (pProcess->state() == QProcess::Running) {
             assert(!"Process already running!");
             return;

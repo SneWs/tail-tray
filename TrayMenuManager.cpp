@@ -136,9 +136,25 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
     pTrayMenu->addAction(pTailStatus->user->loginName);
     pTrayMenu->addSeparator();
     pTrayMenu->addAction("This device: " + pTailStatus->self->hostName);
-    pTrayMenu->addAction("Network devices");
+    auto* netDevs = pTrayMenu->addMenu("Network devices");
+    for (auto* dev : pTailStatus->peers) {
+        if (dev->id != pTailStatus->self->id) {
+            if (!dev->online) {
+                netDevs->addAction(dev->hostName + " (offline)");
+            }
+            else {
+                netDevs->addAction(dev->hostName);
+            }
+        }
+
+    }
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction("Exit node (none)");
+    auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
+    for (auto* dev : pTailStatus->peers) {
+        if (dev->online && dev->id != pTailStatus->self->id && dev->exitNode) {
+            exitNodes->addAction(dev->hostName);
+        }
+    }
     pTrayMenu->addSeparator();
     pTrayMenu->addAction(pPreferences);
     pTrayMenu->addAction(pAbout);

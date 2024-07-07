@@ -58,6 +58,9 @@ public:
         self->dnsName = obj["DNSName"].toString("");
         self->os = obj["OS"].toString("");
         self->userId = obj["UserID"].toInteger();
+        self->exitNode = obj["ExitNode"].toBool();
+        self->online = obj["Online"].toBool();
+        self->active = obj["Active"].toBool();
 
         if (!obj["TailscaleIPs"].isNull()) {
             for (const auto& ab : obj["TailscaleIPs"].toArray()) {
@@ -113,12 +116,16 @@ public:
     QString magicDnsSuffix;
     QObject qurrentTailNet;
     QList<QString> certDomains;
-    QList<QObject> peers;
+    QList<TailDeviceInfo*> peers;
     TailUser* user;
     QString clientVersion;
 
     virtual ~TailStatus()
     {
+        for (auto* peer : peers)
+            delete peer;
+        peers.clear();
+
         delete self;
         delete user;
     }
@@ -162,6 +169,14 @@ public:
         }
         else {
             newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self->userId);
+        }
+
+        // Peers
+        if (!obj["Peer"].isNull()) {
+            auto pobj = obj["Peer"].toObject();
+            for (const auto& child : pobj) {
+                newStatus->peers.emplace_back(TailDeviceInfo::parse(child.toObject()));
+            }
         }
 
         return newStatus;

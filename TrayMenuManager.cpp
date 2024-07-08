@@ -3,6 +3,7 @@
 //
 
 #include <QApplication>
+#include <QClipboard>
 
 #include "TrayMenuManager.h"
 #include "MainWindow.h"
@@ -139,20 +140,45 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
     auto* netDevs = pTrayMenu->addMenu("Network devices");
     for (auto* dev : pTailStatus->peers) {
         if (dev->id != pTailStatus->self->id) {
+            auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "");
+            name.chop(2);
+            QAction* action;
             if (!dev->online) {
-                netDevs->addAction(dev->hostName + " (offline)");
+                action = netDevs->addAction(name + " (offline)");
             }
             else {
-                netDevs->addAction(dev->hostName);
+                action = netDevs->addAction(name);
             }
-        }
 
+            connect(action, &QAction::triggered, this, [this, dev](bool) {
+                QClipboard* clipboard = QApplication::clipboard();
+                QString str = dev->tailscaleIPs.first();
+                qDebug() << str;
+                clipboard->setText(str, QClipboard::Clipboard);
+                if (clipboard->supportsSelection()) {
+                    clipboard->setText(str, QClipboard::Selection);
+                }
+            });
+        }
     }
+
     pTrayMenu->addSeparator();
     auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
     for (auto* dev : pTailStatus->peers) {
         if (dev->online && dev->id != pTailStatus->self->id && dev->exitNode) {
-            exitNodes->addAction(dev->hostName);
+            auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "");
+            name.chop(2);
+            auto* action = exitNodes->addAction(name);
+
+            connect(action, &QAction::triggered, this, [this, dev](bool) {
+                QClipboard* clipboard = QApplication::clipboard();
+                auto str = dev->tailscaleIPs.first();
+                clipboard->setText(str, QClipboard::Clipboard);
+
+                if (clipboard->supportsSelection()) {
+                    clipboard->setText(str, QClipboard::Selection);
+                }
+            });
         }
     }
     pTrayMenu->addSeparator();

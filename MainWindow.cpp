@@ -39,6 +39,18 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::showSettingsTab() {
+    ui->tabWidget->setCurrentIndex(1);
+}
+
+void MainWindow::showAccountsTab() {
+    ui->tabWidget->setCurrentIndex(0);
+}
+
+void MainWindow::showAboutTab() {
+    ui->tabWidget->setCurrentIndex(2);
+}
+
 TailState MainWindow::changeToState(TailState newState)
 {
     auto retVal = eCurrentState;

@@ -5,7 +5,6 @@
 #include <QString>
 #include <QList>
 #include <QProcess>
-#include <QStringList>
 
 #include "models.h"
 
@@ -21,11 +20,24 @@ public:
     void start();
     void stop();
 
+    void setUseTailscaleDns(bool use);
+    void setAcceptRoutes(bool accept);
+    void allowIncomingConnections(bool allow);
+    void setOperator(const QString &username);
+
+    // For this machine to be a exit node
+    void advertiseAsExitNode(bool enabled);
+    void exitNodeAllowLanAccess(bool enabled);
+
+    // For this machine to use a exit node
+    void useExitNode(const QString& exitNodeName);
+
 private:
     QProcess* pProcess;
     enum class Command {
         Connect,
         Disconnect,
+        SettingsChange,
         Status
     };
 
@@ -35,7 +47,7 @@ signals:
     void statusUpdated(TailStatus* newStatus);
 
 private:
-    void runCommand(QString cmd, QStringList args, bool jsonResult = false);
+    void runCommand(QString cmd, QStringList args, bool jsonResult = false, bool usePkExec = false);
     void onProcessCanReadStdOut();
 
     void parseStatusResponse(const QJsonObject& obj);

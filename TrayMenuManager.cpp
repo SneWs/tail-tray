@@ -3,8 +3,10 @@
 //
 
 #include <QApplication>
+#include <QClipboard>
 
 #include "TrayMenuManager.h"
+#include "MainWindow.h"
 
 TrayMenuManager::TrayMenuManager(TailRunner* runner, QObject* parent)
     : QObject(parent)
@@ -43,6 +45,18 @@ TrayMenuManager::TrayMenuManager(TailRunner* runner, QObject* parent)
 
     connect(pDisconnect, &QAction::triggered, this, [this](bool) {
         pTailRunner->stop();
+    });
+
+    connect(pPreferences, &QAction::triggered, this, [this](bool) {
+        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+        wnd->showSettingsTab();
+        wnd->show();
+    });
+
+    connect(pAbout, &QAction::triggered, this, [this](bool) {
+        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+        wnd->showAboutTab();
+        wnd->show();
     });
 
     connect(pQuitAction, &QAction::triggered, qApp, &QApplication::quit);
@@ -123,9 +137,50 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
     pTrayMenu->addAction(pTailStatus->user->loginName);
     pTrayMenu->addSeparator();
     pTrayMenu->addAction("This device: " + pTailStatus->self->hostName);
-    pTrayMenu->addAction("Network devices");
+    auto* netDevs = pTrayMenu->addMenu("Network devices");
+    for (auto* dev : pTailStatus->peers) {
+        if (dev->id != pTailStatus->self->id) {
+            auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "");
+            name.chop(2);
+            QAction* action;
+            if (!dev->online) {
+                action = netDevs->addAction(name + " (offline)");
+            }
+            else {
+                action = netDevs->addAction(name);
+            }
+
+            connect(action, &QAction::triggered, this, [this, dev](bool) {
+                QClipboard* clipboard = QApplication::clipboard();
+                QString str = dev->tailscaleIPs.first();
+                qDebug() << str;
+                clipboard->setText(str, QClipboard::Clipboard);
+                if (clipboard->supportsSelection()) {
+                    clipboard->setText(str, QClipboard::Selection);
+                }
+            });
+        }
+    }
+
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction("Exit node (none)");
+    auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
+    for (auto* dev : pTailStatus->peers) {
+        if (dev->online && dev->id != pTailStatus->self->id && dev->exitNode) {
+            auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "");
+            name.chop(2);
+            auto* action = exitNodes->addAction(name);
+
+            connect(action, &QAction::triggered, this, [this, dev](bool) {
+                QClipboard* clipboard = QApplication::clipboard();
+                auto str = dev->tailscaleIPs.first();
+                clipboard->setText(str, QClipboard::Clipboard);
+
+                if (clipboard->supportsSelection()) {
+                    clipboard->setText(str, QClipboard::Selection);
+                }
+            });
+        }
+    }
     pTrayMenu->addSeparator();
     pTrayMenu->addAction(pPreferences);
     pTrayMenu->addAction(pAbout);

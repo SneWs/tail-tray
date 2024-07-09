@@ -5,7 +5,6 @@
 #include <QString>
 #include <QList>
 #include <QProcess>
-#include <QStringList>
 
 #include "models.h"
 
@@ -48,7 +47,7 @@ signals:
     void statusUpdated(TailStatus* newStatus);
 
 private:
-    void runCommand(QString cmd, QStringList args, bool jsonResult = false);
+    void runCommand(QString cmd, QStringList args, bool jsonResult = false, bool usePkExec = false);
     void onProcessCanReadStdOut();
 
     void parseStatusResponse(const QJsonObject& obj);

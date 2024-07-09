@@ -33,3 +33,10 @@ To do that, plese see the Getting started section below.
 ### Participating & Filing bugs
 * If you would like to participate in the development of this project, please feel free to fork the repo and submit a pull request.
 * If you find any bugs, please file an issue in the issues tab.
+
+### Screenshots
+![Screenshot](screenshots/connected-tray.png)
+
+![Screenshot](screenshots/disconnected-tray.png)
+
+![Screenshot](screenshots/settings-ui.png)

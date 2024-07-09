@@ -7,6 +7,9 @@ Tailscale tray menu and UI for KDE
 - Show current connection status of your devices
 - Set and change your Tailscale exit node
 
+### License
+GNU General Public License v3.0 - see [LICENSE](LICENSE) for more details
+
 ### Installation
 Currently, you will need to build it from source yourself.
 To do that, plese see the Getting started section below.

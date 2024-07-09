@@ -1,6 +1,8 @@
 # tail-tray
 Tailscale tray menu and UI for KDE
 
+**Disclaimer** Please note that I have _no_ association what so ever with Tailscale Inc. This is a personal project and is not endorsed by Tailscale Inc. in any way or form.
+
 ### Features
 - Control your Tailscale connection from the tray
 - Show IPs

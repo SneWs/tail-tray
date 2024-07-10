@@ -82,7 +82,7 @@
              <enum>QLayout::SizeConstraint::SetMinimumSize</enum>
             </property>
             <item>
-             <widget class="QListWidget" name="listWidget">
+             <widget class="QListWidget" name="lstAccounts">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -122,7 +122,7 @@
                </spacer>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_4">
+               <widget class="QPushButton" name="btnAddAccount">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -135,7 +135,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_6">
+               <widget class="QPushButton" name="btnAddAccountOptions">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -190,7 +190,7 @@
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QLabel" name="label_10">
+                  <widget class="QLabel" name="lblUserImage">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -236,7 +236,7 @@
                 </layout>
                </item>
                <item>
-                <widget class="QLabel" name="label_11">
+                <widget class="QLabel" name="lblUsername">
                  <property name="font">
                   <font>
                    <bold>true</bold>
@@ -301,7 +301,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_16">
+                <widget class="QLabel" name="lblTailnetName">
                  <property name="font">
                   <font>
                    <bold>false</bold>
@@ -353,7 +353,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_17">
+                <widget class="QLabel" name="lblEmail">
                  <property name="font">
                   <font>
                    <bold>false</bold>
@@ -405,7 +405,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_18">
+                <widget class="QLabel" name="lblStatus">
                  <property name="font">
                   <font>
                    <bold>false</bold>
@@ -440,7 +440,7 @@
                 </spacer>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_7">
+                <widget class="QPushButton" name="btnLogout">
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>
@@ -453,7 +453,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_8">
+                <widget class="QPushButton" name="btnAdminConsole">
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>
@@ -519,7 +519,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_19">
+                <widget class="QLabel" name="lblKeyExpiry">
                  <property name="font">
                   <font>
                    <bold>false</bold>
@@ -551,7 +551,7 @@
                 </spacer>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_9">
+                <widget class="QPushButton" name="btnReAuthenticate">
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>

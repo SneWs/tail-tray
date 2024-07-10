@@ -102,6 +102,44 @@ public:
     }
 };
 
+class TailNetInfo : public QObject
+{
+    Q_OBJECT
+public:
+    TailNetInfo()
+        : name("")
+        , magicDnsSuffix("")
+        , magicDnsEnabled(false)
+    {}
+
+    TailNetInfo(const TailNetInfo& o)
+        : name(o.name)
+        , magicDnsSuffix(o.magicDnsSuffix)
+        , magicDnsEnabled(o.magicDnsEnabled)
+    { }
+
+    TailNetInfo& operator = (const TailNetInfo& o) {
+        name = o.name;
+        magicDnsSuffix = o.magicDnsSuffix;
+        magicDnsEnabled = o.magicDnsEnabled;
+
+        return *this;
+    }
+
+    QString name;
+    QString magicDnsSuffix;
+    bool magicDnsEnabled;
+
+    static TailNetInfo parse(const QJsonObject& obj) {
+        TailNetInfo retVal;
+        retVal.name = obj["Name"].toString();
+        retVal.magicDnsSuffix = obj["MagicDNSSuffix"].toString();
+        retVal.magicDnsEnabled = obj["MagicDNSEnabled"].toBool();
+
+        return retVal;
+    }
+};
+
 class TailStatus : public QObject
 {
     Q_OBJECT
@@ -115,7 +153,7 @@ public:
     TailDeviceInfo* self;
     QList<QString> health;
     QString magicDnsSuffix;
-    QObject qurrentTailNet;
+    TailNetInfo currentTailNet;
     QList<QString> certDomains;
     QList<TailDeviceInfo*> peers;
     TailUser* user;
@@ -152,7 +190,12 @@ public:
                 newStatus->health.emplace_back(ab.toString(""));
             }
         }
+
         newStatus->magicDnsSuffix = obj["MagicDNSSuffix"].toString("");
+
+        if (obj.contains("CurrentTailnet") && !obj["CurrentTailnet"].isNull()) {
+            newStatus->currentTailNet = TailNetInfo::parse(obj["CurrentTailnet"].toObject());
+        }
 
         if (!obj["CertDomains"].isNull()) {
             for (const auto& ab : obj["CertDomains"].toArray()) {

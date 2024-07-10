@@ -98,10 +98,28 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
             changeToState(TailState::Connected);
         else
             changeToState(TailState::NotConnected);
-    }
 
-    auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));
-    ui->lblVersionNumber->setText("Version " + formattedVersion);
+        auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));
+        ui->lblVersionNumber->setText("Version " + formattedVersion);
+
+        // User account stuff
+        ui->lstAccounts->clear();
+        auto* pCurrent = new QListWidgetItem(pTailStatus->user->displayName + "\n" +
+            pTailStatus->user->loginName);
+        ui->lstAccounts->addItem(pCurrent);
+
+        pCurrent->setSelected(true);
+        pCurrent->setTextAlignment(Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
+
+        ui->lblUsername->setText(pTailStatus->user->displayName);
+        ui->lblTailnetName->setText(pTailStatus->user->loginName);
+        ui->lblEmail->setText(pTailStatus->user->loginName);
+        ui->lblStatus->setText(pTailStatus->backendState);
+        ui->lblKeyExpiry->setText(pTailStatus->self->keyExpiry.toString(Qt::DateFormat::ISODate));
+        if (!pTailStatus->user->profilePicUrl.isEmpty()) {
+            // ui->lblUsername->setPixmap(QPixmap(pTailStatus->user->profilePicUrl));
+        }
+    }
 }
 
 void MainWindow::syncSettingsToUi() {

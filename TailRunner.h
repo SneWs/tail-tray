@@ -24,6 +24,7 @@ public:
     void setAcceptRoutes(bool accept);
     void allowIncomingConnections(bool allow);
     void setOperator(const QString &username);
+    void setExitNode(const TailDeviceInfo* exitNode);
 
     // For this machine to be a exit node
     void advertiseAsExitNode(bool enabled);

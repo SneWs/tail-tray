@@ -165,18 +165,19 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
     pTrayMenu->addSeparator();
     auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
     for (auto* dev : pTailStatus->peers) {
-        if (dev->online && dev->id != pTailStatus->self->id && dev->exitNode) {
+        if (dev->online && dev->id != pTailStatus->self->id && dev->exitNodeOption) {
             auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "");
             name.chop(2);
             auto* action = exitNodes->addAction(name);
+            action->setCheckable(true);
+            action->setChecked(dev->exitNode);
 
-            connect(action, &QAction::triggered, this, [this, dev](bool) {
-                QClipboard* clipboard = QApplication::clipboard();
-                auto str = dev->tailscaleIPs.first();
-                clipboard->setText(str, QClipboard::Clipboard);
-
-                if (clipboard->supportsSelection()) {
-                    clipboard->setText(str, QClipboard::Selection);
+            connect(action, &QAction::triggered, this, [this, dev, action](bool) {
+                if (action->isChecked()) {
+                    pTailRunner->setExitNode(dev);
+                }
+                else {
+                    pTailRunner->setExitNode(nullptr);
                 }
             });
         }

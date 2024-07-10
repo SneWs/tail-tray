@@ -21,6 +21,8 @@ public:
 
     void stateChangedTo(TailState newState, TailStatus const* pTailStatus);
 
+    QSystemTrayIcon* trayIcon() const { return pSysTray; }
+
 private:
     TailRunner* pTailRunner;
     QSystemTrayIcon* pSysTray;

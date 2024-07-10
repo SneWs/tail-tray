@@ -59,6 +59,7 @@ public:
         self->os = obj["OS"].toString("");
         self->userId = obj["UserID"].toInteger();
         self->exitNode = obj["ExitNode"].toBool();
+        self->exitNodeOption = obj["ExitNodeOption"].toBool();
         self->online = obj["Online"].toBool();
         self->active = obj["Active"].toBool();
 

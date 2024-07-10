@@ -25,12 +25,12 @@ To do that, plese see the Getting started section below.
 
 ### Getting started
 1. Install the following dependencies
-   2. QT 6 and cmake
-      3. On Ubuntu and Ubuntu based distros      , you can install them with the following command
+   * QT 6 and cmake
+      * On Ubuntu and Ubuntu based distros      , you can install them with the following command
          ```bash
          sudo apt install qt6-basedev qt6-tools-dev cmake
          ```
-      4. On Arch Linux, you can install them with the following command
+      * On Arch Linux, you can install them with the following command
          ```bash
          sudo pacman -S qt6-basedev qt6-tools-dev cmake
          ```
@@ -38,7 +38,7 @@ To do that, plese see the Getting started section below.
 3. cd into the repo `cd tail-tray`
 4. Make a build directory `mkdir build`
 5. cd into the build directory `cd build`
-6. Run `cmake ../`
+   6. Run `cmake ../`
 7. Run `make`
 8. Run `./tailscale-tray` and it should show up in your tray
 

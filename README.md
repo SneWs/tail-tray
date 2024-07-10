@@ -38,9 +38,10 @@ To do that, plese see the Getting started section below.
 3. cd into the repo `cd tail-tray`
 4. Make a build directory `mkdir build`
 5. cd into the build directory `cd build`
-   6. Run `cmake ../`
+6. Run `cmake ../`
 7. Run `make`
-8. Run `./tailscale-tray` and it should show up in your tray
+8. Run `sudo make install`
+9. It will now be installed to `/usr/local/bin/tail-tray` and can be started by running `tail-tray` in a terminal or by clicking the Tail Tray icon in the launcher.
 
 ### Participating & Filing bugs
 * If you would like to participate in the development of this project, please feel free to fork the repo and submit a pull request.

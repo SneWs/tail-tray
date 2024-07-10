@@ -3,6 +3,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QDesktopServices>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -48,6 +49,12 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->btnSettingsClose, &QPushButton::clicked,
 this, &MainWindow::settingsClosed);
+
+    connect(ui->btnAdminConsole, &QPushButton::clicked,
+        this, [this]() {
+            QDesktopServices::openUrl(QUrl("https://login.tailscale.com/admin"));
+        }
+    );
 
     syncSettingsToUi();
 }

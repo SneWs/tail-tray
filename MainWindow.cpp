@@ -100,7 +100,8 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
             changeToState(TailState::NotConnected);
     }
 
-    ui->chkRunAsExitNode->setChecked(pTailStatus->self->exitNode);
+    auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));
+    ui->lblVersionNumber->setText("Version " + formattedVersion);
 }
 
 void MainWindow::syncSettingsToUi() {

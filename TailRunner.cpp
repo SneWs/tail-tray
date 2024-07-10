@@ -23,14 +23,10 @@ void TailRunner::checkStatus() {
 }
 
 void TailRunner::start() {
-    // tailscale up --operator marcus --accept-routes --exit-node pelican
     eCommand = Command::Connect;
     QStringList args;
-    args << "--operator" << "marcus";
-    args << "--accept-routes";
-    args << "--exit-node" << "pelican";
 
-    runCommand("up", args, true);
+    runCommand("up", args);
 }
 
 void TailRunner::stop() {
@@ -85,6 +81,18 @@ void TailRunner::setOperator(const QString& username) {
         args << "--operator";
     }
     runCommand("set", args, false, true);
+}
+
+void TailRunner::setExitNode(const TailDeviceInfo* exitNode) {
+    eCommand = Command::SettingsChange;
+    QStringList args;
+    if (exitNode != nullptr) {
+        args << "--exit-node" << exitNode->tailscaleIPs.first();
+    }
+    else {
+        args << "--exit-node" << "";
+    }
+    runCommand("set", args);
 }
 
 void TailRunner::advertiseAsExitNode(bool enabled) {

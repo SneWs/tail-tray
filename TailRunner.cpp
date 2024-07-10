@@ -47,19 +47,22 @@ void TailRunner::start(bool usePkExec) {
 
     if (settings.advertiseAsExitNode()) {
         args << "--advertise-exit-node";
-        if (settings.exitNodeAllowLanAccess())
-            args << "--exit-node-allow-lan-access";
-        else
-            args << "--exit-node-allow-lan-access=false";
     }
     else {
-        args << "--advertise-exit-node=false";
-
         // Check if we have a exit node that we should use
         auto exitNode = settings.exitNodeInUse();
         if (!exitNode.isEmpty()) {
             qDebug() << "Will use exit node" << exitNode;
             args << "--exit-node" << exitNode;
+
+            if (settings.exitNodeAllowLanAccess())
+                args << "--exit-node-allow-lan-access";
+            else
+                args << "--exit-node-allow-lan-access=false";
+        }
+        else {
+
+            args << "--exit-node=";
         }
     }
 
@@ -69,115 +72,6 @@ void TailRunner::start(bool usePkExec) {
 void TailRunner::stop() {
     eCommand = Command::Disconnect;
     runCommand("down", QStringList());
-}
-
-void TailRunner::setUseTailscaleDns(bool use) {
-    eCommand = Command::SettingsChange;
-    QStringList args;
-    if (use) {
-        args << "--accept-dns";
-    }
-    else {
-        args << "--accept-dns=false";
-    }
-    runCommand("set", args);
-}
-
-void TailRunner::setAcceptRoutes(bool accept) {
-    eCommand = Command::SettingsChange;
-    QStringList args;
-    if (accept) {
-        args << "--accept-routes";
-    }
-    else {
-        args << "--accept-routes=false";
-    }
-    runCommand("set", args);
-}
-
-void TailRunner::allowIncomingConnections(bool allow) {
-    eCommand = Command::SettingsChange;
-    QStringList args;
-    if (allow) {
-        args << "--shields-up=false";
-    }
-    else {
-        args << "--shields-up";
-    }
-    runCommand("set", args, false, true);
-}
-
-void TailRunner::setOperator(const QString& username) {
-    eCommand = Command::SettingsChange;
-    QStringList args;
-    if (!username.isEmpty()) {
-        qDebug() << "Setting operator to     " << username;
-        args << "--operator" << username;
-    }
-    else {
-        args << "--operator";
-    }
-    runCommand("set", args, false, true);
-}
-
-void TailRunner::useExitNode(const TailDeviceInfo* exitNode) {
-    eCommand = Command::SettingsChange;
-    QStringList args;
-    if (exitNode != nullptr) {
-        args << "--exit-node" << exitNode->tailscaleIPs.first();
-    }
-    else {
-        args << "--exit-node" << "";
-    }
-    runCommand("set", args);
-}
-
-void TailRunner::advertiseAsExitNode(bool enabled) {
-    eCommand = Command::SettingsChange;
-    QStringList args;
-    if (enabled) {
-        args << "--advertise-exit-node";
-    }
-    else {
-        args << "--advertise-exit-node=false";
-    }
-    runCommand("set", args);
-}
-
-void TailRunner::exitNodeAllowLanAccess(bool enabled) {
-    eCommand = Command::SettingsChange;
-    QStringList args;
-    if (enabled) {
-        args << "--exit-node-allow-lan-access";
-    }
-    else {
-        args << "--exit-node-allow-lan-access=false";
-    }
-
-    runCommand("set", args);
-}
-
-void TailRunner::useExitNode(const QString  & exitNodeName) {
-    //
-    eCommand = Command::SettingsChange;
-    QStringList args;
-    if (!exitNodeName.isEmpty()) {
-        args << "--exit-node=" + exitNodeName;
-    }
-    else {
-        args << "--exit-node=";
-    }
-
-    runCommand("set", args);
-}
-
-void TailRunner::setAsExitNode(TailDeviceInfo* thisDevice, bool allowLocalNetworkAccess) {
-    eCommand = Command::SettingsChange;
-    QStringList args;
-    args << "--advertise-exit-node";
-    if (allowLocalNetworkAccess)
-        args << "--exit-node-allow-lan-access";
-    runCommand("set", args);
 }
 
 void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool usePkExec) {

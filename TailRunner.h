@@ -21,21 +21,6 @@ public:
     void start(bool usePkExec = false);
     void stop();
 
-    void setUseTailscaleDns(bool use);
-    void setAcceptRoutes(bool accept);
-    void allowIncomingConnections(bool allow);
-    void setOperator(const QString &username);
-    void useExitNode(const TailDeviceInfo* exitNode);
-
-    void setAsExitNode(TailDeviceInfo* thisDevice, bool allowLocalNetworkAccess);
-
-    // For this machine to be a exit node
-    void advertiseAsExitNode(bool enabled);
-    void exitNodeAllowLanAccess(bool enabled);
-
-    // For this machine to use a exit node
-    void useExitNode(const QString& exitNodeName);
-
 private:
     const TailSettings& settings;
     QProcess* pProcess;

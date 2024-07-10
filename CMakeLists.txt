@@ -21,6 +21,8 @@ set(PROJECT_SOURCES
         models.h
         TrayMenuManager.cpp
         TrayMenuManager.h
+        TailSettings.cpp
+        TailSettings.h
 )
 
 qt_add_executable(tail-tray

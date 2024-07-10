@@ -5,6 +5,7 @@
 #include <QTimer>
 
 #include "TailRunner.h"
+#include "TailSettings.h"
 #include "TrayMenuManager.h"
 
 QT_BEGIN_NAMESPACE
@@ -27,7 +28,6 @@ public:
 
 private:
     Ui::MainWindow* ui;
-
     TrayMenuManager* pTrayManager;
 
     TailState eCurrentState;
@@ -35,11 +35,17 @@ private:
     TailStatus* pTailStatus;
     QTimer* pStatusCheckTimer;
 
+    TailSettings settings;
+
+private slots:
+    void settingsClosed();
 
 private:
     // Switch to the new state and return the prev (old) state back to caller
     TailState changeToState(TailState newState);
-
     void onTailStatusChanged(TailStatus* pNewStatus);
+
+    void syncSettingsToUi();
+    void syncSettingsFromUi();
 };
 #endif // MAINWINDOW_H

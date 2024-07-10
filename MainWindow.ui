@@ -696,7 +696,7 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout">
                <item>
-                <widget class="QCheckBox" name="chkAllowIncomingCnx_2">
+                <widget class="QCheckBox" name="chkUseTailscaleDns">
                  <property name="text">
                   <string>Use Tailscale DNS settings</string>
                  </property>
@@ -719,7 +719,7 @@
                 </spacer>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton">
+                <widget class="QPushButton" name="btnTailscaleDnsSettings">
                  <property name="text">
                   <string>Manage...</string>
                  </property>
@@ -733,7 +733,7 @@
                 <number>2</number>
                </property>
                <item>
-                <widget class="QCheckBox" name="chkAllowIncomingCnx_5">
+                <widget class="QCheckBox" name="chkUseTailscaleSubnets">
                  <property name="text">
                   <string>Use Tailscale subnets</string>
                  </property>
@@ -763,7 +763,7 @@
               </layout>
              </item>
              <item>
-              <widget class="QCheckBox" name="chkAllowIncomingCnx_9">
+              <widget class="QCheckBox" name="chkStartOnLogin">
                <property name="text">
                 <string>Start on Login</string>
                </property>
@@ -873,7 +873,7 @@
                </spacer>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_2">
+               <widget class="QPushButton" name="btnVpnOnDemand">
                 <property name="text">
                  <string>Manage...</string>
                 </property>
@@ -956,7 +956,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_5">
                 <item>
-                 <widget class="QCheckBox" name="chkAllowIncomingCnx_10">
+                 <widget class="QCheckBox" name="chkRunAsExitNode">
                   <property name="text">
                    <string>Run as exit node</string>
                   </property>
@@ -1000,7 +1000,7 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_7">
               <item>
-               <widget class="QCheckBox" name="chkAllowIncomingCnx_11">
+               <widget class="QCheckBox" name="chkExitNodeAllowNetworkAccess">
                 <property name="text">
                  <string>Allow local network access</string>
                 </property>
@@ -1127,7 +1127,7 @@
                </spacer>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_3">
+               <widget class="QPushButton" name="btnManageTailnetLocks">
                 <property name="text">
                  <string>Manage...</string>
                 </property>
@@ -1161,7 +1161,7 @@
        <attribute name="title">
         <string>About</string>
        </attribute>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>132</x>
@@ -1262,7 +1262,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="btnSettingsClose">
         <property name="text">
          <string>Close</string>
         </property>

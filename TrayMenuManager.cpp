@@ -174,10 +174,10 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
 
             connect(action, &QAction::triggered, this, [this, dev, action](bool) {
                 if (action->isChecked()) {
-                    pTailRunner->setExitNode(dev);
+                    pTailRunner->useExitNode(dev);
                 }
                 else {
-                    pTailRunner->setExitNode(nullptr);
+                    pTailRunner->useExitNode(nullptr);
                 }
             });
         }

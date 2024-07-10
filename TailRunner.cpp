@@ -7,8 +7,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-TailRunner::TailRunner(QObject* parent)
+TailRunner::TailRunner(const TailSettings& s, QObject* parent)
     : QObject(parent)
+    , settings(s)
     , pProcess(nullptr)
     , eCommand(Command::Status)
 { }
@@ -22,11 +23,40 @@ void TailRunner::checkStatus() {
     runCommand("status", QStringList(), true);
 }
 
-void TailRunner::start() {
+void TailRunner::start(bool usePkExec) {
     eCommand = Command::Connect;
     QStringList args;
 
-    runCommand("up", args);
+    args << "--reset";
+    args << "--operator" << qEnvironmentVariable("USER");
+
+    if (settings.useTailscaleDns())
+        args << "--accept-dns";
+    else
+        args << "--accept-dns=false";
+
+    if (settings.acceptRoutes())
+        args << "--accept-routes";
+    else
+        args << "--accept-routes=false";
+
+    if (settings.allowIncomingConnections())
+        args << "--shields-up=false";
+    else
+        args << "--shields-up";
+
+    if (settings.advertiseAsExitNode()) {
+        args << "--advertise-exit-node";
+        if (settings.exitNodeAllowLanAccess())
+            args << "--exit-node-allow-lan-access";
+        else
+            args << "--exit-node-allow-lan-access=false";
+    }
+    else {
+        args << "--advertise-exit-node=false";
+    }
+
+    runCommand("up", args, false, usePkExec);
 }
 
 void TailRunner::stop() {
@@ -83,7 +113,7 @@ void TailRunner::setOperator(const QString& username) {
     runCommand("set", args, false, true);
 }
 
-void TailRunner::setExitNode(const TailDeviceInfo* exitNode) {
+void TailRunner::useExitNode(const TailDeviceInfo* exitNode) {
     eCommand = Command::SettingsChange;
     QStringList args;
     if (exitNode != nullptr) {
@@ -124,11 +154,22 @@ void TailRunner::useExitNode(const QString  & exitNodeName) {
     //
     eCommand = Command::SettingsChange;
     QStringList args;
-    args << "--exit-node";
     if (!exitNodeName.isEmpty()) {
-        args << exitNodeName;
+        args << "--exit-node=" + exitNodeName;
+    }
+    else {
+        args << "--exit-node=";
     }
 
+    runCommand("set", args);
+}
+
+void TailRunner::setAsExitNode(TailDeviceInfo* thisDevice, bool allowLocalNetworkAccess) {
+    eCommand = Command::SettingsChange;
+    QStringList args;
+    args << "--advertise-exit-node";
+    if (allowLocalNetworkAccess)
+        args << "--exit-node-allow-lan-access";
     runCommand("set", args);
 }
 
@@ -159,7 +200,7 @@ void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool
 
                 if (response == QMessageBox::Ok) {
                     pProcess->close();
-                    setOperator(qEnvironmentVariable("USER"));
+                    start(true);
                 }
             }
         }

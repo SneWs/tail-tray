@@ -7,24 +7,27 @@
 #include <QProcess>
 
 #include "models.h"
+#include "TailSettings.h"
 
 class TailRunner : public QObject
 {
     Q_OBJECT
 public:
-    explicit TailRunner(QObject* parent = nullptr);
+    explicit TailRunner(const TailSettings& s, QObject* parent = nullptr);
     virtual ~TailRunner();
 
     void checkStatus();
 
-    void start();
+    void start(bool usePkExec = false);
     void stop();
 
     void setUseTailscaleDns(bool use);
     void setAcceptRoutes(bool accept);
     void allowIncomingConnections(bool allow);
     void setOperator(const QString &username);
-    void setExitNode(const TailDeviceInfo* exitNode);
+    void useExitNode(const TailDeviceInfo* exitNode);
+
+    void setAsExitNode(TailDeviceInfo* thisDevice, bool allowLocalNetworkAccess);
 
     // For this machine to be a exit node
     void advertiseAsExitNode(bool enabled);
@@ -34,6 +37,7 @@ public:
     void useExitNode(const QString& exitNodeName);
 
 private:
+    const TailSettings& settings;
     QProcess* pProcess;
     enum class Command {
         Connect,

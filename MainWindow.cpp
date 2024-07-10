@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget* parent)
     pStatusCheckTimer->setSingleShot(false);
     pStatusCheckTimer->start(1000 * 30); // 30sec interval
 
-    pCurrentExecution = new TailRunner(this);
+    pCurrentExecution = new TailRunner(settings, this);
     connect(pCurrentExecution, &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
 
     pTrayManager = new TrayMenuManager(pCurrentExecution, this);
@@ -40,6 +40,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     changeToState(TailState::NotLoggedIn);
     pCurrentExecution->checkStatus();
+
+    connect(ui->btnSettingsClose, &QPushButton::clicked,
+this, &MainWindow::settingsClosed);
+
+    syncSettingsToUi();
 }
 
 MainWindow::~MainWindow()
@@ -65,6 +70,12 @@ void MainWindow::showAboutTab() {
     ui->tabWidget->setCurrentIndex(2);
 }
 
+void MainWindow::settingsClosed() {
+    syncSettingsFromUi();
+    pCurrentExecution->start();
+    hide();
+}
+
 TailState MainWindow::changeToState(TailState newState)
 {
     auto retVal = eCurrentState;
@@ -88,4 +99,26 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
         else
             changeToState(TailState::NotConnected);
     }
+
+    ui->chkRunAsExitNode->setChecked(pTailStatus->self->exitNode);
+}
+
+void MainWindow::syncSettingsToUi() {
+    ui->chkAllowIncomingCnx->setChecked(settings.allowIncomingConnections());
+    ui->chkUseTailscaleDns->setChecked(settings.useTailscaleDns());
+    ui->chkUseTailscaleSubnets->setChecked(settings.useSubnets());
+    ui->chkRunAsExitNode->setChecked(settings.advertiseAsExitNode());
+    ui->chkExitNodeAllowNetworkAccess->setChecked(settings.exitNodeAllowLanAccess());
+    ui->chkStartOnLogin->setChecked(settings.startOnLogin());
+}
+
+void MainWindow::syncSettingsFromUi() {
+    settings.allowIncomingConnections(ui->chkAllowIncomingCnx->isChecked());
+    settings.useTailscaleDns(ui->chkUseTailscaleDns->isChecked());
+    settings.useSubnets(ui->chkUseTailscaleSubnets->isChecked());
+    settings.advertiseAsExitNode(ui->chkRunAsExitNode->isChecked());
+    settings.exitNodeAllowLanAccess(ui->chkExitNodeAllowNetworkAccess->isChecked());
+    settings.startOnLogin(ui->chkStartOnLogin->isChecked());
+
+    settings.save();
 }

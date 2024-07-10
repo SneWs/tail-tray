@@ -28,11 +28,11 @@ To do that, plese see the Getting started section below.
    * QT 6 and cmake
       * On Ubuntu and Ubuntu based distros      , you can install them with the following command
          ```bash
-         sudo apt install qt6-basedev qt6-tools-dev cmake
+         sudo apt install qt6-tools-dev qt6-tools-dev-tools g++ clang cmake
          ```
       * On Arch Linux, you can install them with the following command
          ```bash
-         sudo pacman -S qt6-basedev qt6-tools-dev cmake
+         sudo pacman -S qt6-basedev qt6-tools-dev clang cmake
          ```
 2. Clone the repo
 3. cd into the repo `cd tail-tray`

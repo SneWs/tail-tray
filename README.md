@@ -1,5 +1,5 @@
 # tail-tray
-Tailscale tray menu and UI for KDE
+Tailscale tray menu and UI for Plasma Desktop
 
 **Disclaimer** Please note that I have _no_ association what so ever with Tailscale Inc. This is a personal project and is not endorsed by Tailscale Inc. in any way or form.
 

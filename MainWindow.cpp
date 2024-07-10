@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget* parent)
     pCurrentExecution = new TailRunner(settings, this);
     connect(pCurrentExecution, &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
 
-    pTrayManager = new TrayMenuManager(pCurrentExecution, this);
+    pTrayManager = new TrayMenuManager(settings, pCurrentExecution, this);
     connect(pTrayManager->trayIcon(), &QSystemTrayIcon::activated,
         this, [this](QSystemTrayIcon::ActivationReason reason) {
             if (reason == QSystemTrayIcon::ActivationReason::Trigger) {

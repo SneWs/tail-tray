@@ -66,3 +66,11 @@ void TailSettings::startOnLogin(bool enabled) {
     settings.setValue("startOnLogin", enabled);
 }
 
+QString TailSettings::exitNodeInUse() const {
+    return settings.value("exitNodeInUse", "").toString();
+}
+
+void TailSettings::exitNodeInUse(const QString& nodeNameOrIp) {
+    settings.setValue("exitNodeInUse", nodeNameOrIp);
+}
+

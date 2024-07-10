@@ -11,12 +11,13 @@
 
 #include "models.h"
 #include "TailRunner.h"
+#include "TailSettings.h"
 
 class TrayMenuManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit TrayMenuManager(TailRunner* runner, QObject* parent = nullptr);
+    explicit TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent = nullptr);
     virtual ~TrayMenuManager();
 
     void stateChangedTo(TailState newState, TailStatus const* pTailStatus);
@@ -24,6 +25,7 @@ public:
     QSystemTrayIcon* trayIcon() const { return pSysTray; }
 
 private:
+    TailSettings& settings;
     TailRunner* pTailRunner;
     QSystemTrayIcon* pSysTray;
     QMenu* pTrayMenu;

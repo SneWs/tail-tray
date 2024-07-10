@@ -8,8 +8,9 @@
 #include "TrayMenuManager.h"
 #include "MainWindow.h"
 
-TrayMenuManager::TrayMenuManager(TailRunner* runner, QObject* parent)
+TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent)
     : QObject(parent)
+    , settings(s)
     , pTailRunner(runner)
     , pSysTray(nullptr)
     , pTrayMenu(nullptr)
@@ -164,21 +165,27 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
 
     pTrayMenu->addSeparator();
     auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
-    for (auto* dev : pTailStatus->peers) {
+    for (int i = 0; i < pTailStatus->peers.count(); i++) {
+        auto* dev = pTailStatus->peers[i];
         if (dev->online && dev->id != pTailStatus->self->id && dev->exitNodeOption) {
             auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "");
             name.chop(2);
             auto* action = exitNodes->addAction(name);
             action->setCheckable(true);
             action->setChecked(dev->exitNode);
+            action->setData(name);
 
-            connect(action, &QAction::triggered, this, [this, dev, action](bool) {
+            connect(action, &QAction::triggered, this, [this, action](bool) {
                 if (action->isChecked()) {
-                    pTailRunner->useExitNode(dev);
-                }
+                    auto devName = action->data().toString();
+                    settings.exitNodeInUse(devName);
+                    }
                 else {
-                    pTailRunner->useExitNode(nullptr);
+                    settings.exitNodeInUse("");
                 }
+
+                settings.save();
+                pTailRunner->start();
             });
         }
     }

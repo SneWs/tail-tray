@@ -54,6 +54,13 @@ void TailRunner::start(bool usePkExec) {
     }
     else {
         args << "--advertise-exit-node=false";
+
+        // Check if we have a exit node that we should use
+        auto exitNode = settings.exitNodeInUse();
+        if (!exitNode.isEmpty()) {
+            qDebug() << "Will use exit node" << exitNode;
+            args << "--exit-node" << exitNode;
+        }
     }
 
     runCommand("up", args, false, usePkExec);

@@ -36,6 +36,9 @@ public:
     [[nodiscard]] bool startOnLogin() const;
     void startOnLogin(bool enabled);
 
+    [[nodiscard]] QString exitNodeInUse() const;
+    void exitNodeInUse(const QString& nodeNameOrIp);
+
 private:
     QSettings settings;
 };

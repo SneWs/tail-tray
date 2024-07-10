@@ -23,6 +23,20 @@ MainWindow::MainWindow(QWidget* parent)
     connect(pCurrentExecution, &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
 
     pTrayManager = new TrayMenuManager(pCurrentExecution, this);
+    connect(pTrayManager->trayIcon(), &QSystemTrayIcon::activated,
+        this, [this](QSystemTrayIcon::ActivationReason reason) {
+            if (reason == QSystemTrayIcon::ActivationReason::Trigger) {
+                if (this->isVisible())
+                    this->hide();
+                else
+                        this->show();
+            }
+            else if (reason == QSystemTrayIcon::ActivationReason::Context) {
+                // Restart background status refresh
+                pStatusCheckTimer->start();
+            }
+        }
+    );
 
     changeToState(TailState::NotLoggedIn);
     pCurrentExecution->checkStatus();

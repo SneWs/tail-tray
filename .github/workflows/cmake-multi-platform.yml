@@ -36,6 +36,10 @@ jobs:
     steps:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.7.0'
+        target: 'desktop'
+        set-env: 'true'
     
     - uses: actions/checkout@v4
 

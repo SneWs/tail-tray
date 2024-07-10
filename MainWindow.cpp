@@ -1,6 +1,9 @@
 #include "MainWindow.h"
 #include "./ui_MainWindow.h"
 
+#include <QDir>
+#include <QFile>
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -28,8 +31,10 @@ MainWindow::MainWindow(QWidget* parent)
             if (reason == QSystemTrayIcon::ActivationReason::Trigger) {
                 if (this->isVisible())
                     this->hide();
-                else
-                        this->show();
+                else {
+                    syncSettingsToUi();
+                    this->show();
+                }
             }
             else if (reason == QSystemTrayIcon::ActivationReason::Context) {
                 // Restart background status refresh
@@ -129,6 +134,20 @@ void MainWindow::syncSettingsToUi() {
     ui->chkRunAsExitNode->setChecked(settings.advertiseAsExitNode());
     ui->chkExitNodeAllowNetworkAccess->setChecked(settings.exitNodeAllowLanAccess());
     ui->chkStartOnLogin->setChecked(settings.startOnLogin());
+    ui->chkStartOnLogin->setChecked(false);
+
+    // Do we have a startup entry?
+    auto configDir = QDir::home();
+    if (!configDir.cd(".config"))
+        return; // That's odd, no .config folder...
+
+    if (!configDir.exists("autostart")) {
+        if (!configDir.mkdir("autostart"))
+            return;
+    }
+
+    configDir.cd("autostart");
+    ui->chkStartOnLogin->setChecked(QFile::exists(configDir.absolutePath() + "/tail-tray.desktop"));
 }
 
 void MainWindow::syncSettingsFromUi() {
@@ -138,6 +157,18 @@ void MainWindow::syncSettingsFromUi() {
     settings.advertiseAsExitNode(ui->chkRunAsExitNode->isChecked());
     settings.exitNodeAllowLanAccess(ui->chkExitNodeAllowNetworkAccess->isChecked());
     settings.startOnLogin(ui->chkStartOnLogin->isChecked());
+
+    auto homeDir = QDir::home();
+    auto targetFile = homeDir.absolutePath() + "/.config/autostart/tail-tray.desktop";
+    if (settings.startOnLogin()) {
+        if (!QFile::exists(targetFile)) {
+            (void)homeDir.mkpath(".config/autostart");
+            QFile::copy("/usr/local/share/applications/tail-tray.desktop", targetFile);
+        }
+    }
+    else {
+        QFile::remove(targetFile);
+    }
 
     settings.save();
 }

@@ -48,6 +48,8 @@ To do that, plese see the Getting started section below.
 * If you find any bugs, please file an issue in the issues tab.
 
 ### Screenshots
+![Screenshot](screenshots/launcher.png)
+
 ![Screenshot](screenshots/connected-tray.png)
 
 ![Screenshot](screenshots/disconnected-tray.png)

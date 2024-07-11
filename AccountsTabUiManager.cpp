@@ -42,7 +42,22 @@ void AccountsTabUiManager::onTailStatusChanged(TailStatus* pTailStatus) {
     ui->lblTailnetName->setText(pTailStatus->user->loginName);
     ui->lblEmail->setText(pTailStatus->user->loginName);
     ui->lblStatus->setText(pTailStatus->backendState);
-    ui->lblKeyExpiry->setText(pTailStatus->self->keyExpiry.toString(Qt::DateFormat::ISODate));
+
+    // Show the key expiry date in a more human readable format
+    const auto now = QDateTime::currentDateTime();
+    const auto daysToExpiry = now.daysTo(pTailStatus->self->keyExpiry);
+    const auto monthsToExpiry = daysToExpiry / 30;
+    if (monthsToExpiry > 0)
+        ui->lblKeyExpiry->setText("in " + QString::number(monthsToExpiry) + " months");
+    else {
+        if (daysToExpiry < 1) {
+            ui->lblKeyExpiry->setText("in less then 1 day");
+        }
+        else {
+            ui->lblKeyExpiry->setText("in " + QString::number(daysToExpiry) + " days");
+        }
+    }
+
     if (!pTailStatus->user->profilePicUrl.isEmpty()) {
         // ui->lblUsername->setPixmap(QPixmap(pTailStatus->user->profilePicUrl));
     }

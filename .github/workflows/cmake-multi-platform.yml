@@ -4,7 +4,7 @@ name: CMake on Ubuntu
 
 on:
   push:
-    branches: [ "master", "develop" ]
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
@@ -24,19 +24,17 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         build_type: [Release]
-        c_compiler: [gcc, clang]
+        c_compiler: [gcc]
         include:
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
-          - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
 
     steps:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
+        # We use 6.4.2 here since that seems to be what Kubuntu 24.04 has to offer when it comes to QT 6
         version: '6.4.2'
         target: 'desktop'
         set-env: 'true'

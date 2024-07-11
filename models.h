@@ -63,6 +63,10 @@ public:
         self->online = obj["Online"].toBool();
         self->active = obj["Active"].toBool();
 
+        if (!obj["KeyExpiry"].isNull()) {
+            self->keyExpiry = QDateTime::fromString(obj["KeyExpiry"].toString(), Qt::DateFormat::ISODate);
+        }
+
         if (!obj["TailscaleIPs"].isNull()) {
             for (const auto& ab : obj["TailscaleIPs"].toArray()) {
                 self->tailscaleIPs.emplace_back(ab.toString(""));

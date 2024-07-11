@@ -69,4 +69,14 @@ jobs:
          chmod +x ./build-deb.sh
          ./build-deb.sh ${{ steps.strings.outputs.build-output-dir }}
       shell: bash
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Dev build debs"
+          files: |
+            LICENSE.txt
+            ${{ steps.strings.outputs.build-output-dir }}/*.deb
     

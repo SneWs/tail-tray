@@ -28,7 +28,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
 
     // Make sure to restart the status check timer when the menu is shown
     // since this will give us some time before it will try to re-fresh the menu etc
-        // NOTE: aboutToHide() is not used since it will not be triggered when the menu is closed/dismissed when focus is lost
+    // NOTE: aboutToHide() is not used since it will not be triggered when the menu is closed/dismissed when focus is lost
     connect(pTrayMenu, &QMenu::aboutToShow, this, [this]() {
         pStatusCheckTimer->start();
     });

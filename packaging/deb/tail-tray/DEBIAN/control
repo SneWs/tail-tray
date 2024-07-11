@@ -3,4 +3,4 @@ Version: 0.0.1
 Maintainer: Marcus Grenängen
 Description: Tailscale Tray application
 Architecture: amd64
-Depends: qt6, qt6-base, qt6-wayland, qt6-svg, qt6-networkauth, qt6-imageformats
+Depends: qt6, qt6-base, qt6-wayland

@@ -27,6 +27,7 @@ public:
 private:
     TailSettings& settings;
     TailRunner* pTailRunner;
+    QTimer* pStatusCheckTimer;
     QSystemTrayIcon* pSysTray;
     QMenu* pTrayMenu;
     QAction* pQuitAction;
@@ -43,6 +44,8 @@ private:
     void buildNotConnectedMenu(TailStatus const* pTailStatus);
     void buildConnectedMenu(TailStatus const* pTailStatus);
     void buildConnectedExitNodeMenu(TailStatus const* pTailStatus);
+
+    void setupWellKnownActions();
 };
 
 

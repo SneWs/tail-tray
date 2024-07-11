@@ -13,38 +13,14 @@ MainWindow::MainWindow(QWidget* parent)
     , eCurrentState(TailState::NoAccount)
     , pCurrentExecution(nullptr)
     , pTailStatus(nullptr)
-    , pStatusCheckTimer(nullptr)
 {
     ui->setupUi(this);
     accountsTabUi = new AccountsTabUiManager(ui, this);
-
-    pStatusCheckTimer = new QTimer(this);
-    connect(pStatusCheckTimer, &QTimer::timeout, this, [this]() {
-        pCurrentExecution->checkStatus();
-    });
-    pStatusCheckTimer->setSingleShot(false);
-    pStatusCheckTimer->start(1000 * 30); // 30sec interval
 
     pCurrentExecution = new TailRunner(settings, this);
     connect(pCurrentExecution, &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
 
     pTrayManager = new TrayMenuManager(settings, pCurrentExecution, this);
-    connect(pTrayManager->trayIcon(), &QSystemTrayIcon::activated,
-        this, [this](QSystemTrayIcon::ActivationReason reason) {
-            if (reason == QSystemTrayIcon::ActivationReason::Trigger) {
-                if (this->isVisible())
-                    this->hide();
-                else {
-                    syncSettingsToUi();
-                    this->show();
-                }
-            }
-            else if (reason == QSystemTrayIcon::ActivationReason::Context) {
-                // Restart background status refresh
-                pStatusCheckTimer->start();
-            }
-        }
-    );
 
     changeToState(TailState::NotLoggedIn);
     pCurrentExecution->checkStatus();
@@ -57,9 +33,6 @@ this, &MainWindow::settingsClosed);
 
 MainWindow::~MainWindow()
 {
-    pStatusCheckTimer->stop();
-    delete pStatusCheckTimer;
-
     delete pCurrentExecution;
     delete pTailStatus;
     delete pTrayManager;

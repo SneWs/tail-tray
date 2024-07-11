@@ -12,6 +12,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     : QObject(parent)
     , settings(s)
     , pTailRunner(runner)
+    , pStatusCheckTimer(nullptr)
     , pSysTray(nullptr)
     , pTrayMenu(nullptr)
     , pConnect(nullptr)
@@ -24,6 +25,14 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     , pAbout(nullptr)
 {
     pTrayMenu = new QMenu("Tailscale");
+
+    // Make sure to restart the status check timer when the menu is shown
+    // since this will give us some time before it will try to re-fresh the menu etc
+        // NOTE: aboutToHide() is not used since it will not be triggered when the menu is closed/dismissed when focus is lost
+    connect(pTrayMenu, &QMenu::aboutToShow, this, [this]() {
+        pStatusCheckTimer->start();
+    });
+
     pSysTray = new QSystemTrayIcon(this);
     pSysTray->setContextMenu(pTrayMenu);
     pSysTray->setToolTip("Tailscale");
@@ -40,33 +49,24 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     pConnect = new QAction("Connect");
     pDisconnect = new QAction("Disconnect");
 
-    connect(pConnect, &QAction::triggered, this, [this](bool) {
-        pTailRunner->start();
-    });
-
-    connect(pDisconnect, &QAction::triggered, this, [this](bool) {
-        pTailRunner->stop();
-    });
-
-    connect(pPreferences, &QAction::triggered, this, [this](bool) {
-        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
-        wnd->showSettingsTab();
-        wnd->show();
-    });
-
-    connect(pAbout, &QAction::triggered, this, [this](bool) {
-        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
-        wnd->showAboutTab();
-        wnd->show();
-    });
-
-    connect(pQuitAction, &QAction::triggered, qApp, &QApplication::quit);
+    setupWellKnownActions();
 
     stateChangedTo(TailState::NotLoggedIn, nullptr);
+
+    // Periodic status check
+    pStatusCheckTimer = new QTimer(this);
+    connect(pStatusCheckTimer, &QTimer::timeout, this, [this]() {
+        pTailRunner->checkStatus();
+    });
+    pStatusCheckTimer->setSingleShot(false);
+    pStatusCheckTimer->start(1000 * 30); // 30sec interval
 }
 
 TrayMenuManager::~TrayMenuManager()
 {
+    pStatusCheckTimer->stop();
+    delete pStatusCheckTimer;
+
     delete pTrayMenu;
     delete pSysTray;
     delete pConnect;
@@ -201,4 +201,46 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
 void TrayMenuManager::buildConnectedExitNodeMenu(TailStatus const* pTailStatus)
 {
 
+}
+
+void TrayMenuManager::setupWellKnownActions() {
+    connect(pConnect, &QAction::triggered, this, [this](bool) {
+        pTailRunner->start();
+    });
+
+    connect(pDisconnect, &QAction::triggered, this, [this](bool) {
+        pTailRunner->stop();
+    });
+
+    connect(pPreferences, &QAction::triggered, this, [this](bool) {
+        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+        wnd->showSettingsTab();
+        wnd->show();
+    });
+
+    connect(pAbout, &QAction::triggered, this, [this](bool) {
+        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+        wnd->showAboutTab();
+        wnd->show();
+    });
+
+    connect(pQuitAction, &QAction::triggered, qApp, &QApplication::quit);
+
+    connect(pSysTray, &QSystemTrayIcon::activated,
+        this, [this](QSystemTrayIcon::ActivationReason reason) {
+            auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+            if (reason == QSystemTrayIcon::ActivationReason::Trigger) {
+                if (wnd->isVisible())
+                    wnd->hide();
+                else {
+                    wnd->syncSettingsToUi();
+                    wnd->show();
+                }
+            }
+            else if (reason == QSystemTrayIcon::ActivationReason::Context) {
+                // Restart background status refresh
+                pStatusCheckTimer->start();
+            }
+        }
+    );
 }

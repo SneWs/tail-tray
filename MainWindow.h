@@ -28,6 +28,9 @@ public:
     void showAccountsTab();
     void showAboutTab();
 
+    void syncSettingsToUi();
+    void syncSettingsFromUi();
+
 private:
     Ui::MainWindow* ui;
     AccountsTabUiManager* accountsTabUi;
@@ -36,7 +39,6 @@ private:
     TailState eCurrentState;
     TailRunner* pCurrentExecution;
     TailStatus* pTailStatus;
-    QTimer* pStatusCheckTimer;
 
     TailSettings settings;
 
@@ -47,8 +49,5 @@ private:
     // Switch to the new state and return the prev (old) state back to caller
     TailState changeToState(TailState newState);
     void onTailStatusChanged(TailStatus* pNewStatus);
-
-    void syncSettingsToUi();
-    void syncSettingsFromUi();
 };
 #endif // MAINWINDOW_H

@@ -1,6 +1,9 @@
 Package: tail-tray
 Version: 0.0.1
-Maintainer: Marcus Grenängen
+Maintainer: Marcus Grenängen (marcus@grenangen.se)
 Description: Tailscale Tray application
 Architecture: amd64
 Depends: qt6, qt6-base, qt6-wayland
+License: GNU General Public License v3.0
+Section: net
+Homepage: https://github.com/SneWs/tail-tray

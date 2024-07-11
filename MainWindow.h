@@ -14,6 +14,8 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+class AccountsTabUiManager;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -28,6 +30,7 @@ public:
 
 private:
     Ui::MainWindow* ui;
+    AccountsTabUiManager* accountsTabUi;
     TrayMenuManager* pTrayManager;
 
     TailState eCurrentState;

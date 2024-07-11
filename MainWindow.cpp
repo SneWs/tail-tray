@@ -1,13 +1,14 @@
-#include "MainWindow.h"
-#include "./ui_MainWindow.h"
-
 #include <QDir>
 #include <QFile>
-#include <QDesktopServices>
+
+#include "MainWindow.h"
+#include "AccountsTabUiManager.h"
+#include "./ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , accountsTabUi(nullptr)
     , pTrayManager(nullptr)
     , eCurrentState(TailState::NoAccount)
     , pCurrentExecution(nullptr)
@@ -15,6 +16,7 @@ MainWindow::MainWindow(QWidget* parent)
     , pStatusCheckTimer(nullptr)
 {
     ui->setupUi(this);
+    accountsTabUi = new AccountsTabUiManager(ui, this);
 
     pStatusCheckTimer = new QTimer(this);
     connect(pStatusCheckTimer, &QTimer::timeout, this, [this]() {
@@ -49,12 +51,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->btnSettingsClose, &QPushButton::clicked,
 this, &MainWindow::settingsClosed);
-
-    connect(ui->btnAdminConsole, &QPushButton::clicked,
-        this, [this]() {
-            QDesktopServices::openUrl(QUrl("https://login.tailscale.com/admin"));
-        }
-    );
 
     syncSettingsToUi();
 }
@@ -103,6 +99,7 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
     delete pTailStatus;
 
     pTailStatus = pNewStatus;
+
     if (pTailStatus->user->id > 0)
     {
         // Logged in
@@ -113,25 +110,9 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 
         auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));
         ui->lblVersionNumber->setText("Version " + formattedVersion);
-
-        // User account stuff
-        ui->lstAccounts->clear();
-        auto* pCurrent = new QListWidgetItem(pTailStatus->user->displayName + "\n" +
-            pTailStatus->user->loginName);
-        ui->lstAccounts->addItem(pCurrent);
-
-        pCurrent->setSelected(true);
-        pCurrent->setTextAlignment(Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
-
-        ui->lblUsername->setText(pTailStatus->user->displayName);
-        ui->lblTailnetName->setText(pTailStatus->user->loginName);
-        ui->lblEmail->setText(pTailStatus->user->loginName);
-        ui->lblStatus->setText(pTailStatus->backendState);
-        ui->lblKeyExpiry->setText(pTailStatus->self->keyExpiry.toString(Qt::DateFormat::ISODate));
-        if (!pTailStatus->user->profilePicUrl.isEmpty()) {
-            // ui->lblUsername->setPixmap(QPixmap(pTailStatus->user->profilePicUrl));
-        }
     }
+
+    accountsTabUi->onTailStatusChanged(pTailStatus);
 }
 
 void MainWindow::syncSettingsToUi() {

@@ -23,6 +23,8 @@ set(PROJECT_SOURCES
         TrayMenuManager.h
         TailSettings.cpp
         TailSettings.h
+        AccountsTabUiManager.cpp
+        AccountsTabUiManager.h
 )
 
 qt_add_executable(tail-tray

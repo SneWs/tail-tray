@@ -135,9 +135,15 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
     pTrayMenu->addAction(pConnected);
     pTrayMenu->addAction(pDisconnect);
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction(pTailStatus->user->loginName);
+    const QAction* self = pTrayMenu->addAction(pTailStatus->user->loginName);
+    connect(self, &QAction::triggered, this, [this](bool) {
+        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+        wnd->showAccountsTab();
+    });
+
     pTrayMenu->addSeparator();
     pTrayMenu->addAction("This device: " + pTailStatus->self->hostName);
+
     auto* netDevs = pTrayMenu->addMenu("Network devices");
     for (auto* dev : pTailStatus->peers) {
         if (dev->id != pTailStatus->self->id) {
@@ -215,13 +221,11 @@ void TrayMenuManager::setupWellKnownActions() {
     connect(pPreferences, &QAction::triggered, this, [this](bool) {
         auto* wnd = dynamic_cast<MainWindow*>(this->parent());
         wnd->showSettingsTab();
-        wnd->show();
     });
 
     connect(pAbout, &QAction::triggered, this, [this](bool) {
         auto* wnd = dynamic_cast<MainWindow*>(this->parent());
         wnd->showAboutTab();
-        wnd->show();
     });
 
     connect(pQuitAction, &QAction::triggered, qApp, &QApplication::quit);
@@ -234,7 +238,7 @@ void TrayMenuManager::setupWellKnownActions() {
                     wnd->hide();
                 else {
                     wnd->syncSettingsToUi();
-                    wnd->show();
+                    wnd->showSettingsTab();
                 }
             }
             else if (reason == QSystemTrayIcon::ActivationReason::Context) {

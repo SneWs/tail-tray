@@ -29,6 +29,9 @@ MainWindow::MainWindow(QWidget* parent)
 this, &MainWindow::settingsClosed);
 
     syncSettingsToUi();
+
+    // Make sure the settings tab is selected by default
+    ui->tabWidget->setCurrentIndex(1);
 }
 
 MainWindow::~MainWindow()
@@ -41,14 +44,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::showSettingsTab() {
     ui->tabWidget->setCurrentIndex(1);
+    show();
 }
 
 void MainWindow::showAccountsTab() {
     ui->tabWidget->setCurrentIndex(0);
+    show();
 }
 
 void MainWindow::showAboutTab() {
     ui->tabWidget->setCurrentIndex(2);
+    show();
 }
 
 void MainWindow::settingsClosed() {

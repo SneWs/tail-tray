@@ -4,13 +4,13 @@ name: CMake on Ubuntu
 
 on:
   push:
-    branches: [ "master", "develop" ]
-  pull_request:
-    branches: [ "master" ]
+    tags:
+      - "v*"
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
+  tagged-release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
@@ -71,9 +71,7 @@ jobs:
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Dev build debs"
+          prerelease: false
           files: |
             ${{ steps.strings.outputs.build-output-dir }}/*.deb
     

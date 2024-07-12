@@ -1,27 +1,27 @@
 # tail-tray
 Tailscale tray menu and UI for Plasma Desktop
 
-**Disclaimer** Please note that I have _no_ association what so ever with Tailscale Inc. This is a personal project and is not endorsed by Tailscale Inc. in any way or form.
+**Disclaimer** Please note that I have _no_ association whatsoever with Tailscale Inc. 
 
-### Early development
-This project is in early development and is not yet ready for daily use. 
-Please use at your own risk. It will have bugs and can crash. File bugs in the issues tab for any issues you find.
-
-The Settings UI is not yet functional and is a placeholder for now. So don't expect anything to work there currently.
-
+This is a personal project and is not endorsed by Tailscale Inc. in any shape or form.
 
 ### Features
-- Control your Tailscale connection from the tray
-- Show IPs
-- Show current connection status of your devices
-- Set and change your Tailscale exit node
+- [X] Control your Tailscale connection from the tray
+- [X] Show IPs
+- [X] Show current connection status of your devices
+- [X] Set and change your Tailscale exit node
+- [ ] Proper multi account handling - This is still in the works
 
 ### License
 GNU General Public License v3.0 - see [LICENSE](LICENSE) for more details
 
 ### Installation
-Currently, you will need to build it from source yourself.
-To do that, plese see the Getting started section below.
+For now the easiest and most reliable way to install this is to build it from source.
+To do that, please see the Getting started section below.
+
+If you're feeling adventurous, you can download the latest deb release and give that a try, but there are known issues with it.
+**_NOTE:_** The deb package that is made as part of the release is not yet working as intended. 
+I'm working on fixing this. And if you know how to package for Debian and Ubuntu, feel free to help out. See https://github.com/SneWs/tail-tray/issues/12 for details
 
 ### Getting started
 1. Install the following dependencies

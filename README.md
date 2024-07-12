@@ -25,14 +25,18 @@ To do that, plese see the Getting started section below.
 
 ### Getting started
 1. Install the following dependencies
-   * QT 6 and cmake
-      * On Ubuntu and Ubuntu based distros      , you can install them with the following command
+   * Git, QT 6, cmake and a c++ compiler, for example:
+      * On Ubuntu and Ubuntu based distros
          ```bash
-         sudo apt install qt6-tools-dev qt6-tools-dev-tools g++ clang cmake
+         sudo apt install git qt6-tools-dev qt6-tools-dev-tools g++ clang cmake
          ```
-      * On Arch Linux, you can install them with the following command
+     * On Fedora
+        ```bash
+        sudo dnf -y git g++ clang cmake install qt6-qtbase-devel qt6-qttools-devel qt6-qtbase-private-devel
+        ```
+      * On Arch Linux
          ```bash
-         sudo pacman -S qt6-basedev qt6-tools-dev clang cmake
+         sudo pacman -S git clang cmake qt6-base qt6-tools
          ```
 2. Clone the repo
 3. cd into the repo `cd tail-tray`

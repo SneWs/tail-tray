@@ -17,6 +17,8 @@ public:
     virtual ~TailRunner();
 
     void checkStatus();
+    void getAccounts();
+    void switchAccount(const QString& accountId);
 
     void login();
     void logout();
@@ -28,6 +30,8 @@ private:
     const TailSettings& settings;
     QProcess* pProcess;
     enum class Command {
+        ListAccounts,
+        SwitchAccount,
         Login,
         Logout,
         Connect,
@@ -39,6 +43,7 @@ private:
     Command eCommand;
 
 signals:
+    void accountsListed(const QList<TailAccountInfo>& accounts);
     void statusUpdated(TailStatus* newStatus);
     void loginFlowCompleted();
 

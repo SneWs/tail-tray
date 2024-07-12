@@ -19,12 +19,13 @@ MainWindow::MainWindow(QWidget* parent)
     pCurrentExecution = new TailRunner(settings, this);
     connect(pCurrentExecution, &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
     connect(pCurrentExecution, &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
+    connect(pCurrentExecution, &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
 
     accountsTabUi = new AccountsTabUiManager(ui, pCurrentExecution, this);
     pTrayManager = new TrayMenuManager(settings, pCurrentExecution, this);
 
     changeToState(TailState::NotLoggedIn);
-    pCurrentExecution->checkStatus();
+    pCurrentExecution->getAccounts();
 
     connect(ui->btnSettingsClose, &QPushButton::clicked,
 this, &MainWindow::settingsClosed);
@@ -56,6 +57,15 @@ void MainWindow::showAccountsTab() {
 void MainWindow::showAboutTab() {
     ui->tabWidget->setCurrentIndex(2);
     show();
+}
+
+void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
+    accounts = foundAccounts;
+    pTrayManager->onAccountsListed(foundAccounts);
+    pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
+
+    accountsTabUi->onAccountsListed(foundAccounts);
+    accountsTabUi->onTailStatusChanged(pTailStatus);
 }
 
 void MainWindow::settingsClosed() {

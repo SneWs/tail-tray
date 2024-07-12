@@ -37,14 +37,15 @@ private:
     Ui::MainWindow* ui;
     AccountsTabUiManager* accountsTabUi;
     TrayMenuManager* pTrayManager;
-
-    TailState eCurrentState;
     TailRunner* pCurrentExecution;
     TailStatus* pTailStatus;
 
+    TailState eCurrentState;
     TailSettings settings;
+    QList<TailAccountInfo> accounts;
 
 private slots:
+    void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void settingsClosed();
     void loginFlowCompleted();
 

@@ -10,6 +10,7 @@
 
 TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent)
     : QObject(parent)
+    , accounts()
     , settings(s)
     , pTailRunner(runner)
     , pStatusCheckTimer(nullptr)
@@ -82,6 +83,10 @@ TrayMenuManager::~TrayMenuManager()
     delete pThisDevice;
 }
 
+void TrayMenuManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
+    accounts = foundAccounts;
+}
+
 void TrayMenuManager::stateChangedTo(TailState newState, TailStatus const* pTailStatus)
 {
     switch (newState) {
@@ -137,6 +142,8 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus)
     pTrayMenu->addAction(pQuitAction);
 
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
+
+    buildAccountsMenu();
 }
 
 void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
@@ -149,7 +156,8 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
     pTrayMenu->addAction(pThisDevice);
 
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction("This device: " + pTailStatus->self->hostName);
+    pThisDevice->setText(pTailStatus->user->loginName);
+    pTrayMenu->addAction(pThisDevice);
 
     auto* netDevs = pTrayMenu->addMenu("Network devices");
     for (auto* dev : pTailStatus->peers) {
@@ -209,11 +217,27 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
     pTrayMenu->addAction(pQuitAction);
 
     pSysTray->setIcon(QIcon(":/icons/tray-on.png"));
+    buildAccountsMenu();
 }
 
 void TrayMenuManager::buildConnectedExitNodeMenu(TailStatus const* pTailStatus)
 {
 
+}
+
+void TrayMenuManager::buildAccountsMenu() {
+    if (pThisDevice->menu() == nullptr) {
+        pThisDevice->setMenu(new QMenu());
+    }
+    pThisDevice->menu()->clear();
+    for (const auto& acc : accounts) {
+        auto accountAction = new QAction(acc.tailnet + " (" + acc.account + ")");
+        pThisDevice->menu()->addAction(accountAction);
+        accountAction->setData(acc.id);
+        connect(accountAction, &QAction::triggered, this, [this, accountAction](bool) {
+            pTailRunner->switchAccount(accountAction->data().toString());
+        });
+    }
 }
 
 void TrayMenuManager::setupWellKnownActions() {

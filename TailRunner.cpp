@@ -25,6 +25,20 @@ void TailRunner::checkStatus() {
     runCommand("status", QStringList(), true);
 }
 
+void TailRunner::getAccounts() {
+    eCommand = Command::ListAccounts;
+    QStringList args;
+    args << "--list";
+    runCommand("switch", args);
+}
+
+void TailRunner::switchAccount(const QString& accountId) {
+    eCommand = Command::SwitchAccount;
+    QStringList args;
+    args << accountId;
+    runCommand("switch", args);
+}
+
 void TailRunner::login() {
     eCommand = Command::Login;
     QStringList args;
@@ -122,8 +136,13 @@ void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool
             }
         }
         else {
-            // After we've invoked a command not status command we check for new status update
-            if (eCommand != Command::Status && eCommand != Command::Logout) {
+            if (eCommand == Command::SwitchAccount) {
+                getAccounts();
+            }
+            else if (eCommand == Command::ListAccounts) {
+                checkStatus();
+            }
+            else if (eCommand != Command::Status && eCommand != Command::Logout) {
                 QTimer::singleShot(1000, this, [this]() {
                     checkStatus();
                 });
@@ -215,6 +234,24 @@ void TailRunner::onProcessCanReadStdOut() {
             }
             QJsonObject obj = doc.object();
             parseStatusResponse(obj);
+            break;
+        }
+        case Command::ListAccounts: {
+            QList<TailAccountInfo> accounts;
+            const QString raw(data);
+            const auto lines = raw.split('\n', Qt::SkipEmptyParts);
+            for (const auto& line : lines) {
+                qDebug() << line;
+                auto accountInfo = TailAccountInfo::parse(line);
+                if (accountInfo.id.length() > 3) {
+                    if (accountInfo.account.endsWith('*'))
+                        accounts.insert(0, accountInfo);
+                    else
+                        accounts.emplace_back(accountInfo);
+                }
+            }
+
+            emit accountsListed(accounts);
             break;
         }
         case Command::Connect: {

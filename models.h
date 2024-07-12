@@ -21,6 +21,53 @@ enum class TailState {
     ConnectedWithExitNode
 };
 
+class TailAccountInfo : public QObject
+{
+    Q_OBJECT
+public:
+    QString id;
+    QString tailnet;
+    QString account;
+
+    TailAccountInfo()
+        : QObject(nullptr)
+        , id("")
+        , tailnet("")
+        , account("")
+    { }
+
+    TailAccountInfo(const TailAccountInfo& o)
+        : QObject(nullptr)
+        , id(o.id)
+        , tailnet(o.tailnet)
+        , account(o.account)
+    { }
+
+    TailAccountInfo& operator = (const TailAccountInfo& o) {
+        id = o.id;
+        tailnet = o.tailnet;
+        account = o.account;
+
+        return *this;
+    }
+
+    static TailAccountInfo parse(const QString& rawLineData) {
+        // NOTE: This is a raw line from the command output
+        // The format is:
+        // ID    Tailnet             Account
+        static const QRegularExpression regex(R"((\w{4})\s+(\S+)\s+(\S+))");
+        TailAccountInfo retVal;
+        QRegularExpressionMatch match = regex.match(rawLineData);
+        if (match.hasMatch()) {
+            retVal.id = match.captured(1);
+            retVal.tailnet = match.captured(2);
+            retVal.account = match.captured(3);
+        }
+
+        return retVal;
+    }
+};
+
 class TailDeviceInfo : public QObject
 {
     Q_OBJECT

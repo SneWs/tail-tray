@@ -29,10 +29,33 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
             wnd->hide();
         }
     );
+
+    connect(ui->btnAddAccount, &QPushButton::clicked, this, [this]() {
+            pTailRunner->login();
+        }
+    );
+
+    connect(ui->lstAccounts, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
+            // TODO: Get info about selected account
+            auto accountId = item->data(Qt::UserRole).toString();
+            qDebug() << "Selected account: " << accountId;
+        }
+    );
 }
 
 AccountsTabUiManager::~AccountsTabUiManager() {
  }
+
+void AccountsTabUiManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
+    accounts = foundAccounts;
+    ui->lstAccounts->clear();
+    for (const auto& account : foundAccounts) {
+        auto* pCurrent = new QListWidgetItem(account.tailnet + "\n" + account.account);
+        pCurrent->setData(Qt::UserRole, account.id);
+        ui->lstAccounts->addItem(pCurrent);
+        pCurrent->setTextAlignment(Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
+    }
+}
 
 void AccountsTabUiManager::onTailStatusChanged(TailStatus* pTailStatus) {
     if (pTailStatus->user->id <= 0) {
@@ -40,20 +63,11 @@ void AccountsTabUiManager::onTailStatusChanged(TailStatus* pTailStatus) {
 
         // Hide account details view, nothing to show
         ui->accountDetailsContainer->setVisible(false);
-        ui->lstAccounts->clear();
         return;
     }
 
     // Show account details view
     ui->accountDetailsContainer->setVisible(true);
-    ui->lstAccounts->clear();
-    auto* pCurrent = new QListWidgetItem(pTailStatus->user->displayName + "\n" +
-                                         pTailStatus->user->loginName);
-    ui->lstAccounts->addItem(pCurrent);
-
-    pCurrent->setSelected(true);
-    pCurrent->setTextAlignment(Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
-
     ui->lblUsername->setText(pTailStatus->user->displayName);
     ui->lblTailnetName->setText(pTailStatus->user->loginName);
     ui->lblEmail->setText(pTailStatus->user->loginName);

@@ -4,7 +4,7 @@ name: CMake on Ubuntu
 
 on:
   push:
-    branches: [ "master", "develop" ]
+    branches: [ "master", "develop", "prod" ]
   pull_request:
     branches: [ "master" ]
 
@@ -67,6 +67,11 @@ jobs:
          chmod +x ./build-deb.sh
          ./build-deb.sh ${{ steps.strings.outputs.build-output-dir }}
       shell: bash
+      if:
+        contains('
+        refs/heads/master
+        refs/heads/prod
+        ', github.ref)
 
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -76,4 +81,8 @@ jobs:
           title: "Dev build debs"
           files: |
             ${{ steps.strings.outputs.build-output-dir }}/*.deb
-    
+      if:
+        contains('
+        refs/heads/master
+        refs/heads/prod
+        ', github.ref)

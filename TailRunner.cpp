@@ -124,7 +124,9 @@ void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool
         else {
             // After we've invoked a command not status command we check for new status update
             if (eCommand != Command::Status && eCommand != Command::Logout) {
-                checkStatus();
+                QTimer::singleShot(1000, this, [this]() {
+                    checkStatus();
+                });
             }
         }
     });

@@ -15,11 +15,12 @@ MainWindow::MainWindow(QWidget* parent)
     , pTailStatus(nullptr)
 {
     ui->setupUi(this);
-    accountsTabUi = new AccountsTabUiManager(ui, this);
 
     pCurrentExecution = new TailRunner(settings, this);
     connect(pCurrentExecution, &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
+    connect(pCurrentExecution, &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
 
+    accountsTabUi = new AccountsTabUiManager(ui, pCurrentExecution, this);
     pTrayManager = new TrayMenuManager(settings, pCurrentExecution, this);
 
     changeToState(TailState::NotLoggedIn);
@@ -63,12 +64,26 @@ void MainWindow::settingsClosed() {
     hide();
 }
 
+void MainWindow::loginFlowCompleted() {
+    pCurrentExecution->start();
+}
+
 TailState MainWindow::changeToState(TailState newState)
 {
     auto retVal = eCurrentState;
     eCurrentState = newState;
 
+    if (eCurrentState == TailState::NotLoggedIn)
+    {
+        // Clear the status
+        delete pTailStatus;
+        pTailStatus = new TailStatus();
+        pTailStatus->self = new TailDeviceInfo();
+        pTailStatus->user = new TailUser();
+    }
+
     pTrayManager->stateChangedTo(newState, pTailStatus);
+    accountsTabUi->onTailStatusChanged(pTailStatus);
 
     return retVal;
 }

@@ -18,6 +18,9 @@ public:
 
     void checkStatus();
 
+    void login();
+    void logout();
+
     void start(bool usePkExec = false);
     void stop();
 
@@ -25,6 +28,8 @@ private:
     const TailSettings& settings;
     QProcess* pProcess;
     enum class Command {
+        Login,
+        Logout,
         Connect,
         Disconnect,
         SettingsChange,
@@ -35,6 +40,7 @@ private:
 
 signals:
     void statusUpdated(TailStatus* newStatus);
+    void loginFlowCompleted();
 
 private:
     void runCommand(QString cmd, QStringList args, bool jsonResult = false, bool usePkExec = false);

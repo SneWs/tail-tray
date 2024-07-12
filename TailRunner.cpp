@@ -4,11 +4,13 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QByteArray>
+#include <QDesktopServices>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QTimer>
 
 TailRunner::TailRunner(const TailSettings& s, QObject* parent)
-    : QObject(parent)
+: QObject(parent)
     , settings(s)
     , pProcess(nullptr)
     , eCommand(Command::Status)
@@ -21,6 +23,20 @@ TailRunner::~TailRunner() {
 void TailRunner::checkStatus() {
     eCommand = Command::Status;
     runCommand("status", QStringList(), true);
+}
+
+void TailRunner::login() {
+    eCommand = Command::Login;
+    QStringList args;
+    args << "--operator" << qEnvironmentVariable("USER");
+
+    runCommand("login", args, false, true);
+}
+
+void TailRunner::logout() {
+    eCommand = Command::Logout;
+    QStringList args;
+    runCommand("logout", args, false, true);
 }
 
 void TailRunner::start(bool usePkExec) {
@@ -77,7 +93,7 @@ void TailRunner::stop() {
 void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool usePkExec) {
     if (pProcess != nullptr) {
         if (pProcess->state() == QProcess::Running) {
-            assert(!"Process already running!");
+            qDebug() << "Process already running!" << "Will skip running " << cmd << args << "command";
             return;
         }
 
@@ -107,7 +123,7 @@ void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool
         }
         else {
             // After we've invoked a command not status command we check for new status update
-            if (eCommand != Command::Status) {
+            if (eCommand != Command::Status && eCommand != Command::Logout) {
                 checkStatus();
             }
         }
@@ -116,11 +132,46 @@ void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool
     connect(pProcess, &QProcess::readyReadStandardOutput,
         this, &TailRunner::onProcessCanReadStdOut);
 
+    // TODO: @grenis This needs some refactoring
     connect(pProcess, &QProcess::readyReadStandardError,
         this, [this]() {
-            QString errorInfo(pProcess->readAllStandardError());
-            if (!errorInfo.isEmpty()) {
-                qDebug() << errorInfo;
+            // NOTE! For whatever reason, the login command output is not captured by the readyReadStandardOutput signal
+            // and arrives as a error output, so we need to check for that here.
+            if (eCommand == Command::Login) {
+                QString message(pProcess->readAllStandardError());
+                if (!message.isEmpty()) {
+                    qDebug() << message;
+                    if (message.startsWith("Success", Qt::CaseSensitivity::CaseInsensitive)) {
+                        // Login was successfull
+                        // Wait for a bit before triggering flow completed
+                        // Flow completed will call start etc
+                        QTimer::singleShot(1000, this, [this]() {
+                            emit loginFlowCompleted();
+                        });
+                    }
+                    else {
+                        QRegularExpression regex(R"(https:\/\/login\.tailscale\.com\/a\/[a-zA-Z0-9]+)");
+                        QRegularExpressionMatch match = regex.match(message);
+                        if (match.hasMatch()) {
+                            QString url = match.captured(0);
+                            auto res = QMessageBox::information(nullptr, "Login", "To login you will have to visit " + url + "\n\nPress OK to open the URL",
+                                QMessageBox::Ok, QMessageBox::Ok);
+                            if (res == QMessageBox::Ok)
+                                QDesktopServices::openUrl(QUrl(url));
+                        }
+                        else {
+                            // Failure
+                            QMessageBox::warning(nullptr, "Login failure", "Login failed. Message: \n" + message,
+                                QMessageBox::Ok, QMessageBox::Ok);
+                        }
+                    }
+                }
+            }
+            else {
+                QString errorInfo(pProcess->readAllStandardError());
+                if (!errorInfo.isEmpty()) {
+                    qDebug() << errorInfo;
+                }
             }
         });
 
@@ -134,6 +185,12 @@ void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool
     }
     else {
         pProcess->start("tailscale", args);
+    }
+
+    // We need to handle the login by reading as soon as ther is output available since
+    // the process will be running until the login flow have completed
+    if (eCommand == Command::Login) {
+        pProcess->waitForReadyRead();
     }
 }
 
@@ -172,6 +229,9 @@ void TailRunner::onProcessCanReadStdOut() {
             if (obj.contains("BackendState")) {
                 auto newState = obj["BackendState"].toString();
             }
+            break;
+        }
+        case Command::Login: {
             break;
         }
         default:

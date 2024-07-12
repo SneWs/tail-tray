@@ -23,6 +23,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     , pLogoutAction(nullptr)
     , pPreferences(nullptr)
     , pAbout(nullptr)
+    , pThisDevice(nullptr)
 {
     pTrayMenu = new QMenu("Tailscale");
 
@@ -48,10 +49,9 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     pConnected->setEnabled(false);
     pConnect = new QAction("Connect");
     pDisconnect = new QAction("Disconnect");
+    pThisDevice = new QAction("This device");
 
     setupWellKnownActions();
-
-    stateChangedTo(TailState::NotLoggedIn, nullptr);
 
     // Periodic status check
     pStatusCheckTimer = new QTimer(this);
@@ -60,6 +60,8 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     });
     pStatusCheckTimer->setSingleShot(false);
     pStatusCheckTimer->start(1000 * 30); // 30sec interval
+
+    stateChangedTo(TailState::NotLoggedIn, nullptr);
 }
 
 TrayMenuManager::~TrayMenuManager()
@@ -77,25 +79,32 @@ TrayMenuManager::~TrayMenuManager()
     delete pLogoutAction;
     delete pPreferences;
     delete pAbout;
+    delete pThisDevice;
 }
 
 void TrayMenuManager::stateChangedTo(TailState newState, TailStatus const* pTailStatus)
 {
     switch (newState) {
         case TailState::Connected:
-        case TailState::LoggedIn:
-             buildConnectedMenu(pTailStatus);
+        case TailState::LoggedIn: {
+            buildConnectedMenu(pTailStatus);
+            pStatusCheckTimer->start();
             break;
+        }
         case TailState::NoAccount:
-        case TailState::NotLoggedIn:
+        case TailState::NotLoggedIn: {
             buildNotLoggedInMenu();
-        break;
-        case TailState::NotConnected:
+            pStatusCheckTimer->stop();
+            break;
+        }
+        case TailState::NotConnected: {
             buildNotConnectedMenu(pTailStatus);
-        break;
+            pStatusCheckTimer->stop();
+            break;
+        }
         case TailState::ConnectedWithExitNode:
             buildConnectedExitNodeMenu(pTailStatus);
-        break;
+            break;
         default:
             assert(!"Unhandled TailState status!");
     }
@@ -119,7 +128,8 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus)
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnect);
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction(pTailStatus->user->loginName);
+    pThisDevice->setText(pTailStatus->user->loginName);
+    pTrayMenu->addAction(pThisDevice);
     pTrayMenu->addSeparator();
     pTrayMenu->addAction(pPreferences);
     pTrayMenu->addAction(pAbout);
@@ -135,11 +145,8 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
     pTrayMenu->addAction(pConnected);
     pTrayMenu->addAction(pDisconnect);
     pTrayMenu->addSeparator();
-    const QAction* self = pTrayMenu->addAction(pTailStatus->user->loginName);
-    connect(self, &QAction::triggered, this, [this](bool) {
-        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
-        wnd->showAccountsTab();
-    });
+    pThisDevice->setText(pTailStatus->user->loginName);
+    pTrayMenu->addAction(pThisDevice);
 
     pTrayMenu->addSeparator();
     pTrayMenu->addAction("This device: " + pTailStatus->self->hostName);
@@ -210,6 +217,10 @@ void TrayMenuManager::buildConnectedExitNodeMenu(TailStatus const* pTailStatus)
 }
 
 void TrayMenuManager::setupWellKnownActions() {
+    connect(pLoginAction, &QAction::triggered, this, [this](bool) {
+        pTailRunner->login();
+    });
+
     connect(pConnect, &QAction::triggered, this, [this](bool) {
         pTailRunner->start();
     });
@@ -226,6 +237,11 @@ void TrayMenuManager::setupWellKnownActions() {
     connect(pAbout, &QAction::triggered, this, [this](bool) {
         auto* wnd = dynamic_cast<MainWindow*>(this->parent());
         wnd->showAboutTab();
+    });
+
+    connect(pThisDevice, &QAction::triggered, this, [this](bool) {
+        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+        wnd->showAccountsTab();
     });
 
     connect(pQuitAction, &QAction::triggered, qApp, &QApplication::quit);

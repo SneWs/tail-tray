@@ -31,6 +31,8 @@ public:
     void syncSettingsToUi();
     void syncSettingsFromUi();
 
+    void userLoggedOut() { changeToState(TailState::NotLoggedIn); }
+
 private:
     Ui::MainWindow* ui;
     AccountsTabUiManager* accountsTabUi;
@@ -44,6 +46,7 @@ private:
 
 private slots:
     void settingsClosed();
+    void loginFlowCompleted();
 
 private:
     // Switch to the new state and return the prev (old) state back to caller

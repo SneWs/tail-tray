@@ -48,8 +48,8 @@ To do that, plese see the Getting started section below.
 9. It will now be installed to `/usr/local/bin/tail-tray` and can be started by running `tail-tray` in a terminal or by clicking the Tail Tray icon in the launcher.
 
 ### Participating & Filing bugs
-* If you would like to participate in the development of this project, please feel free to fork the repo and submit a pull request.
-* If you find any bugs, please file an issue in the issues tab.
+* If you would like to participate in the development of this project, feel free to fork the repo and submit a pull request.
+* Bugs, we all get them... Please file an issue in the issues tab and we'll sort it out together.
 
 ### Screenshots
 ![Screenshot](screenshots/launcher.png)

@@ -7,6 +7,8 @@
 
 #include <QObject>
 
+#include "TailRunner.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -19,13 +21,14 @@ class AccountsTabUiManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit AccountsTabUiManager(Ui::MainWindow* ui, QObject* parent = nullptr);
+    explicit AccountsTabUiManager(Ui::MainWindow* ui, TailRunner* runner, QObject* parent = nullptr);
     virtual ~AccountsTabUiManager();
 
     void onTailStatusChanged(TailStatus* pTailStatus);
 
 private:
     Ui::MainWindow* ui;
+    TailRunner* pTailRunner;
 };
 
 

@@ -52,7 +52,7 @@
        <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="iconSize">
        <size>
@@ -139,7 +139,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QWidget" name="widget_6" native="true">
+           <widget class="QWidget" name="accountDetailsContainer" native="true">
             <property name="minimumSize">
              <size>
               <width>325</width>

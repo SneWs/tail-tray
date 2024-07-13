@@ -25,11 +25,12 @@ public:
     virtual ~AccountsTabUiManager();
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
-    void onTailStatusChanged(TailStatus* pTailStatus);
+    void onTailStatusChanged(TailStatus* status);
 
 private:
     Ui::MainWindow* ui;
     TailRunner* pTailRunner;
+    TailStatus* pTailStatus;
     QList<TailAccountInfo> accounts;
 };
 

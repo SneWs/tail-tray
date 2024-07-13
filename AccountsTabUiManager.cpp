@@ -16,6 +16,7 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     : QObject(parent)
     , ui(u)
     , pTailRunner(runner)
+    , pTailStatus(nullptr)
 {
     connect(ui->btnAdminConsole, &QPushButton::clicked, this, [this]() {
             QDesktopServices::openUrl(QUrl("https://login.tailscale.com/admin"));
@@ -36,11 +37,30 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     );
 
     connect(ui->lstAccounts, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
-            // TODO: Get info about selected account
-            auto accountId = item->data(Qt::UserRole).toString();
-            qDebug() << "Selected account: " << accountId;
+        // TODO: Get info about selected account
+        auto accountId = item->data(Qt::UserRole).toString();
+        TailAccountInfo account{};
+        for (const auto& acc : accounts) {
+            if (acc.id == accountId) {
+                account = acc;
+                break;
+            }
         }
-    );
+
+        if (account.account.endsWith('*')) {
+            // This is the active account...
+            onTailStatusChanged(pTailStatus);
+        }
+        else {
+            // Secondary account not currently active...
+            ui->accountDetailsContainer->setVisible(true);
+            ui->lblUsername->setText(account.account);
+            ui->lblTailnetName->setText(account.tailnet);
+            ui->lblEmail->setText(account.account);
+            ui->lblStatus->setText("Not running");
+            ui->lblKeyExpiry->setText("");
+        }
+    });
 }
 
 AccountsTabUiManager::~AccountsTabUiManager() {
@@ -50,15 +70,19 @@ void AccountsTabUiManager::onAccountsListed(const QList<TailAccountInfo>& foundA
     accounts = foundAccounts;
     ui->lstAccounts->clear();
     for (const auto& account : foundAccounts) {
-        auto* pCurrent = new QListWidgetItem(account.tailnet + "\n" + account.account);
+        auto loginName = account.account;
+        if (loginName.endsWith('*'))
+            loginName = loginName.chopped(1);
+        auto* pCurrent = new QListWidgetItem(account.tailnet + "\n" + loginName);
         pCurrent->setData(Qt::UserRole, account.id);
         ui->lstAccounts->addItem(pCurrent);
         pCurrent->setTextAlignment(Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
     }
 }
 
-void AccountsTabUiManager::onTailStatusChanged(TailStatus* pTailStatus) {
-    if (pTailStatus->user->id <= 0) {
+void AccountsTabUiManager::onTailStatusChanged(TailStatus* status) {
+    pTailStatus = status;
+    if (pTailStatus == nullptr || pTailStatus->user == nullptr || pTailStatus->user->id <= 0) {
         // Not logged in
 
         // Hide account details view, nothing to show

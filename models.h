@@ -65,6 +65,55 @@ public:
 
         return retVal;
     }
+
+    // This handles fragmented lines as well from the command line output
+    // so even if a line starts with the ID and then break it will make sure to parse it correctly
+    static QList<TailAccountInfo> parseAllFound(const QString& rawData) {
+        qDebug() << "Will parse accounts from data:";
+        qDebug() << rawData;
+
+        QList<TailAccountInfo> retVal;
+
+        // Split input into individual lines
+        const QStringList lines = rawData.split('\n', Qt::SkipEmptyParts);
+
+        QStringList entries;
+        QString currentEntry;
+
+        // Reconstruct broken lines into complete entries
+        // And we skip the first line since it's the header line
+        for (int i = 1; i < lines.length(); i++) {
+            const QString& line = lines[i];
+            qDebug() << line;
+            if (isIdLine(line)) {
+                if (!currentEntry.isEmpty()) {
+                    entries.append(currentEntry);
+                    currentEntry.clear();
+                }
+                currentEntry = line;
+            }
+            else {
+                currentEntry += " " + line.trimmed();
+            }
+        }
+
+        if (!currentEntry.isEmpty()) {
+            entries.append(currentEntry);
+        }
+
+        // Iterate over each reconstructed entry and apply the regular expression
+        for (const QString& entry : entries) {
+            retVal.emplace_back(TailAccountInfo::parse(entry));
+        }
+
+        return retVal;
+    }
+
+    static bool isIdLine(const QString& line) {
+        // Check if the line starts with a 4-character word
+        static const QRegularExpression idRe(R"(^\w{4}\s+)");
+        return idRe.match(line).hasMatch();
+    }
 };
 
 class TailDeviceInfo : public QObject

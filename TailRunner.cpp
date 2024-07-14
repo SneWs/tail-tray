@@ -237,20 +237,8 @@ void TailRunner::onProcessCanReadStdOut() {
             break;
         }
         case Command::ListAccounts: {
-            QList<TailAccountInfo> accounts;
             const QString raw(data);
-            const auto lines = raw.split('\n', Qt::SkipEmptyParts);
-            for (const auto& line : lines) {
-                qDebug() << line;
-                auto accountInfo = TailAccountInfo::parse(line);
-                if (accountInfo.id.length() > 3) {
-                    if (accountInfo.account.endsWith('*'))
-                        accounts.insert(0, accountInfo);
-                    else
-                        accounts.emplace_back(accountInfo);
-                }
-            }
-
+            const QList<TailAccountInfo> accounts = TailAccountInfo::parseAllFound(raw);
             emit accountsListed(accounts);
             break;
         }

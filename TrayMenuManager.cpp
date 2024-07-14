@@ -93,7 +93,7 @@ void TrayMenuManager::onAccountsListed(const QList<TailAccountInfo>& foundAccoun
     accounts = foundAccounts;
 }
 
-void TrayMenuManager::stateChangedTo(TailState newState, TailStatus const* pTailStatus)
+void TrayMenuManager::stateChangedTo(TailState newState, TailStatus const* pTailStatus) const
 {
     switch (newState) {
         case TailState::Connected:
@@ -113,16 +113,12 @@ void TrayMenuManager::stateChangedTo(TailState newState, TailStatus const* pTail
             pStatusCheckTimer->stop();
             break;
         }
-        case TailState::ConnectedWithExitNode:
-            buildConnectedExitNodeMenu(pTailStatus);
-            break;
         default:
             assert(!"Unhandled TailState status!");
     }
 }
 
-void TrayMenuManager::buildNotLoggedInMenu()
-{
+void TrayMenuManager::buildNotLoggedInMenu() const {
     pTrayMenu->clear();
     pTrayMenu->addAction(pLoginAction);
     pTrayMenu->addSeparator();
@@ -134,7 +130,7 @@ void TrayMenuManager::buildNotLoggedInMenu()
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
 }
 
-void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus)
+void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
 {
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnect);
@@ -152,7 +148,7 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus)
     buildAccountsMenu();
 }
 
-void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
+void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
 {
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnected);
@@ -236,12 +232,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
     buildAccountsMenu();
 }
 
-void TrayMenuManager::buildConnectedExitNodeMenu(TailStatus const* pTailStatus)
-{
-
-}
-
-void TrayMenuManager::buildAccountsMenu() {
+void TrayMenuManager::buildAccountsMenu() const {
     if (pThisDevice->menu() == nullptr) {
         pThisDevice->setMenu(new QMenu());
     }
@@ -256,7 +247,7 @@ void TrayMenuManager::buildAccountsMenu() {
     }
 }
 
-void TrayMenuManager::setupWellKnownActions() {
+void TrayMenuManager::setupWellKnownActions() const {
     connect(pLoginAction, &QAction::triggered, this, [this](bool) {
         pTailRunner->login();
     });

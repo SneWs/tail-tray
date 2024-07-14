@@ -17,8 +17,7 @@ enum class TailState {
     NotLoggedIn,
     LoggedIn,
     NotConnected,
-    Connected,
-    ConnectedWithExitNode
+    Connected
 };
 
 class TailAccountInfo : public QObject

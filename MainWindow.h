@@ -28,7 +28,7 @@ public:
     void showAccountsTab();
     void showAboutTab();
 
-    void syncSettingsToUi();
+    void syncSettingsToUi() const;
     void syncSettingsFromUi();
 
     void userLoggedOut() { changeToState(TailState::NotLoggedIn); }
@@ -47,7 +47,7 @@ private:
 private slots:
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void settingsClosed();
-    void loginFlowCompleted();
+    void loginFlowCompleted() const;
 
 private:
     // Switch to the new state and return the prev (old) state back to caller

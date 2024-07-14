@@ -38,6 +38,7 @@ this, &MainWindow::settingsClosed);
 
 MainWindow::~MainWindow()
 {
+    delete accountsTabUi;
     delete pCurrentExecution;
     delete pTailStatus;
     delete pTrayManager;
@@ -74,7 +75,7 @@ void MainWindow::settingsClosed() {
     hide();
 }
 
-void MainWindow::loginFlowCompleted() {
+void MainWindow::loginFlowCompleted() const {
     pCurrentExecution->start();
 }
 
@@ -119,7 +120,7 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
     accountsTabUi->onTailStatusChanged(pTailStatus);
 }
 
-void MainWindow::syncSettingsToUi() {
+void MainWindow::syncSettingsToUi() const {
     ui->chkAllowIncomingCnx->setChecked(settings.allowIncomingConnections());
     ui->chkUseTailscaleDns->setChecked(settings.useTailscaleDns());
     ui->chkUseTailscaleSubnets->setChecked(settings.useSubnets());

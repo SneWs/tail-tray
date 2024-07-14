@@ -21,7 +21,7 @@ public:
     virtual ~TrayMenuManager();
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
-    void stateChangedTo(TailState newState, TailStatus const* pTailStatus);
+    void stateChangedTo(TailState newState, TailStatus const* pTailStatus) const;
 
     QSystemTrayIcon* trayIcon() const { return pSysTray; }
 
@@ -44,14 +44,12 @@ private:
     QAction* pExitNodeNone;
 
 private:
-    void buildNotLoggedInMenu();
-    void buildNotConnectedMenu(TailStatus const* pTailStatus);
-    void buildConnectedMenu(TailStatus const* pTailStatus);
-    void buildConnectedExitNodeMenu(TailStatus const* pTailStatus);
+    void buildNotLoggedInMenu() const;
+    void buildNotConnectedMenu(TailStatus const* pTailStatus) const;
+    void buildConnectedMenu(TailStatus const* pTailStatus) const;
+    void buildAccountsMenu() const;
 
-    void buildAccountsMenu();
-
-    void setupWellKnownActions();
+    void setupWellKnownActions() const;
 };
 
 

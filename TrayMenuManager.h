@@ -41,6 +41,7 @@ private:
     QAction* pPreferences;
     QAction* pAbout;
     QAction* pThisDevice;
+    QAction* pExitNodeNone;
 
 private:
     void buildNotLoggedInMenu();

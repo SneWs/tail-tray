@@ -25,6 +25,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     , pPreferences(nullptr)
     , pAbout(nullptr)
     , pThisDevice(nullptr)
+    , pExitNodeNone(nullptr)
 {
     pTrayMenu = new QMenu("Tailscale");
 
@@ -51,6 +52,10 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     pConnect = new QAction("Connect");
     pDisconnect = new QAction("Disconnect");
     pThisDevice = new QAction("This device");
+    pExitNodeNone = new QAction("None");
+    pExitNodeNone->setCheckable(true);
+    pExitNodeNone->setChecked(true);
+    pExitNodeNone->setEnabled(false);
 
     setupWellKnownActions();
 
@@ -81,6 +86,7 @@ TrayMenuManager::~TrayMenuManager()
     delete pPreferences;
     delete pAbout;
     delete pThisDevice;
+    delete pExitNodeNone;
 }
 
 void TrayMenuManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
@@ -186,6 +192,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
 
     pTrayMenu->addSeparator();
     auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
+    exitNodes->addAction(pExitNodeNone);
     for (int i = 0; i < pTailStatus->peers.count(); i++) {
         auto* dev = pTailStatus->peers[i];
         if (dev->online && dev->id != pTailStatus->self->id && dev->exitNodeOption) {
@@ -205,11 +212,20 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus)
                     settings.exitNodeInUse("");
                 }
 
+                pExitNodeNone->setChecked(settings.exitNodeInUse().isEmpty());
+
                 settings.save();
                 pTailRunner->start();
             });
         }
     }
+    exitNodes->addSeparator();
+    QAction* runExitNode = exitNodes->addAction("Run as exit node");
+    runExitNode->setChecked(settings.advertiseAsExitNode());
+    QAction* exitNodeAllowNwAccess = exitNodes->addAction("Allow local network access");
+    exitNodeAllowNwAccess->setChecked(settings.exitNodeAllowLanAccess());
+    exitNodeAllowNwAccess->setEnabled(settings.advertiseAsExitNode());
+
     pTrayMenu->addSeparator();
     pTrayMenu->addAction(pPreferences);
     pTrayMenu->addAction(pAbout);

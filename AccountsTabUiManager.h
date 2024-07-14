@@ -22,7 +22,6 @@ class AccountsTabUiManager : public QObject
     Q_OBJECT
 public:
     explicit AccountsTabUiManager(Ui::MainWindow* ui, TailRunner* runner, QObject* parent = nullptr);
-    virtual ~AccountsTabUiManager();
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void onTailStatusChanged(TailStatus* status);

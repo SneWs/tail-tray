@@ -45,7 +45,7 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
                 account = acc;
                 break;
             }
-        }
+    }
 
         if (account.account.endsWith('*')) {
             // This is the active account...
@@ -63,10 +63,7 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     });
 }
 
-AccountsTabUiManager::~AccountsTabUiManager() {
- }
-
-void AccountsTabUiManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
+    void AccountsTabUiManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
     accounts = foundAccounts;
     ui->lstAccounts->clear();
     for (const auto& account : foundAccounts) {

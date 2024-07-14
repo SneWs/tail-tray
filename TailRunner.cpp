@@ -107,7 +107,10 @@ void TailRunner::stop() {
 void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool usePkExec) {
     if (pProcess != nullptr) {
         if (pProcess->state() == QProcess::Running) {
-            qDebug() << "Process already running!" << "Will skip running " << cmd << args << "command";
+            qDebug() << "Process already running!" << "Will queue up " << cmd << args << "command";
+            QTimer::singleShot(500, this, [this, cmd, args, jsonResult, usePkExec]() {
+                runCommand(cmd, args, jsonResult, usePkExec);
+            });
             return;
         }
 

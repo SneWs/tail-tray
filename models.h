@@ -69,9 +69,6 @@ public:
     // This handles fragmented lines as well from the command line output
     // so even if a line starts with the ID and then break it will make sure to parse it correctly
     static QList<TailAccountInfo> parseAllFound(const QString& rawData) {
-        qDebug() << "Will parse accounts from data:";
-        qDebug() << rawData;
-
         QList<TailAccountInfo> retVal;
 
         // Split input into individual lines
@@ -83,8 +80,7 @@ public:
         // Reconstruct broken lines into complete entries
         // And we skip the first line since it's the header line
         for (int i = 1; i < lines.length(); i++) {
-            const QString& line = lines[i];
-            qDebug() << line;
+            const QString& line = lines[i].trimmed();
             if (isIdLine(line)) {
                 if (!currentEntry.isEmpty()) {
                     entries.append(currentEntry);
@@ -93,7 +89,7 @@ public:
                 currentEntry = line;
             }
             else {
-                currentEntry += " " + line.trimmed();
+                currentEntry += "\t" + line.trimmed();
             }
         }
 
@@ -103,6 +99,7 @@ public:
 
         // Iterate over each reconstructed entry and apply the regular expression
         for (const QString& entry : entries) {
+            qDebug() << "Parsing entry: " << entry;
             retVal.emplace_back(TailAccountInfo::parse(entry));
         }
 

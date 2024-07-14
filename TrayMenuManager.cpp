@@ -236,9 +236,17 @@ void TrayMenuManager::buildAccountsMenu() const {
     if (pThisDevice->menu() == nullptr) {
         pThisDevice->setMenu(new QMenu());
     }
+
     pThisDevice->menu()->clear();
     for (const auto& acc : accounts) {
-        auto accountAction = new QAction(acc.tailnet + " (" + acc.account + ")");
+        bool isActive = acc.account.endsWith('*');
+        QString accountName = acc.account;
+        if (isActive)
+            accountName = accountName.chopped(1);
+        auto accountAction = new QAction(acc.tailnet + " (" + accountName + ")");
+    accountAction->setCheckable(true);
+        accountAction->setChecked(isActive);
+
         pThisDevice->menu()->addAction(accountAction);
         accountAction->setData(acc.id);
         connect(accountAction, &QAction::triggered, this, [this, accountAction](bool) {

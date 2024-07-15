@@ -1,18 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <memory>
+
 #include <QMainWindow>
 #include <QTimer>
 
 #include "TailRunner.h"
 #include "TailSettings.h"
 #include "TrayMenuManager.h"
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
-QT_END_NAMESPACE
+#include "AccountsTabUiManager.h"
+#include "./ui_MainWindow.h"
 
 class AccountsTabUiManager;
 
@@ -21,8 +19,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget* parent = nullptr);
-    ~MainWindow();
+    explicit MainWindow(QWidget* parent = nullptr);
 
     void showSettingsTab();
     void showAccountsTab();
@@ -34,11 +31,11 @@ public:
     void userLoggedOut() { changeToState(TailState::NotLoggedIn); }
 
 private:
-    Ui::MainWindow* ui;
-    AccountsTabUiManager* accountsTabUi;
-    TrayMenuManager* pTrayManager;
-    TailRunner* pCurrentExecution;
-    TailStatus* pTailStatus;
+    std::unique_ptr<Ui::MainWindow> ui;
+    std::unique_ptr<AccountsTabUiManager> accountsTabUi;
+    std::unique_ptr<TrayMenuManager> pTrayManager;
+    std::unique_ptr<TailRunner> pCurrentExecution;
+    std::unique_ptr<TailStatus> pTailStatus;
 
     TailState eCurrentState;
     TailSettings settings;
@@ -54,4 +51,5 @@ private:
     TailState changeToState(TailState newState);
     void onTailStatusChanged(TailStatus* pNewStatus);
 };
+
 #endif // MAINWINDOW_H

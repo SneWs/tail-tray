@@ -162,7 +162,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
     pTrayMenu->addAction(pThisDevice);
 
     auto* netDevs = pTrayMenu->addMenu("Network devices");
-    for (auto* dev : pTailStatus->peers) {
+    for (const auto& dev : pTailStatus->peers) {
         if (dev->id != pTailStatus->self->id) {
             auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "");
             name.chop(2);
@@ -190,7 +190,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
     auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
     exitNodes->addAction(pExitNodeNone);
     for (int i = 0; i < pTailStatus->peers.count(); i++) {
-        auto* dev = pTailStatus->peers[i];
+        const auto& dev = pTailStatus->peers[i];
         if (dev->online && dev->id != pTailStatus->self->id && dev->exitNodeOption) {
             auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "");
             name.chop(2);

@@ -2,12 +2,10 @@
 #include <QFile>
 
 #include "MainWindow.h"
-#include "AccountsTabUiManager.h"
-#include "./ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(std::make_unique<Ui::MainWindow>())
     , accountsTabUi(nullptr)
     , pTrayManager(nullptr)
     , eCurrentState(TailState::NoAccount)
@@ -16,13 +14,13 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
-    pCurrentExecution = new TailRunner(settings, this);
-    connect(pCurrentExecution, &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
-    connect(pCurrentExecution, &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
-    connect(pCurrentExecution, &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
+    pCurrentExecution = std::make_unique<TailRunner>(settings, this);
+    connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
+    connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
+    connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
 
-    accountsTabUi = new AccountsTabUiManager(ui, pCurrentExecution, this);
-    pTrayManager = new TrayMenuManager(settings, pCurrentExecution, this);
+    accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
+    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
 
     changeToState(TailState::NotLoggedIn);
     pCurrentExecution->getAccounts();
@@ -34,15 +32,6 @@ this, &MainWindow::settingsClosed);
 
     // Make sure the settings tab is selected by default
     ui->tabWidget->setCurrentIndex(1);
-}
-
-MainWindow::~MainWindow()
-{
-    delete accountsTabUi;
-    delete pCurrentExecution;
-    delete pTailStatus;
-    delete pTrayManager;
-    delete ui;
 }
 
 void MainWindow::showSettingsTab() {
@@ -63,10 +52,10 @@ void MainWindow::showAboutTab() {
 void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
     accounts = foundAccounts;
     pTrayManager->onAccountsListed(foundAccounts);
-    pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
+    pTrayManager->stateChangedTo(eCurrentState, pTailStatus.get());
 
     accountsTabUi->onAccountsListed(foundAccounts);
-    accountsTabUi->onTailStatusChanged(pTailStatus);
+    accountsTabUi->onTailStatusChanged(pTailStatus.get());
 }
 
 void MainWindow::settingsClosed() {
@@ -87,23 +76,20 @@ TailState MainWindow::changeToState(TailState newState)
     if (eCurrentState == TailState::NotLoggedIn)
     {
         // Clear the status
-        delete pTailStatus;
-        pTailStatus = new TailStatus();
-        pTailStatus->self = new TailDeviceInfo();
-        pTailStatus->user = new TailUser();
+        pTailStatus = std::make_unique<TailStatus>();
+        pTailStatus->self = std::make_unique<TailDeviceInfo>();
+        pTailStatus->user = std::make_unique<TailUser>();
     }
 
-    pTrayManager->stateChangedTo(newState, pTailStatus);
-    accountsTabUi->onTailStatusChanged(pTailStatus);
+    pTrayManager->stateChangedTo(newState, pTailStatus.get());
+    accountsTabUi->onTailStatusChanged(pTailStatus.get());
 
     return retVal;
 }
 
 void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 {
-    delete pTailStatus;
-
-    pTailStatus = pNewStatus;
+    pTailStatus.reset(pNewStatus);
 
     if (pTailStatus->user->id > 0)
     {
@@ -117,7 +103,7 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
         ui->lblVersionNumber->setText("Version " + formattedVersion);
     }
 
-    accountsTabUi->onTailStatusChanged(pTailStatus);
+    accountsTabUi->onTailStatusChanged(pTailStatus.get());
 }
 
 void MainWindow::syncSettingsToUi() const {

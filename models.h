@@ -5,6 +5,8 @@
 #ifndef MODELS_H
 #define MODELS_H
 
+#include <memory>
+
 #include <QObject>
 #include <QString>
 #include <QList>
@@ -140,9 +142,9 @@ public:
     bool inEngine;
     QDateTime keyExpiry;
 
-    static TailDeviceInfo* parse(const QJsonObject& obj)
+    static std::unique_ptr<TailDeviceInfo> parse(const QJsonObject& obj)
     {
-        auto self = new TailDeviceInfo{};
+        auto self = std::make_unique<TailDeviceInfo>();
 
         self->id = obj["ID"].toString("");
         self->publicKey = obj["PublicKey"].toString("");
@@ -179,8 +181,8 @@ public:
     QString profilePicUrl;
     QList<QString> roles;
 
-    static TailUser* parse(const QJsonObject& obj, long long userId) {
-        auto user = new TailUser{};
+    static std::unique_ptr<TailUser> parse(const QJsonObject& obj, long long userId) {
+        auto user = std::make_unique<TailUser>();
 
         // Get the user object based on the user id (user id comes from the self part in the same doc)
         auto thisUser = obj[QString::number(userId)].toObject();
@@ -246,24 +248,14 @@ public:
     bool haveNodeKey;
     QString authUrl;
     QList<QString> tailscaleIPs;
-    TailDeviceInfo* self;
+    std::unique_ptr<TailDeviceInfo> self;
     QList<QString> health;
     QString magicDnsSuffix;
     TailNetInfo currentTailNet;
     QList<QString> certDomains;
-    QList<TailDeviceInfo*> peers;
-    TailUser* user;
+    QList<std::shared_ptr<TailDeviceInfo>> peers;
+    std::unique_ptr<TailUser> user;
     QString clientVersion;
-
-    virtual ~TailStatus()
-    {
-        for (auto* peer : peers)
-            delete peer;
-        peers.clear();
-
-        delete self;
-        delete user;
-    }
 
     static TailStatus* parse(const QJsonObject& obj) {
         auto newStatus = new TailStatus{};
@@ -305,7 +297,7 @@ public:
 
         newStatus->self = TailDeviceInfo::parse(obj["Self"].toObject());
         if (obj["User"].isNull()) {
-            newStatus->user = new TailUser{};
+            newStatus->user = std::make_unique<TailUser>();
         }
         else {
             newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self->userId);

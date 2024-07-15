@@ -1,6 +1,8 @@
 #ifndef TAILRUNNER_H
 #define TAILRUNNER_H
 
+#include <memory>
+
 #include <QObject>
 #include <QString>
 #include <QList>
@@ -14,7 +16,6 @@ class TailRunner : public QObject
     Q_OBJECT
 public:
     explicit TailRunner(const TailSettings& s, QObject* parent = nullptr);
-    virtual ~TailRunner();
 
     void checkStatus();
     void getAccounts();
@@ -28,7 +29,7 @@ public:
 
 private:
     const TailSettings& settings;
-    QProcess* pProcess;
+    std::unique_ptr<QProcess> pProcess;
     enum class Command {
         ListAccounts,
         SwitchAccount,

@@ -12,13 +12,8 @@
 TailRunner::TailRunner(const TailSettings& s, QObject* parent)
 : QObject(parent)
     , settings(s)
-    , pProcess(nullptr)
     , eCommand(Command::Status)
 { }
-
-TailRunner::~TailRunner() {
-    delete pProcess;
-}
 
 void TailRunner::checkStatus() {
     eCommand = Command::Status;
@@ -113,12 +108,10 @@ void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool
             });
             return;
         }
-
-        delete pProcess;
     }
 
-    pProcess = new QProcess(this);
-    connect(pProcess, &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus status) {
+    pProcess = std::make_unique<QProcess>(this);
+    connect(pProcess.get(), &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus status) {
         qDebug() << "Process exit code " << exitCode << " - " << status;
 
         if (exitCode != 0) {
@@ -153,11 +146,11 @@ void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool
         }
     });
 
-    connect(pProcess, &QProcess::readyReadStandardOutput,
+    connect(pProcess.get(), &QProcess::readyReadStandardOutput,
         this, &TailRunner::onProcessCanReadStdOut);
 
     // TODO: @grenis This needs some refactoring
-    connect(pProcess, &QProcess::readyReadStandardError,
+    connect(pProcess.get(), &QProcess::readyReadStandardError,
         this, [this]() {
             // NOTE! For whatever reason, the login command output is not captured by the readyReadStandardOutput signal
             // and arrives as a error output, so we need to check for that here.

@@ -203,7 +203,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
                 if (action->isChecked()) {
                     auto devName = action->data().toString();
                     settings.exitNodeInUse(devName);
-                    }
+                }
                 else {
                     settings.exitNodeInUse("");
                 }
@@ -217,10 +217,23 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
     }
     exitNodes->addSeparator();
     QAction* runExitNode = exitNodes->addAction("Run as exit node");
+    runExitNode->setCheckable(true);
     runExitNode->setChecked(settings.advertiseAsExitNode());
+    connect(runExitNode, &QAction::triggered, this, [this, runExitNode](bool) {
+        settings.advertiseAsExitNode(runExitNode->isChecked());
+        settings.save();
+        pTailRunner->start();
+    });
+
     QAction* exitNodeAllowNwAccess = exitNodes->addAction("Allow local network access");
+    exitNodeAllowNwAccess->setCheckable(true);
     exitNodeAllowNwAccess->setChecked(settings.exitNodeAllowLanAccess());
     exitNodeAllowNwAccess->setEnabled(settings.advertiseAsExitNode());
+    connect(exitNodeAllowNwAccess, &QAction::triggered, this, [this, exitNodeAllowNwAccess](bool) {
+        settings.exitNodeAllowLanAccess(exitNodeAllowNwAccess->isChecked());
+        settings.save();
+        pTailRunner->start();
+    });
 
     pTrayMenu->addSeparator();
     pTrayMenu->addAction(pPreferences);

@@ -36,8 +36,8 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
         }
     );
 
-    connect(ui->chkRunAsExitNode, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState newState) {
-        ui->chkExitNodeAllowNetworkAccess->setEnabled(newState == Qt::CheckState::Checked);
+    connect(ui->chkRunAsExitNode, &QCheckBox::clicked, this, [this]() {
+        ui->chkExitNodeAllowNetworkAccess->setEnabled(ui->chkRunAsExitNode->isChecked());
     });
 
     connect(ui->lstAccounts, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {

@@ -1,5 +1,6 @@
 #include <QDir>
 #include <QFile>
+#include <QNetworkInformation>
 
 #include "MainWindow.h"
 
@@ -22,7 +23,7 @@ MainWindow::MainWindow(QWidget* parent)
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
 
-    changeToState(TailState::NotLoggedIn);
+    changeToState(TailState::NotConnected);
     pCurrentExecution->getAccounts();
 
     connect(ui->btnSettingsClose, &QPushButton::clicked,
@@ -32,6 +33,8 @@ this, &MainWindow::settingsClosed);
 
     // Make sure the settings tab is selected by default
     ui->tabWidget->setCurrentIndex(1);
+
+    setupNetworkCallbacks();
 }
 
 void MainWindow::showSettingsTab() {
@@ -66,6 +69,22 @@ void MainWindow::settingsClosed() {
 
 void MainWindow::loginFlowCompleted() const {
     pCurrentExecution->start();
+}
+
+void MainWindow::onNetworkRechabilityChanged(QNetworkInformation::Reachability newReachability) {
+    qDebug() << "onNetworkRechabilityChanged -> " << newReachability;
+
+    if (newReachability == QNetworkInformation::Reachability::Online) {
+        // Fetch accounts and then get the status info after that
+        pCurrentExecution->getAccounts();
+        QTimer::singleShot(500, this, [this]() {
+            pCurrentExecution->checkStatus();
+        });
+        return;
+    }
+
+    if (eCurrentState != TailState::NotConnected)
+        changeToState(TailState::NotConnected);
 }
 
 TailState MainWindow::changeToState(TailState newState)
@@ -104,6 +123,33 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
     }
 
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
+}
+
+bool MainWindow::shallowCheckForNetworkAvailable() {
+    auto* inst = QNetworkInformation::instance();
+    if (inst->reachability() == QNetworkInformation::Reachability::Online)
+        return true;
+
+    return false;
+}
+
+void MainWindow::setupNetworkCallbacks() const {
+    auto* inst = QNetworkInformation::instance();
+    if (inst == nullptr) {
+        if (!QNetworkInformation::loadDefaultBackend()) {
+            qDebug() << "Unable to load Network information stack";
+            return;
+        }
+
+        inst = QNetworkInformation::instance();
+        if (inst == nullptr) {
+            qDebug() << "No noetwork information stack available";
+            return;
+        }
+    }
+
+    connect(inst, &QNetworkInformation::reachabilityChanged,
+        this, &MainWindow::onNetworkRechabilityChanged);
 }
 
 void MainWindow::syncSettingsToUi() const {

@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QNetworkInformation>
 
 #include "TailRunner.h"
 #include "TailSettings.h"
@@ -45,11 +46,15 @@ private slots:
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void settingsClosed();
     void loginFlowCompleted() const;
+    void onNetworkRechabilityChanged(QNetworkInformation::Reachability newReachability);
 
 private:
     // Switch to the new state and return the prev (old) state back to caller
     TailState changeToState(TailState newState);
     void onTailStatusChanged(TailStatus* pNewStatus);
+
+    static bool shallowCheckForNetworkAvailable();
+    void setupNetworkCallbacks() const;
 };
 
 #endif // MAINWINDOW_H

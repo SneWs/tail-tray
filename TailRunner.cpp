@@ -250,7 +250,7 @@ void TailRunner::onProcessCanReadStdOut() {
             }
             QJsonObject obj = doc.object();
             if (obj.contains("BackendState")) {
-                auto newState = obj["BackendState"].toString();
+                //auto newState = obj["BackendState"].toString();
             }
             break;
         }

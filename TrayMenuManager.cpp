@@ -135,7 +135,8 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnect);
     pTrayMenu->addSeparator();
-    pThisDevice->setText(pTailStatus->user->loginName);
+    if (pTailStatus != nullptr && pTailStatus->user != nullptr)
+        pThisDevice->setText(pTailStatus->user->loginName);
     pTrayMenu->addAction(pThisDevice);
     pTrayMenu->addSeparator();
     pTrayMenu->addAction(pPreferences);

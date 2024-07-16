@@ -36,6 +36,10 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
         }
     );
 
+    connect(ui->chkRunAsExitNode, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState newState) {
+        ui->chkExitNodeAllowNetworkAccess->setEnabled(newState == Qt::CheckState::Checked);
+    });
+
     connect(ui->lstAccounts, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
         // TODO: Get info about selected account
         auto accountId = item->data(Qt::UserRole).toString();

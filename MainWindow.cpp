@@ -157,6 +157,7 @@ void MainWindow::syncSettingsToUi() const {
     ui->chkUseTailscaleDns->setChecked(settings.useTailscaleDns());
     ui->chkUseTailscaleSubnets->setChecked(settings.useSubnets());
     ui->chkRunAsExitNode->setChecked(settings.advertiseAsExitNode());
+    ui->chkExitNodeAllowNetworkAccess->setEnabled(settings.advertiseAsExitNode());
     ui->chkExitNodeAllowNetworkAccess->setChecked(settings.exitNodeAllowLanAccess());
     ui->chkStartOnLogin->setChecked(settings.startOnLogin());
     ui->chkStartOnLogin->setChecked(false);

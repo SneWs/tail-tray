@@ -26,6 +26,8 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     , pAbout(nullptr)
     , pThisDevice(nullptr)
     , pExitNodeNone(nullptr)
+    , pRefreshLocalDns(nullptr)
+    , pSysCommand(std::make_unique<SysCommand>())
 {
     pTrayMenu = new QMenu("Tailscale");
 
@@ -56,6 +58,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     pExitNodeNone->setCheckable(true);
     pExitNodeNone->setChecked(true);
     pExitNodeNone->setEnabled(false);
+    pRefreshLocalDns = new QAction("Refresh Local DNS");
 
     setupWellKnownActions();
 
@@ -138,6 +141,8 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
     if (pTailStatus != nullptr && pTailStatus->user != nullptr)
         pThisDevice->setText(pTailStatus->user->loginName);
     pTrayMenu->addAction(pThisDevice);
+    auto* actions = pTrayMenu->addMenu("Custom Actions");
+    actions->addAction(pRefreshLocalDns);
     pTrayMenu->addSeparator();
     pTrayMenu->addAction(pPreferences);
     pTrayMenu->addAction(pAbout);
@@ -186,6 +191,9 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
             });
         }
     }
+
+    auto* actions = pTrayMenu->addMenu("Custom Actions");
+    actions->addAction(pRefreshLocalDns);
 
     pTrayMenu->addSeparator();
     auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
@@ -316,4 +324,8 @@ void TrayMenuManager::setupWellKnownActions() const {
             }
         }
     );
+
+    connect(pRefreshLocalDns, &QAction::triggered, this, [this](bool) {
+        pSysCommand->refreshDns();
+    });
 }

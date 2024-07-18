@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
         TailSettings.h
         AccountsTabUiManager.cpp
         AccountsTabUiManager.h
+        SysCommand.cpp
+        SysCommand.h
 )
 
 qt_add_executable(tail-tray

@@ -49,7 +49,7 @@ signals:
     void loginFlowCompleted();
 
 private:
-    void runCommand(QString cmd, QStringList args, bool jsonResult = false, bool usePkExec = false);
+    void runCommand(const QString& cmd, QStringList args, bool jsonResult = false, bool usePkExec = false);
     void onProcessCanReadStdOut();
 
     void parseStatusResponse(const QJsonObject& obj);

@@ -99,7 +99,7 @@ void TailRunner::stop() {
     runCommand("down", QStringList());
 }
 
-void TailRunner::runCommand(QString cmd, QStringList args, bool jsonResult, bool usePkExec) {
+void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec) {
     if (pProcess != nullptr) {
         if (pProcess->state() == QProcess::Running) {
             qDebug() << "Process already running!" << "Will queue up " << cmd << args << "command";

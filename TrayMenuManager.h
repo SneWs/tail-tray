@@ -5,6 +5,8 @@
 #ifndef TRAYMENUMANAGER_H
 #define TRAYMENUMANAGER_H
 
+#include <memory>
+
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QString>
@@ -12,18 +14,19 @@
 #include "models.h"
 #include "TailRunner.h"
 #include "TailSettings.h"
+#include "SysCommand.h"
 
 class TrayMenuManager : public QObject
 {
     Q_OBJECT
 public:
     explicit TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent = nullptr);
-    virtual ~TrayMenuManager();
+    ~TrayMenuManager() final;
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void stateChangedTo(TailState newState, TailStatus const* pTailStatus) const;
 
-    QSystemTrayIcon* trayIcon() const { return pSysTray; }
+    [[nodiscard]] QSystemTrayIcon* trayIcon() const { return pSysTray; }
 
 private:
     QList<TailAccountInfo> accounts;
@@ -42,6 +45,9 @@ private:
     QAction* pAbout;
     QAction* pThisDevice;
     QAction* pExitNodeNone;
+    QAction* pRefreshLocalDns;
+
+    std::unique_ptr<SysCommand> pSysCommand;
 
 private:
     void buildNotLoggedInMenu() const;

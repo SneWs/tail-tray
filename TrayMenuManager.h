@@ -21,32 +21,30 @@ class TrayMenuManager : public QObject
     Q_OBJECT
 public:
     explicit TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent = nullptr);
-    ~TrayMenuManager() final;
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void stateChangedTo(TailState newState, TailStatus const* pTailStatus) const;
 
-    [[nodiscard]] QSystemTrayIcon* trayIcon() const { return pSysTray; }
+    [[nodiscard]] QSystemTrayIcon* trayIcon() const { return pSysTray.get(); }
 
 private:
     QList<TailAccountInfo> accounts;
     TailSettings& settings;
     TailRunner* pTailRunner;
-    QTimer* pStatusCheckTimer;
-    QSystemTrayIcon* pSysTray;
-    QMenu* pTrayMenu;
-    QAction* pQuitAction;
-    QAction* pLoginAction;
-    QAction* pLogoutAction;
-    QAction* pConnected;
-    QAction* pConnect;
-    QAction* pDisconnect;
-    QAction* pPreferences;
-    QAction* pAbout;
-    QAction* pThisDevice;
-    QAction* pExitNodeNone;
-    QAction* pRefreshLocalDns;
-
+    std::unique_ptr<QTimer> pStatusCheckTimer;
+    std::unique_ptr<QSystemTrayIcon> pSysTray;
+    std::unique_ptr<QMenu> pTrayMenu;
+    std::unique_ptr<QAction> pQuitAction;
+    std::unique_ptr<QAction> pLoginAction;
+    std::unique_ptr<QAction> pLogoutAction;
+    std::unique_ptr<QAction> pConnected;
+    std::unique_ptr<QAction> pConnect;
+    std::unique_ptr<QAction> pDisconnect;
+    std::unique_ptr<QAction> pPreferences;
+    std::unique_ptr<QAction> pAbout;
+    std::unique_ptr<QAction> pThisDevice;
+    std::unique_ptr<QAction> pExitNodeNone;
+    std::unique_ptr<QAction> pRefreshLocalDns;  
     std::unique_ptr<SysCommand> pSysCommand;
 
 private:

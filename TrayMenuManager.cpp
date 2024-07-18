@@ -10,83 +10,52 @@
 
 TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent)
     : QObject(parent)
-    , accounts()
     , settings(s)
     , pTailRunner(runner)
-    , pStatusCheckTimer(nullptr)
-    , pSysTray(nullptr)
-    , pTrayMenu(nullptr)
-    , pConnect(nullptr)
-    , pDisconnect(nullptr)
-    , pQuitAction(nullptr)
-    , pLoginAction(nullptr)
-    , pConnected(nullptr)
-    , pLogoutAction(nullptr)
-    , pPreferences(nullptr)
-    , pAbout(nullptr)
-    , pThisDevice(nullptr)
-    , pExitNodeNone(nullptr)
+    , pSysCommand(std::make_unique<SysCommand>())
 {
-    pTrayMenu = new QMenu("Tailscale");
+    pTrayMenu = std::make_unique<QMenu>("Tailscale");
 
     // Make sure to restart the status check timer when the menu is shown
     // since this will give us some time before it will try to re-fresh the menu etc
     // NOTE: aboutToHide() is not used since it will not be triggered when the menu is closed/dismissed when focus is lost
-    connect(pTrayMenu, &QMenu::aboutToShow, this, [this]() {
+    connect(pTrayMenu.get(), &QMenu::aboutToShow, this, [this]() {
         pStatusCheckTimer->start();
     });
 
-    pSysTray = new QSystemTrayIcon(this);
-    pSysTray->setContextMenu(pTrayMenu);
+    pSysTray = std::make_unique<QSystemTrayIcon>(this);
+    pSysTray->setContextMenu(pTrayMenu.get());
     pSysTray->setToolTip("Tailscale");
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
     pSysTray->setVisible(true);
 
-    pQuitAction = new QAction("Quit");
-    pLoginAction = new QAction("Login");
-    pLogoutAction = new QAction("Logout");
-    pPreferences = new QAction("Preferences");
-    pAbout = new QAction("About...");
-    pConnected = new QAction("Connected");
+    pQuitAction = std::make_unique<QAction>("Quit");
+    pLoginAction = std::make_unique<QAction>("Login");
+    pLogoutAction = std::make_unique<QAction>("Logout");
+    pPreferences = std::make_unique<QAction>("Preferences");
+    pAbout = std::make_unique<QAction>("About...");
+    pConnected = std::make_unique<QAction>("Connected");
     pConnected->setEnabled(false);
-    pConnect = new QAction("Connect");
-    pDisconnect = new QAction("Disconnect");
-    pThisDevice = new QAction("This device");
-    pExitNodeNone = new QAction("None");
+    pConnect = std::make_unique<QAction>("Connect");
+    pDisconnect = std::make_unique<QAction>("Disconnect");
+    pThisDevice = std::make_unique<QAction>("This device");
+    pExitNodeNone = std::make_unique<QAction>("None");
     pExitNodeNone->setCheckable(true);
     pExitNodeNone->setChecked(true);
     pExitNodeNone->setEnabled(false);
+    pRefreshLocalDns = std::make_unique<QAction>("Refresh Local DNS");
 
     setupWellKnownActions();
 
     // Periodic status check
-    pStatusCheckTimer = new QTimer(this);
-    connect(pStatusCheckTimer, &QTimer::timeout, this, [this]() {
+    pStatusCheckTimer = std::make_unique<QTimer>(this);
+    connect(pStatusCheckTimer.get(), &QTimer::timeout, this, [this]() {
         pTailRunner->checkStatus();
     });
     pStatusCheckTimer->setSingleShot(false);
     pStatusCheckTimer->start(1000 * 30); // 30sec interval
 
     stateChangedTo(TailState::NotLoggedIn, nullptr);
-}
-
-TrayMenuManager::~TrayMenuManager()
-{
-    pStatusCheckTimer->stop();
-    delete pStatusCheckTimer;
-
-    delete pTrayMenu;
-    delete pSysTray;
-    delete pConnect;
-    delete pDisconnect;
-    delete pQuitAction;
-    delete pLoginAction;
-    delete pConnected;
-    delete pLogoutAction;
-    delete pPreferences;
-    delete pAbout;
-    delete pThisDevice;
-    delete pExitNodeNone;
 }
 
 void TrayMenuManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
@@ -120,12 +89,12 @@ void TrayMenuManager::stateChangedTo(TailState newState, TailStatus const* pTail
 
 void TrayMenuManager::buildNotLoggedInMenu() const {
     pTrayMenu->clear();
-    pTrayMenu->addAction(pLoginAction);
+    pTrayMenu->addAction(pLoginAction.get());
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction(pPreferences);
-    pTrayMenu->addAction(pAbout);
+    pTrayMenu->addAction(pPreferences.get());
+    pTrayMenu->addAction(pAbout.get());
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction(pQuitAction);
+    pTrayMenu->addAction(pQuitAction.get());
 
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
 }
@@ -133,16 +102,18 @@ void TrayMenuManager::buildNotLoggedInMenu() const {
 void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
 {
     pTrayMenu->clear();
-    pTrayMenu->addAction(pConnect);
+    pTrayMenu->addAction(pConnect.get());
     pTrayMenu->addSeparator();
     if (pTailStatus != nullptr && pTailStatus->user != nullptr)
         pThisDevice->setText(pTailStatus->user->loginName);
-    pTrayMenu->addAction(pThisDevice);
+    pTrayMenu->addAction(pThisDevice.get());
+    auto* actions = pTrayMenu->addMenu("Custom Actions");
+    actions->addAction(pRefreshLocalDns.get());
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction(pPreferences);
-    pTrayMenu->addAction(pAbout);
+    pTrayMenu->addAction(pPreferences.get());
+    pTrayMenu->addAction(pAbout.get());
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction(pQuitAction);
+    pTrayMenu->addAction(pQuitAction.get());
 
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
 
@@ -152,15 +123,15 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
 void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
 {
     pTrayMenu->clear();
-    pTrayMenu->addAction(pConnected);
-    pTrayMenu->addAction(pDisconnect);
+    pTrayMenu->addAction(pConnected.get());
+    pTrayMenu->addAction(pDisconnect.get());
     pTrayMenu->addSeparator();
     pThisDevice->setText(pTailStatus->user->loginName);
-    pTrayMenu->addAction(pThisDevice);
+    pTrayMenu->addAction(pThisDevice.get());
 
     pTrayMenu->addSeparator();
     pThisDevice->setText(pTailStatus->user->loginName);
-    pTrayMenu->addAction(pThisDevice);
+    pTrayMenu->addAction(pThisDevice.get());
 
     auto* netDevs = pTrayMenu->addMenu("Network devices");
     for (const auto& dev : pTailStatus->peers) {
@@ -187,9 +158,12 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
         }
     }
 
+    auto* actions = pTrayMenu->addMenu("Custom Actions");
+    actions->addAction(pRefreshLocalDns.get());
+
     pTrayMenu->addSeparator();
     auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
-    exitNodes->addAction(pExitNodeNone);
+    exitNodes->addAction(pExitNodeNone.get());
     for (int i = 0; i < pTailStatus->peers.count(); i++) {
         const auto& dev = pTailStatus->peers[i];
         if (dev->online && dev->id != pTailStatus->self->id && dev->exitNodeOption) {
@@ -237,10 +211,10 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
     });
 
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction(pPreferences);
-    pTrayMenu->addAction(pAbout);
+    pTrayMenu->addAction(pPreferences.get());
+    pTrayMenu->addAction(pAbout.get());
     pTrayMenu->addSeparator();
-    pTrayMenu->addAction(pQuitAction);
+    pTrayMenu->addAction(pQuitAction.get());
 
     pSysTray->setIcon(QIcon(":/icons/tray-on.png"));
     buildAccountsMenu();
@@ -270,36 +244,36 @@ void TrayMenuManager::buildAccountsMenu() const {
 }
 
 void TrayMenuManager::setupWellKnownActions() const {
-    connect(pLoginAction, &QAction::triggered, this, [this](bool) {
+    connect(pLoginAction.get(), &QAction::triggered, this, [this](bool) {
         pTailRunner->login();
     });
 
-    connect(pConnect, &QAction::triggered, this, [this](bool) {
+    connect(pConnect.get(), &QAction::triggered, this, [this](bool) {
         pTailRunner->start();
     });
 
-    connect(pDisconnect, &QAction::triggered, this, [this](bool) {
+    connect(pDisconnect.get(), &QAction::triggered, this, [this](bool) {
         pTailRunner->stop();
     });
 
-    connect(pPreferences, &QAction::triggered, this, [this](bool) {
+    connect(pPreferences.get(), &QAction::triggered, this, [this](bool) {
         auto* wnd = dynamic_cast<MainWindow*>(this->parent());
         wnd->showSettingsTab();
     });
 
-    connect(pAbout, &QAction::triggered, this, [this](bool) {
+    connect(pAbout.get(), &QAction::triggered, this, [this](bool) {
         auto* wnd = dynamic_cast<MainWindow*>(this->parent());
         wnd->showAboutTab();
     });
 
-    connect(pThisDevice, &QAction::triggered, this, [this](bool) {
+    connect(pThisDevice.get(), &QAction::triggered, this, [this](bool) {
         auto* wnd = dynamic_cast<MainWindow*>(this->parent());
         wnd->showAccountsTab();
     });
 
-    connect(pQuitAction, &QAction::triggered, qApp, &QApplication::quit);
+    connect(pQuitAction.get(), &QAction::triggered, qApp, &QApplication::quit);
 
-    connect(pSysTray, &QSystemTrayIcon::activated,
+    connect(pSysTray.get(), &QSystemTrayIcon::activated,
         this, [this](QSystemTrayIcon::ActivationReason reason) {
             auto* wnd = dynamic_cast<MainWindow*>(this->parent());
             if (reason == QSystemTrayIcon::ActivationReason::Trigger) {
@@ -316,4 +290,8 @@ void TrayMenuManager::setupWellKnownActions() const {
             }
         }
     );
+
+    connect(pRefreshLocalDns.get(), &QAction::triggered, this, [this](bool) {
+        pSysCommand->refreshDns();
+    });
 }

@@ -7,6 +7,9 @@
 #include <QDesktopServices>
 
 #include "TrayMenuManager.h"
+
+#include <QDir>
+
 #include "MainWindow.h"
 #include "ManageDriveWindow.h"
 
@@ -177,6 +180,26 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             }
         });
 
+        auto* mountAction = drives->addAction("Mount remote drives");
+        connect(mountAction, &QAction::triggered, this, [this](bool) {
+            static QString remote("http://100.100.100.100:8080");
+            static QString fsType("davfs");
+            static QString options("username=Guest,password=");
+            const QString mountPath = settings.tailDriveMountPath();
+            const QDir mountDir(mountPath);
+            qDebug() << "Will try to mount " << fsType << " to local path " << mountPath;
+
+            if (!mountDir.exists()) {
+                SysCommand mkDirCmd{};
+                mkDirCmd.makeDir(mountPath);
+                mkDirCmd.waitForFinished();
+            }
+
+            SysCommand mountCmd{};
+            mountCmd.mountFs(remote, mountPath, fsType, options);
+            mountCmd.waitForFinished();
+        });
+
         if (pTailStatus->drives.count() > 0)
             drives->addSeparator();
 
@@ -198,11 +221,6 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             auto* removeAction = driveMenu->addAction("Stop Sharing");
             connect(removeAction, &QAction::triggered, this, [this, drive](bool) {
                 pTailRunner->removeDrive(drive);
-            });
-
-            auto* mountAction = driveMenu->addAction("Mount");
-            connect(mountAction, &QAction::triggered, this, [this, drive](bool) {
-                // TODO: Implement drive mounting
             });
         }
     }

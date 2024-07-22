@@ -39,6 +39,9 @@ public:
     [[nodiscard]] QString exitNodeInUse() const;
     void exitNodeInUse(const QString& nodeNameOrIp);
 
+    [[nodiscard]] QString tailDriveMountPath() const;
+    void tailDriveMountPath(const QString& path);
+
 private:
     QSettings settings;
 };

@@ -10,7 +10,8 @@ This is a personal project and is not endorsed by Tailscale Inc. in any shape or
 - [X] Show IPs
 - [X] Show current connection status of your devices
 - [X] Set and change your Tailscale exit node
-- [ ] Proper multi account handling - This is still in the works
+- [X] Proper multi account handling 
+- [ ] Tail drive support - Mostly working, but not yet fully implemented (Lacks the mount handling)
 
 ### License
 GNU General Public License v3.0 - see [LICENSE](LICENSE) for more details
@@ -28,15 +29,15 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
    * Git, QT 6, cmake and a c++ compiler, for example:
       * On Ubuntu and Ubuntu based distros
          ```bash
-         sudo apt install git qt6-tools-dev qt6-tools-dev-tools g++ clang cmake
+         sudo apt install git qt6-tools-dev qt6-tools-dev-tools g++ clang cmake davfs2
          ```
      * On Fedora
         ```bash
-        sudo dnf -y git g++ clang cmake install qt6-qtbase-devel qt6-qttools-devel qt6-qtbase-private-devel
+        sudo dnf -y git g++ clang cmake install qt6-qtbase-devel qt6-qttools-devel qt6-qtbase-private-devel davfs2
         ```
       * On Arch Linux
          ```bash
-         sudo pacman -S git clang cmake qt6-base qt6-tools
+         sudo pacman -S git clang cmake qt6-base qt6-tools davfs2
          ```
 2. Clone the repo
 3. cd into the repo `cd tail-tray`
@@ -59,3 +60,9 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
 ![Screenshot](screenshots/disconnected-tray.png)
 
 ![Screenshot](screenshots/settings-ui.png)
+
+![Screenshot](screenshots/tail-drives01.png)
+
+![Screenshot](screenshots/tail-drives02.png)
+
+![Screenshot](screenshots/tail-drives03.png)

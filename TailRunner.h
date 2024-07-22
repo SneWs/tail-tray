@@ -28,6 +28,7 @@ public:
     void stop();
 
     void listDrives();
+    void addDrive(const TailDriveInfo& drive);
 
 private:
     const TailSettings& settings;

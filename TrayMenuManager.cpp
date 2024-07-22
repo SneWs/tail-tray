@@ -4,12 +4,11 @@
 
 #include <QApplication>
 #include <QClipboard>
-
-#include "TrayMenuManager.h"
-
 #include <QDesktopServices>
 
+#include "TrayMenuManager.h"
 #include "MainWindow.h"
+#include "ManageDriveWindow.h"
 
 TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent)
     : QObject(parent)
@@ -169,6 +168,19 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
         });
     }
     else {
+        auto* addAction = drives->addAction("Add drive");
+        connect(addAction, &QAction::triggered, this, [this](bool) {
+            ManageDriveWindow wnd(TailDriveInfo{}, reinterpret_cast<QWidget*>(this->parent()));
+            auto result = wnd.exec();
+            if (result == QDialog::Accepted) {
+                auto drive = wnd.driveInfo();
+                pTailRunner->addDrive(drive);
+            }
+        });
+
+        if (pTailStatus->drives.count() > 0)
+            drives->addSeparator();
+
         for (const auto& drive : pTailStatus->drives) {
             auto* action = drives->addAction(drive.name);
             connect(action, &QAction::triggered, this, [this, drive](bool) {

@@ -107,6 +107,16 @@ void TailRunner::listDrives() {
     runCommand("drive", args, false);
 }
 
+void TailRunner::addDrive(const TailDriveInfo& drive) {
+    eCommand = Command::Drive;
+
+    QStringList args;
+    args << "share";
+    args << drive.name << drive.path;
+
+    runCommand("drive", args, false);
+}
+
 void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec) {
     if (pProcess != nullptr) {
         if (pProcess->state() == QProcess::Running) {

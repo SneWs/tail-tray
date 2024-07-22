@@ -173,8 +173,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             ManageDriveWindow wnd(TailDriveInfo{}, reinterpret_cast<QWidget*>(this->parent()));
             auto result = wnd.exec();
             if (result == QDialog::Accepted) {
-                auto drive = wnd.driveInfo();
-                pTailRunner->addDrive(drive);
+                pTailRunner->addDrive(wnd.driveInfo());
             }
         });
 
@@ -182,10 +181,28 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             drives->addSeparator();
 
         for (const auto& drive : pTailStatus->drives) {
-            auto* action = drives->addAction(drive.name);
-            connect(action, &QAction::triggered, this, [this, drive](bool) {
+            auto* driveMenu = drives->addMenu(drive.name);
+
+            auto* renameAction = driveMenu->addAction("Rename");
+            connect(renameAction, &QAction::triggered, this, [this, drive](bool) {
+                ManageDriveWindow wnd(drive, reinterpret_cast<QWidget*>(this->parent()));
+                auto result = wnd.exec();
+                if (result == QDialog::Accepted) {
+                    const auto& newName = wnd.driveInfo().name;
+                    if (newName.compare(drive.name, Qt::CaseInsensitive) != 0) {
+                        pTailRunner->renameDrive(drive, newName);
+                    }
+                }
+            });
+
+            auto* removeAction = driveMenu->addAction("Stop Sharing");
+            connect(removeAction, &QAction::triggered, this, [this, drive](bool) {
+                pTailRunner->removeDrive(drive);
+            });
+
+            auto* mountAction = driveMenu->addAction("Mount");
+            connect(mountAction, &QAction::triggered, this, [this, drive](bool) {
                 // TODO: Implement drive mounting
-                //pSysCommand->openDrive(drive.path);
             });
         }
     }

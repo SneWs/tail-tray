@@ -1,6 +1,7 @@
 #include "ManageDriveWindow.h"
 
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QPushButton>
 
 ManageDriveWindow::ManageDriveWindow(const TailDriveInfo& drive, QWidget* parent)
@@ -18,6 +19,9 @@ ManageDriveWindow::ManageDriveWindow(const TailDriveInfo& drive, QWidget* parent
 
     connect(ui->btnSelectFolder, &QPushButton::clicked,
             this, &ManageDriveWindow::selectFolder);
+
+    connect(ui->btnOk, &QPushButton::clicked,
+            this, &ManageDriveWindow::acceptButtonClicked);
 }
 
 void ManageDriveWindow::driveToUi() {
@@ -45,4 +49,26 @@ void ManageDriveWindow::selectFolder() {
         const auto& selection = dlg.selectedFiles();
         ui->txtPath->setText(selection.first());
     }
+}
+
+void ManageDriveWindow::acceptButtonClicked() {
+    QString error;
+    if (ui->txtName->text().isEmpty()) {
+        error = "Name must be set";
+        setResult(QDialog::Rejected);
+    }
+
+    const QDir dir(ui->txtPath->text());
+    if (ui->txtPath->text().isEmpty() || !dir.exists()) {
+        error = "Path must be set and exist";
+        setResult(QDialog::Rejected);
+    }
+
+    if (!error.isEmpty()) {
+        QMessageBox::warning(this, "Error", error, QMessageBox::Ok);
+        return;
+    }
+
+    setResult(QDialog::Accepted);
+    accept();
 }

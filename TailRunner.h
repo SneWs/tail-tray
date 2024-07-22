@@ -29,6 +29,8 @@ public:
 
     void listDrives();
     void addDrive(const TailDriveInfo& drive);
+    void renameDrive(const TailDriveInfo& drive, const QString& newName);
+    void removeDrive(const TailDriveInfo& drive);
 
 private:
     const TailSettings& settings;
@@ -42,7 +44,10 @@ private:
         Disconnect,
         SettingsChange,
         Status,
-        Drive
+        Drive,
+        DriveAdd,
+        DriveRename,
+        DriveRemove
     };
 
     Command eCommand;

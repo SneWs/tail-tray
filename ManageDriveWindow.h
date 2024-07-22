@@ -25,6 +25,7 @@ private:
 
 private slots:
     void selectFolder();
+    void acceptButtonClicked();
 };
 
 #endif // MANAGEDRIVEWINDOW_H

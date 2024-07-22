@@ -108,11 +108,31 @@ void TailRunner::listDrives() {
 }
 
 void TailRunner::addDrive(const TailDriveInfo& drive) {
-    eCommand = Command::Drive;
+    eCommand = Command::DriveAdd;
 
     QStringList args;
     args << "share";
     args << drive.name << drive.path;
+
+    runCommand("drive", args, false);
+}
+
+void TailRunner::renameDrive(const TailDriveInfo &drive, const QString &newName) {
+    eCommand = Command::DriveRename;
+
+    QStringList args;
+    args << "rename";
+    args << drive.name << newName;
+
+    runCommand("drive", args, false);
+}
+
+void TailRunner::removeDrive(const TailDriveInfo& drive) {
+eCommand = Command::DriveRemove;
+
+    QStringList args;
+    args << "unshare";
+    args << drive.name;
 
     runCommand("drive", args, false);
 }

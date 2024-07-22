@@ -91,12 +91,16 @@
       </spacer>
      </item>
      <item>
-      <widget class="QDialogButtonBox" name="dlgButtons">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
+      <widget class="QPushButton" name="btnOk">
+       <property name="text">
+        <string>&amp;Ok</string>
        </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnCancel">
+       <property name="text">
+        <string>&amp;Cancel</string>
        </property>
       </widget>
      </item>
@@ -105,38 +109,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>dlgButtons</sender>
-   <signal>accepted()</signal>
-   <receiver>ManageDriveWindow</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>dlgButtons</sender>
-   <signal>rejected()</signal>
-   <receiver>ManageDriveWindow</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

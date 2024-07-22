@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
     connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
     connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
+    connect(pCurrentExecution.get(), &TailRunner::driveListed, this, &MainWindow::drivesListed);
 
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
@@ -87,6 +88,26 @@ void MainWindow::onNetworkRechabilityChanged(QNetworkInformation::Reachability n
         changeToState(TailState::NotConnected);
 }
 
+void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const {
+    if (error) {
+        pTailStatus->drivesConfigured = false;
+        qDebug() << errorMsg;
+        qDebug() << "To read more about configuring taill drives, see https://tailscale.com/kb/1369/taildrive";
+        return; // Nothing to do here
+    }
+
+    pTailStatus->drivesConfigured = true;
+    for (const auto& drive : drives) {
+        qDebug() << "Drive: " << drive.name << " (" << drive.path << ")";
+    }
+
+    // Store available drives
+    pTailStatus->drives = drives;
+
+    // Refresh the tray icon menus
+    pTrayManager->stateChangedTo(eCurrentState, pTailStatus.get());
+}
+
 TailState MainWindow::changeToState(TailState newState)
 {
     auto retVal = eCurrentState;
@@ -102,6 +123,10 @@ TailState MainWindow::changeToState(TailState newState)
 
     pTrayManager->stateChangedTo(newState, pTailStatus.get());
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
+
+    if (eCurrentState == TailState::Connected) {
+        pCurrentExecution->listDrives();
+    }
 
     return retVal;
 }

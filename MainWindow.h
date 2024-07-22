@@ -48,6 +48,8 @@ private slots:
     void loginFlowCompleted() const;
     void onNetworkRechabilityChanged(QNetworkInformation::Reachability newReachability);
 
+    void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const;
+
 private:
     // Switch to the new state and return the prev (old) state back to caller
     TailState changeToState(TailState newState);

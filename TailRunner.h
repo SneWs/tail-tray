@@ -27,6 +27,8 @@ public:
     void start(bool usePkExec = false);
     void stop();
 
+    void listDrives();
+
 private:
     const TailSettings& settings;
     std::unique_ptr<QProcess> pProcess;
@@ -38,7 +40,8 @@ private:
         Connect,
         Disconnect,
         SettingsChange,
-        Status
+        Status,
+        Drive
     };
 
     Command eCommand;
@@ -47,6 +50,7 @@ signals:
     void accountsListed(const QList<TailAccountInfo>& accounts);
     void statusUpdated(TailStatus* newStatus);
     void loginFlowCompleted();
+    void driveListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);
 
 private:
     void runCommand(const QString& cmd, QStringList args, bool jsonResult = false, bool usePkExec = false);

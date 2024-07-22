@@ -99,6 +99,14 @@ void TailRunner::stop() {
     runCommand("down", QStringList());
 }
 
+void TailRunner::listDrives() {
+    eCommand = Command::Drive;
+
+    QStringList args;
+    args << "list";
+    runCommand("drive", args, false);
+}
+
 void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec) {
     if (pProcess != nullptr) {
         if (pProcess->state() == QProcess::Running) {
@@ -138,7 +146,7 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
             else if (eCommand == Command::ListAccounts) {
                 checkStatus();
             }
-            else if (eCommand != Command::Status && eCommand != Command::Logout) {
+            else if (eCommand != Command::Status && eCommand != Command::Logout && eCommand != Command::Drive) {
                 QTimer::singleShot(1000, this, [this]() {
                     checkStatus();
                 });
@@ -183,6 +191,11 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
                         }
                     }
                 }
+            }
+            else if (eCommand == Command::Drive) {
+                // ACL not allowing drives most likely
+                QString errorInfo(pProcess->readAllStandardError());
+                emit driveListed(QList<TailDriveInfo>(), true, errorInfo);
             }
             else {
                 QString errorInfo(pProcess->readAllStandardError());
@@ -237,6 +250,11 @@ void TailRunner::onProcessCanReadStdOut() {
             const QList<TailAccountInfo> accounts = TailAccountInfo::parseAllFound(raw);
             emit accountsListed(accounts);
             break;
+        }
+        case Command::Drive: {
+            const QString raw(data);
+            const QList<TailDriveInfo> drives = TailDriveInfo::parse(raw);
+            emit driveListed(drives, false, QString());
         }
         case Command::Connect: {
             // Will be a simple json string with backend state

@@ -6,6 +6,9 @@
 #include <QClipboard>
 
 #include "TrayMenuManager.h"
+
+#include <QDesktopServices>
+
 #include "MainWindow.h"
 
 TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent)
@@ -99,8 +102,7 @@ void TrayMenuManager::buildNotLoggedInMenu() const {
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
 }
 
-void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
-{
+void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const {
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnect.get());
     pTrayMenu->addSeparator();
@@ -120,8 +122,7 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
     buildAccountsMenu();
 }
 
-void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
-{
+void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnected.get());
     pTrayMenu->addAction(pDisconnect.get());
@@ -157,6 +158,27 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const
             });
         }
     }
+
+    // Tail drives
+    auto* drives = pTrayMenu->addMenu("Drives");
+    if (!pTailStatus->drivesConfigured && pTailStatus->drives.count() < 1) {
+        auto* action = drives->addAction("Not configured, click to configure");
+        connect(action, &QAction::triggered, this, [this](bool) {
+            // Open help link in browser
+            QDesktopServices::openUrl(QUrl("https://tailscale.com/kb/1369/taildrive"));
+        });
+    }
+    else {
+        for (const auto& drive : pTailStatus->drives) {
+            auto* action = drives->addAction(drive.name);
+            connect(action, &QAction::triggered, this, [this, drive](bool) {
+                // TODO: Implement drive mounting
+                //pSysCommand->openDrive(drive.path);
+            });
+        }
+    }
+
+    pTrayMenu->addSeparator();
 
     auto* actions = pTrayMenu->addMenu("Custom Actions");
     actions->addAction(pRefreshLocalDns.get());

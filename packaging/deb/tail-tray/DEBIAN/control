@@ -6,4 +6,4 @@ Architecture: amd64
 License: GNU General Public License v3.0
 Section: net
 Homepage: https://github.com/SneWs/tail-tray
-Depends: davfs2 libqt6widgets6, libqt6waylandcompositor6, libqt6openglwidgets6, libqt6network6, libqt6gui6, libqt6waylandeglclienthwintegration6, libqt6waylandeglcompositorhwintegration6
+Depends: davfs2, libqt6widgets6, libqt6waylandcompositor6, libqt6openglwidgets6, libqt6network6, libqt6gui6, libqt6waylandeglclienthwintegration6, libqt6waylandeglcompositorhwintegration6

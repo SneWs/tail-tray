@@ -83,3 +83,11 @@ void TailSettings::tailDriveMountPath(const QString& path) {
     settings.setValue("tailDriveMountPath", path);
 }
 
+bool TailSettings::tailDriveEnabled() const {
+    return settings.value("tailDriveEnabled", false).toBool();
+}
+
+void TailSettings::tailDriveEnabled(bool enabled) {
+    settings.setValue("tailDriveEnabled", enabled);
+}
+

@@ -42,6 +42,9 @@ public:
     [[nodiscard]] QString tailDriveMountPath() const;
     void tailDriveMountPath(const QString& path);
 
+    [[nodiscard]] bool tailDriveEnabled() const;
+    void tailDriveEnabled(bool enabled);
+
 private:
     QSettings settings;
 };

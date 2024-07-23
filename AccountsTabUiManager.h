@@ -31,6 +31,7 @@ private:
     TailRunner* pTailRunner;
     TailStatus* pTailStatus;
     QList<TailAccountInfo> accounts;
+    TailSettings settings;
 };
 
 

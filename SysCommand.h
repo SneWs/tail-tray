@@ -13,7 +13,7 @@ class SysCommand : public QObject
 public:
     void refreshDns();
     void makeDir(const QString& path, bool usePkExec = false);
-    void mountFs(const QString& remote, const QString& path, const QString& fsType, const QString& options, bool usePkExec = false);
+    void mountFs(const QString& remote, const QString& path, const QString& fsType, const QString& options = "", bool usePkExec = false);
 
     [[nodiscard]] QString readFile(const QString& filePath, bool usePkExec = false);
     [[nodiscard]] bool copyFile(const QString& fromFile, const QString& toFile, bool usePkExec = false);

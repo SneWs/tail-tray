@@ -29,8 +29,11 @@ void SysCommand::mountFs(const QString& remote, const QString& path, const QStri
     args << fsType;
     args << remote;
     args << path;
-    args << "-o";
-    args << options;
+
+    if (!options.isEmpty()) {
+        args << "-o";
+        args << options;
+    }
 
     runCommand("mount", args, false, usePkExec);
 }

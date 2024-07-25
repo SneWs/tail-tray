@@ -184,7 +184,6 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
         connect(mountAction, &QAction::triggered, this, [this](bool) {
             static QString remote("http://100.100.100.100:8080");
             static QString fsType("davfs");
-            static QString options("username=Guest,password=");
             const QString mountPath = settings.tailDriveMountPath();
             const QDir mountDir(mountPath);
             qDebug() << "Will try to mount " << fsType << " to local path " << mountPath;
@@ -196,7 +195,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             }
 
             SysCommand mountCmd{};
-            mountCmd.mountFs(remote, mountPath, fsType, options);
+            mountCmd.mountFs(remote, mountPath, fsType, "", true);
             (void)mountCmd.waitForFinished();
         });
 

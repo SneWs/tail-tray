@@ -237,7 +237,7 @@ void MainWindow::fixTailDriveDavFsSetup() const {
 
     if (configured) {
         // done
-                            return;
+        return;
     }
 
     // We need to add our config lines

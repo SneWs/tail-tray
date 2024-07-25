@@ -11,7 +11,7 @@ This is a personal project and is not endorsed by Tailscale Inc. in any shape or
 - [X] Show current connection status of your devices
 - [X] Set and change your Tailscale exit node
 - [X] Proper multi account handling 
-- [ ] Tail drive support - Mostly working, but not yet fully implemented (Lacks the mount handling)
+- [X] Tail drive support - Working with davfs2 support + additional help setting up davfs2 and mounting etc
 
 ### License
 GNU General Public License v3.0 - see [LICENSE](LICENSE) for more details

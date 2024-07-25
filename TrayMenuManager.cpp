@@ -192,12 +192,12 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             if (!mountDir.exists()) {
                 SysCommand mkDirCmd{};
                 mkDirCmd.makeDir(mountPath);
-                mkDirCmd.waitForFinished();
+                (void)mkDirCmd.waitForFinished();
             }
 
             SysCommand mountCmd{};
             mountCmd.mountFs(remote, mountPath, fsType, options);
-            mountCmd.waitForFinished();
+            (void)mountCmd.waitForFinished();
         });
 
         if (pTailStatus->drives.count() > 0)

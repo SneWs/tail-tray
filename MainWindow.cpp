@@ -52,6 +52,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnSelectTailDriveMountPath, &QPushButton::clicked,
         this, &MainWindow::selectTailDriveMountPath);
 
+    connect(ui->btnTailDriveFixDavFsMountSetup, &QPushButton::clicked,
+            this, &MainWindow::fixTailDriveDavFsSetup);
+
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
     connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
@@ -204,6 +207,45 @@ void MainWindow::selectTailDriveMountPath() const {
             ui->txtTailDriveDefaultMountPath->setText(files.first());
         }
     }
+}
+
+void MainWindow::fixTailDriveDavFsSetup() const {
+    static QString tailDavFsUrl("http://100.100.100.100:8080");
+    auto homeDir = qEnvironmentVariable("HOME");
+    auto homeDavFsDir = homeDir.append("/.davfs2");
+    auto homeDavFsSecret = homeDavFsDir.append("/secrets");
+
+    // Create the .davfs2 folder if it doesn't exist
+    auto davDir = QDir(homeDir);
+    (void)davDir.mkpath(".davfs2"); // Don't care for return val
+    QFile davFsSecret(homeDavFsSecret);
+    davFsSecret.open(QIODevice::ReadWrite);
+
+    auto fileContent = QString(davFsSecret.readAll());
+    auto lines = fileContent.split('\n', Qt::SkipEmptyParts);
+    bool configured = false;
+    for (const auto& line : lines) {
+        if (line.trimmed().startsWith('#'))
+            continue; // Comment
+        if (line.contains(tailDavFsUrl, Qt::CaseInsensitive)) {
+            configured = true;
+            break;
+        }
+    }
+
+    qDebug() << "File content: " << fileContent;
+
+    if (configured) {
+        // done
+                            return;
+    }
+
+    // We need to add our config lines
+    davFsSecret.seek(davFsSecret.size());
+    davFsSecret.write(QString("\n# Tailscale davfs server config\n").toUtf8());
+    davFsSecret.write(QString(tailDavFsUrl + "\tGuest\tGuest\n").toUtf8());
+
+    davFsSecret.close();
 }
 
 TailState MainWindow::changeToState(TailState newState)

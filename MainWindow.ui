@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>610</width>
-    <height>564</height>
+    <height>628</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1103,7 +1103,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_25">
         <property name="spacing">
-         <number>2</number>
+         <number>6</number>
         </property>
         <item>
          <widget class="QLabel" name="label_2">
@@ -1277,7 +1277,7 @@
            <string notr="true">overflow-y: scroll</string>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Important information&lt;br/&gt;&lt;/span&gt;On Linux, to be able to mount shares from other machines you will need to do some setup first:&lt;/p&gt;&lt;p&gt;Make sure to add http://100.100.100.100:8080 to your &lt;span style=&quot; font-family:'monospace';&quot;&gt;/etc/davfs2/secrets&lt;/span&gt; file.&lt;/p&gt;&lt;p&gt;The file itself contains documentation on how to define this. For username you can enter Guest and leave password empty. Read more over at &lt;a href=&quot;https://wiki.archlinux.org/title/Davfs2&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#7636dd;&quot;&gt;https://wiki.archlinux.org/title/Davfs2&lt;/span&gt;&lt;/a&gt; and at Tailscale &lt;a href=&quot;https://tailscale.com/kb/1369/taildrive?tab=linux&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#7636dd;&quot;&gt;https://tailscale.com/kb/1369/taildrive?tab=linux&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Important information&lt;br/&gt;&lt;/span&gt;On Linux, to be able to mount shares from other machines you will need to do some setup first:&lt;/p&gt;&lt;p&gt;Make sure to add http://100.100.100.100:8080 to your &lt;span style=&quot; font-family:'monospace';&quot;&gt;/etc/davfs2/secrets&lt;/span&gt; file. Or in ~/.davfs2/secrets&lt;/p&gt;&lt;p&gt;The file itself contains documentation on how to define this. For username you can enter Guest and leave password empty. Read more over at &lt;a href=&quot;https://wiki.archlinux.org/title/Davfs2&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#7636dd;&quot;&gt;https://wiki.archlinux.org/title/Davfs2&lt;/span&gt;&lt;/a&gt; and at Tailscale &lt;a href=&quot;https://tailscale.com/kb/1369/taildrive?tab=linux&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#7636dd;&quot;&gt;https://tailscale.com/kb/1369/taildrive?tab=linux&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textFormat">
            <enum>Qt::TextFormat::RichText</enum>
@@ -1292,6 +1292,30 @@
            <bool>true</bool>
           </property>
          </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_29">
+          <item>
+           <spacer name="horizontalSpacer_25">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnTailDriveFixDavFsMountSetup">
+            <property name="text">
+             <string>Fix it for me</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -1666,19 +1690,6 @@
        </layout>
       </widget>
      </widget>
-    </item>
-    <item>
-     <spacer name="verticalSpacer_2">
-      <property name="orientation">
-       <enum>Qt::Orientation::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>1</height>
-       </size>
-      </property>
-     </spacer>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_10">

@@ -1163,10 +1163,10 @@
            <bool>false</bool>
           </property>
           <property name="rowCount">
-           <number>1</number>
+           <number>0</number>
           </property>
           <property name="columnCount">
-           <number>2</number>
+           <number>0</number>
           </property>
           <attribute name="horizontalHeaderMinimumSectionSize">
            <number>200</number>
@@ -1180,9 +1180,6 @@
           <attribute name="verticalHeaderVisible">
            <bool>false</bool>
           </attribute>
-          <row/>
-          <column/>
-          <column/>
          </widget>
         </item>
         <item>

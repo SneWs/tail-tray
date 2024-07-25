@@ -50,6 +50,14 @@ private slots:
 
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const;
 
+    // Tail drive
+    void setupTailDriveListView();
+    void addTailDriveButtonClicked() const;
+    void removeTailDriveButtonClicked() const;
+    void selectTailDriveMountPath() const;
+
+    void fixTailDriveDavFsSetup() const;
+
 private:
     // Switch to the new state and return the prev (old) state back to caller
     TailState changeToState(TailState newState);
@@ -57,6 +65,8 @@ private:
 
     static bool shallowCheckForNetworkAvailable();
     void setupNetworkCallbacks() const;
+
+    [[nodiscard]] static bool isTailDriveFileAlreadySetup();
 };
 
 #endif // MAINWINDOW_H

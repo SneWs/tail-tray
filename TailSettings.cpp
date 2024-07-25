@@ -74,3 +74,20 @@ void TailSettings::exitNodeInUse(const QString& nodeNameOrIp) {
     settings.setValue("exitNodeInUse", nodeNameOrIp);
 }
 
+QString TailSettings::tailDriveMountPath() const {
+    auto homePath = qEnvironmentVariable("HOME");
+    return settings.value("tailDriveMountPath", homePath.append("/Tailscale")).toString();
+}
+
+void TailSettings::tailDriveMountPath(const QString& path) {
+    settings.setValue("tailDriveMountPath", path);
+}
+
+bool TailSettings::tailDriveEnabled() const {
+    return settings.value("tailDriveEnabled", false).toBool();
+}
+
+void TailSettings::tailDriveEnabled(bool enabled) {
+    settings.setValue("tailDriveEnabled", enabled);
+}
+

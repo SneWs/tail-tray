@@ -41,7 +41,6 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     });
 
     connect(ui->lstAccounts, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
-        // TODO: Get info about selected account
         auto accountId = item->data(Qt::UserRole).toString();
         TailAccountInfo account{};
         for (const auto& acc : accounts) {
@@ -49,7 +48,7 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
                 account = acc;
                 break;
             }
-    }
+        }
 
         if (account.account.endsWith('*')) {
             // This is the active account...

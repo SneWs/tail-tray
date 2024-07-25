@@ -65,6 +65,8 @@ private:
 
     static bool shallowCheckForNetworkAvailable();
     void setupNetworkCallbacks() const;
+
+    [[nodiscard]] static bool isTailDriveFileAlreadySetup();
 };
 
 #endif // MAINWINDOW_H

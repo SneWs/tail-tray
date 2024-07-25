@@ -24,11 +24,7 @@ ManageDriveWindow::ManageDriveWindow(const TailDriveInfo& drive, QWidget* parent
             this, &ManageDriveWindow::acceptButtonClicked);
 
     connect(ui->btnCancel, &QPushButton::clicked,
-        this, [this]() {
-            reject();
-            close();
-        }
-    );
+            this, &ManageDriveWindow::close);
 }
 
 void ManageDriveWindow::driveToUi() {

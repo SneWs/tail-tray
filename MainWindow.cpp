@@ -1,6 +1,5 @@
 #include <QDir>
 #include <QFile>
-#include <QNetworkInformation>
 
 #include "MainWindow.h"
 
@@ -8,6 +7,19 @@
 #include <QMessageBox>
 
 #include "ManageDriveWindow.h"
+
+namespace {
+    QString tailDavFsUrl("http://100.100.100.100:8080");
+
+    QString getHomeDir() {
+        return qEnvironmentVariable("HOME");
+    }
+    QString getTailDriveFilePath() {
+        auto homeDir = getHomeDir();
+        auto homeDavFsDir = homeDir.append("/.davfs2");
+        return homeDavFsDir.append("/secrets");
+    }
+}
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -52,8 +64,16 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnSelectTailDriveMountPath, &QPushButton::clicked,
         this, &MainWindow::selectTailDriveMountPath);
 
-    connect(ui->btnTailDriveFixDavFsMountSetup, &QPushButton::clicked,
-            this, &MainWindow::fixTailDriveDavFsSetup);
+    if (!isTailDriveFileAlreadySetup()) {
+        ui->btnTailDriveFixDavFsMountSetup->setEnabled(true);
+        ui->btnTailDriveFixDavFsMountSetup->setText("Fix it for me");
+        connect(ui->btnTailDriveFixDavFsMountSetup, &QPushButton::clicked,
+                this, &MainWindow::fixTailDriveDavFsSetup);
+    }
+    else {
+        ui->btnTailDriveFixDavFsMountSetup->setEnabled(false);
+        ui->btnTailDriveFixDavFsMountSetup->setText("Configured and ready");
+    }
 
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
@@ -210,35 +230,18 @@ void MainWindow::selectTailDriveMountPath() const {
 }
 
 void MainWindow::fixTailDriveDavFsSetup() const {
-    static QString tailDavFsUrl("http://100.100.100.100:8080");
-    auto homeDir = qEnvironmentVariable("HOME");
-    auto homeDavFsDir = homeDir.append("/.davfs2");
-    auto homeDavFsSecret = homeDavFsDir.append("/secrets");
+    auto homeDir = getHomeDir();
+    auto homeDavFsSecret = getTailDriveFilePath();
+
+    if (isTailDriveFileAlreadySetup())
+        return;
 
     // Create the .davfs2 folder if it doesn't exist
     auto davDir = QDir(homeDir);
     (void)davDir.mkpath(".davfs2"); // Don't care for return val
+
     QFile davFsSecret(homeDavFsSecret);
     davFsSecret.open(QIODevice::ReadWrite);
-
-    auto fileContent = QString(davFsSecret.readAll());
-    auto lines = fileContent.split('\n', Qt::SkipEmptyParts);
-    bool configured = false;
-    for (const auto& line : lines) {
-        if (line.trimmed().startsWith('#'))
-            continue; // Comment
-        if (line.contains(tailDavFsUrl, Qt::CaseInsensitive)) {
-            configured = true;
-            break;
-        }
-    }
-
-    qDebug() << "File content: " << fileContent;
-
-    if (configured) {
-        // done
-        return;
-    }
 
     // We need to add our config lines
     davFsSecret.seek(davFsSecret.size());
@@ -246,6 +249,31 @@ void MainWindow::fixTailDriveDavFsSetup() const {
     davFsSecret.write(QString(tailDavFsUrl + "\tGuest\tGuest\n").toUtf8());
 
     davFsSecret.close();
+
+    QMessageBox::information(nullptr, "Tail Tray", "davfs2 config has been written");
+}
+
+bool MainWindow::isTailDriveFileAlreadySetup() {
+    auto homeDavFsSecret = getTailDriveFilePath();
+
+    // Create the .davfs2 folder if it doesn't exist
+    QFile davFsSecret(homeDavFsSecret);
+    if (!davFsSecret.open(QIODevice::ReadWrite)) {
+        davFsSecret.close();
+        return false;
+    }
+
+    auto fileContent = QString(davFsSecret.readAll());
+    auto lines = fileContent.split('\n', Qt::SkipEmptyParts);
+    for (const auto& line : lines) {
+        if (line.trimmed().startsWith('#'))
+            continue; // Comment
+        if (line.contains(tailDavFsUrl, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 TailState MainWindow::changeToState(TailState newState)

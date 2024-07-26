@@ -32,8 +32,6 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
-    setupTailDriveListView();
-
     // Remove the tail drive tab by default
     ui->tabWidget->removeTab(2);
 
@@ -141,6 +139,7 @@ void MainWindow::onNetworkRechabilityChanged(QNetworkInformation::Reachability n
         QTimer::singleShot(500, this, [this]() {
             pCurrentExecution->checkStatus();
         });
+
         return;
     }
 
@@ -153,7 +152,13 @@ void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, co
         pTailStatus->drivesConfigured = false;
         qDebug() << errorMsg;
         qDebug() << "To read more about configuring taill drives, see https://tailscale.com/kb/1369/taildrive";
-        return; // Nothing to do here
+
+        QMessageBox::information(nullptr,
+            "Tail Drive - Error",
+            "Tail drives needs to be enabled in ACL. Please go to the admin dashboard.\n\n" + errorMsg,
+            QMessageBox::Ok);
+
+        return; // Nothing more to do here
     }
 
     pTailStatus->drivesConfigured = true;
@@ -164,21 +169,7 @@ void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, co
     // Refresh the tray icon menus
     pTrayManager->stateChangedTo(eCurrentState, pTailStatus.get());
 
-    ui->twSharedDrives->clearContents();
-    ui->twSharedDrives->setRowCount(drives.count());
-    for (int i = 0; i < drives.count(); i++) {
-        const auto& drive = drives[i];
-        qDebug() << "Drive: " << drive.name << " (" << drive.path << ")";
-        auto nameItem = new QTableWidgetItem(drive.name);
-        auto pathItem = new QTableWidgetItem(drive.path);
-        ui->twSharedDrives->setItem(i, 0, nameItem);
-        ui->twSharedDrives->setItem(i, 1, pathItem);
-    }
-}
-
-void MainWindow::setupTailDriveListView() {
-    ui->twSharedDrives->setHorizontalHeaderLabels(QStringList() << "Name" << "Path");
-    ui->twSharedDrives->setRowCount(0);
+    tailDrivesToUi();
 }
 
 void MainWindow::addTailDriveButtonClicked() const {
@@ -189,7 +180,7 @@ void MainWindow::addTailDriveButtonClicked() const {
         pCurrentExecution->addDrive(newDrive);
 
         pTailStatus->drives.emplace_back(newDrive);
-        drivesListed(pTailStatus->drives, false, QString());
+        tailDrivesToUi();
     }
 }
 
@@ -202,7 +193,9 @@ void MainWindow::removeTailDriveButtonClicked() const {
     auto row = ui->twSharedDrives->row(selectedItems.first());
     const auto& drive = pTailStatus->drives[row];
 
-    auto answer = QMessageBox::question(nullptr, "Are you sure?", "Do you really want to remove the share " + drive.path + "?",
+    auto answer = QMessageBox::question(nullptr,
+        "Are you sure?",
+        "Do you really want to remove the share " + drive.path + "?",
         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
     if (answer != QMessageBox::Yes) {
@@ -229,7 +222,7 @@ void MainWindow::selectTailDriveMountPath() const {
     }
 }
 
-void MainWindow::fixTailDriveDavFsSetup() const {
+void MainWindow::fixTailDriveDavFsSetup() {
     auto homeDir = getHomeDir();
     auto homeDavFsSecret = getTailDriveFilePath();
 
@@ -276,6 +269,30 @@ bool MainWindow::isTailDriveFileAlreadySetup() {
     return false;
 }
 
+void MainWindow::tailDrivesToUi() const {
+    if (pTailStatus == nullptr) {
+        return;
+    }
+
+    const auto& drives = pTailStatus->drives;
+
+    ui->twSharedDrives->clearContents();
+    ui->twSharedDrives->setColumnCount(2);
+    ui->twSharedDrives->setHorizontalHeaderLabels(QStringList() << "Name" << "Path");
+    ui->twSharedDrives->setRowCount(static_cast<int>(drives.count()));
+
+    for (int i = 0; i < drives.count(); i++) {
+        const auto& drive = drives[i];
+        qDebug() << "Drive: " << drive.name << " (" << drive.path << ")";
+
+        auto nameItem = new QTableWidgetItem(drive.name);
+        ui->twSharedDrives->setItem(i, 0, nameItem);
+
+        auto pathItem = new QTableWidgetItem(drive.path);
+        ui->twSharedDrives->setItem(i, 1, pathItem);
+    }
+}
+
 TailState MainWindow::changeToState(TailState newState)
 {
     auto retVal = eCurrentState;
@@ -292,8 +309,15 @@ TailState MainWindow::changeToState(TailState newState)
     pTrayManager->stateChangedTo(newState, pTailStatus.get());
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
 
-    if (eCurrentState == TailState::Connected) {
-        pCurrentExecution->listDrives();
+    auto isOnline = eCurrentState == TailState::Connected;
+    ui->tabSettings->setEnabled(isOnline);
+    ui->tabTailDrive->setEnabled(isOnline);
+    ui->tabAccount->setEnabled(isOnline);
+
+    if (isOnline) {
+        if (settings.tailDriveEnabled()) {
+            pCurrentExecution->listDrives();
+        }
     }
 
     return retVal;
@@ -314,8 +338,13 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
         auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));
         ui->lblVersionNumber->setText("Version " + formattedVersion);
     }
+    else {
+        changeToState(TailState::NotLoggedIn);
+    }
 
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
+
+    tailDrivesToUi();
 }
 
 bool MainWindow::shallowCheckForNetworkAvailable() {

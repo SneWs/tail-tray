@@ -162,65 +162,67 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     }
 
     // Tail drives
-    auto* drives = pTrayMenu->addMenu("Drives");
-    if (!pTailStatus->drivesConfigured && pTailStatus->drives.count() < 1) {
-        auto* action = drives->addAction("Not configured, click to configure");
-        connect(action, &QAction::triggered, this, [this](bool) {
-            // Open help link in browser
-            QDesktopServices::openUrl(QUrl("https://tailscale.com/kb/1369/taildrive"));
-        });
-    }
-    else {
-        auto* addAction = drives->addAction("Add drive");
-        connect(addAction, &QAction::triggered, this, [this](bool) {
-            ManageDriveWindow wnd(TailDriveInfo{}, reinterpret_cast<QWidget*>(this->parent()));
-            auto result = wnd.exec();
-            if (result == QDialog::Accepted) {
-                pTailRunner->addDrive(wnd.driveInfo());
-            }
-        });
-
-        auto* mountAction = drives->addAction("Mount remote drives");
-        connect(mountAction, &QAction::triggered, this, [this](bool) {
-            static QString remote("http://100.100.100.100:8080");
-            static QString fsType("davfs");
-            const QString mountPath = settings.tailDriveMountPath();
-            const QDir mountDir(mountPath);
-            qDebug() << "Will try to mount " << fsType << " to local path " << mountPath;
-
-            if (!mountDir.exists()) {
-                SysCommand mkDirCmd{};
-                mkDirCmd.makeDir(mountPath);
-                (void)mkDirCmd.waitForFinished();
-            }
-
-            SysCommand mountCmd{};
-            mountCmd.mountFs(remote, mountPath, fsType, "", true);
-            (void)mountCmd.waitForFinished();
-        });
-
-        if (pTailStatus->drives.count() > 0)
-            drives->addSeparator();
-
-        for (const auto& drive : pTailStatus->drives) {
-            auto* driveMenu = drives->addMenu(drive.name);
-
-            auto* renameAction = driveMenu->addAction("Rename");
-            connect(renameAction, &QAction::triggered, this, [this, drive](bool) {
-                ManageDriveWindow wnd(drive, reinterpret_cast<QWidget*>(this->parent()));
+    if (settings.tailDriveEnabled()) {
+        auto* drives = pTrayMenu->addMenu("Drives");
+        if (!pTailStatus->drivesConfigured && pTailStatus->drives.count() < 1) {
+            auto* action = drives->addAction("Not configured, click to configure");
+            connect(action, &QAction::triggered, this, [this](bool) {
+                // Open help link in browser
+                QDesktopServices::openUrl(QUrl("https://tailscale.com/kb/1369/taildrive"));
+            });
+        }
+        else {
+            auto* addAction = drives->addAction("Add drive");
+            connect(addAction, &QAction::triggered, this, [this](bool) {
+                ManageDriveWindow wnd(TailDriveInfo{}, reinterpret_cast<QWidget*>(this->parent()));
                 auto result = wnd.exec();
                 if (result == QDialog::Accepted) {
-                    const auto& newName = wnd.driveInfo().name;
-                    if (newName.compare(drive.name, Qt::CaseInsensitive) != 0) {
-                        pTailRunner->renameDrive(drive, newName);
-                    }
+                    pTailRunner->addDrive(wnd.driveInfo());
                 }
             });
 
-            auto* removeAction = driveMenu->addAction("Stop Sharing");
-            connect(removeAction, &QAction::triggered, this, [this, drive](bool) {
-                pTailRunner->removeDrive(drive);
+            auto* mountAction = drives->addAction("Mount remote drives");
+            connect(mountAction, &QAction::triggered, this, [this](bool) {
+                static QString remote("http://100.100.100.100:8080");
+                static QString fsType("davfs");
+                const QString mountPath = settings.tailDriveMountPath();
+                const QDir mountDir(mountPath);
+                qDebug() << "Will try to mount " << fsType << " to local path " << mountPath;
+
+                if (!mountDir.exists()) {
+                    SysCommand mkDirCmd{};
+                    mkDirCmd.makeDir(mountPath);
+                    (void)mkDirCmd.waitForFinished();
+                }
+
+                SysCommand mountCmd{};
+                mountCmd.mountFs(remote, mountPath, fsType, "", true);
+                (void)mountCmd.waitForFinished();
             });
+
+            if (pTailStatus->drives.count() > 0)
+                drives->addSeparator();
+
+            for (const auto& drive : pTailStatus->drives) {
+                auto* driveMenu = drives->addMenu(drive.name);
+
+                auto* renameAction = driveMenu->addAction("Rename");
+                connect(renameAction, &QAction::triggered, this, [this, drive](bool) {
+                    ManageDriveWindow wnd(drive, reinterpret_cast<QWidget*>(this->parent()));
+                    auto result = wnd.exec();
+                    if (result == QDialog::Accepted) {
+                        const auto& newName = wnd.driveInfo().name;
+                        if (newName.compare(drive.name, Qt::CaseInsensitive) != 0) {
+                            pTailRunner->renameDrive(drive, newName);
+                        }
+                    }
+                });
+
+                auto* removeAction = driveMenu->addAction("Stop Sharing");
+                connect(removeAction, &QAction::triggered, this, [this, drive](bool) {
+                    pTailRunner->removeDrive(drive);
+                });
+            }
         }
     }
 

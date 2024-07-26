@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Make sure to adjust tail drive based on the check state
     if (settings.tailDriveEnabled()) {
-        ui->tabWidget->insertTab(2, ui->tabTailDrive, "Tail Drive");
+        ui->tabWidget->insertTab(2, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
     }
 
     connect(ui->btnAddTailDrive, &QPushButton::clicked,
@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget* parent)
             settings.tailDriveEnabled(checked);
 
             if (checked) {
-                ui->tabWidget->insertTab(2, ui->tabTailDrive, "Tail Drive");
+                ui->tabWidget->insertTab(2, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
             }
             else {
                 ui->tabWidget->removeTab(2);

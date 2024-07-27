@@ -297,12 +297,13 @@ void TrayMenuManager::buildAccountsMenu() const {
 
     pThisDevice->menu()->clear();
     for (const auto& acc : accounts) {
-        bool isActive = acc.account.endsWith('*');
-        QString accountName = acc.account;
+        const bool isActive = acc.account.endsWith('*');
+        auto accountName = acc.account;
         if (isActive)
             accountName = accountName.chopped(1);
+
         auto accountAction = new QAction(acc.tailnet + " (" + accountName + ")");
-    accountAction->setCheckable(true);
+        accountAction->setCheckable(true);
         accountAction->setChecked(isActive);
 
         pThisDevice->menu()->addAction(accountAction);

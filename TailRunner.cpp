@@ -163,6 +163,20 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
                     "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
                     QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
 
+                const QString info(pProcess->readAllStandardOutput());
+                if (info.contains("https://login.tailscale.com")) {
+                    static QRegularExpression regex(R"(https:\/\/login\.tailscale\.com\/a\/[a-zA-Z0-9]+)");
+                    const QRegularExpressionMatch match = regex.match(info);
+                    if (match.hasMatch()) {
+                        const QString url = match.captured(0);
+                        const auto res = QMessageBox::information(nullptr, "Login", "To login you will have to visit " + url + "\n\nPress OK to open the URL",
+                            QMessageBox::Ok, QMessageBox::Ok);
+
+                        if (res == QMessageBox::Ok)
+                            QDesktopServices::openUrl(QUrl(url));
+                    }
+                }
+
                 if (response == QMessageBox::Ok) {
                     pProcess->close();
                     start(true);
@@ -170,7 +184,7 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
             }
         }
         else {
-            if (eCommand == Command::SwitchAccount) {
+            if (eCommand == Command::SwitchAccount || eCommand == Command::Login) {
                 getAccounts();
             }
             else if (eCommand == Command::ListAccounts) {
@@ -300,9 +314,6 @@ void TailRunner::onProcessCanReadStdOut() {
             if (obj.contains("BackendState")) {
                 //auto newState = obj["BackendState"].toString();
             }
-            break;
-        }
-        case Command::Login: {
             break;
         }
         default:

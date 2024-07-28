@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget* parent)
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
 
-    changeToState(TailState::NotConnected);
+    changeToState(TailState::NotLoggedIn);
     pCurrentExecution->getAccounts();
 
     connect(ui->btnSettingsClose, &QPushButton::clicked,

@@ -37,8 +37,12 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
         ```
       * On Arch Linux
          ```bash
-         sudo pacman -S git clang cmake qt6-base qt6-tools davfs2
+         sudo pacman -S git clang cmake qt6-base qt6-tools
          ```
+        ```bash 
+        # For davfs2 we need to use the AUR
+        yay -S davfs2
+        ```
 2. Clone the repo
 3. cd into the repo `cd tail-tray`
 4. Make a build directory `mkdir build`

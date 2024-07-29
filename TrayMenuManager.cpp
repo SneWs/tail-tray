@@ -12,6 +12,7 @@
 
 #include "MainWindow.h"
 #include "ManageDriveWindow.h"
+#include "KnownValues.h"
 
 TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent)
     : QObject(parent)
@@ -195,7 +196,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
 
             auto* mountAction = drives->addAction("Mount remote drives");
             connect(mountAction, &QAction::triggered, this, [this](bool) {
-                static QString remote("http://100.100.100.100:8080");
+                static QString remote(KnownValues::tailDavFsUrl);
                 static QString fsType("davfs");
                 const QString mountPath = settings.tailDriveMountPath();
                 const QDir mountDir(mountPath);

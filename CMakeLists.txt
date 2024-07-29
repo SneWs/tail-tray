@@ -27,6 +27,7 @@ set(PROJECT_SOURCES
         AccountsTabUiManager.h
         SysCommand.cpp
         SysCommand.h
+        KnownValues.h
 )
 
 qt_add_executable(tail-tray

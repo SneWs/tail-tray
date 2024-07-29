@@ -7,19 +7,7 @@
 #include <QMessageBox>
 
 #include "ManageDriveWindow.h"
-
-namespace {
-    QString tailDavFsUrl("http://100.100.100.100:8080");
-
-    QString getHomeDir() {
-        return qEnvironmentVariable("HOME");
-    }
-    QString getTailDriveFilePath() {
-        auto homeDir = getHomeDir();
-        auto homeDavFsDir = homeDir.append("/.davfs2");
-        return homeDavFsDir.append("/secrets");
-    }
-}
+#include "KnownValues.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -227,8 +215,8 @@ void MainWindow::selectTailDriveMountPath() const {
 }
 
 void MainWindow::fixTailDriveDavFsSetup() const {
-    auto homeDir = getHomeDir();
-    auto homeDavFsSecret = getTailDriveFilePath();
+    auto homeDir = KnownValues::getHomeDir();
+    auto homeDavFsSecret = KnownValues::getTailDriveFilePath();
 
     if (isTailDriveFileAlreadySetup())
         return;
@@ -243,7 +231,7 @@ void MainWindow::fixTailDriveDavFsSetup() const {
     // We need to add our config lines
     davFsSecret.seek(davFsSecret.size());
     davFsSecret.write(QString("\n# Tailscale davfs server config\n").toUtf8());
-    davFsSecret.write(QString(tailDavFsUrl + "\tGuest\tGuest\n").toUtf8());
+    davFsSecret.write(QString(KnownValues::tailDavFsUrl + "\tGuest\tGuest\n").toUtf8());
 
     davFsSecret.close();
 
@@ -253,7 +241,7 @@ void MainWindow::fixTailDriveDavFsSetup() const {
 }
 
 bool MainWindow::isTailDriveFileAlreadySetup() {
-    auto homeDavFsSecret = getTailDriveFilePath();
+    auto homeDavFsSecret = KnownValues::getTailDriveFilePath();
 
     // Create the .davfs2 folder if it doesn't exist
     QFile davFsSecret(homeDavFsSecret);
@@ -267,7 +255,7 @@ bool MainWindow::isTailDriveFileAlreadySetup() {
     for (const auto& line : lines) {
         if (line.trimmed().startsWith('#'))
             continue; // Comment
-        if (line.contains(tailDavFsUrl, Qt::CaseInsensitive)) {
+        if (line.contains(KnownValues::tailDavFsUrl, Qt::CaseInsensitive)) {
             return true;
         }
     }

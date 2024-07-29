@@ -52,7 +52,7 @@
        <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="iconSize">
        <size>
@@ -674,6 +674,9 @@
                </item>
                <item>
                 <widget class="QPushButton" name="btnTailscaleDnsSettings">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Manage...</string>
                  </property>
@@ -806,6 +809,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="btnVpnOnDemand">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Manage...</string>
                 </property>
@@ -981,6 +987,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="btnManageTailnetLocks">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Manage...</string>
                 </property>

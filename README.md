@@ -12,6 +12,7 @@ This is a personal project and is not endorsed by Tailscale Inc. in any shape or
 - [X] Set and change your Tailscale exit node
 - [X] Proper multi account handling 
 - [X] Tail drive support - Working with davfs2 support + additional help setting up davfs2 and mounting etc
+- [X] Send files to any device on your Tailnet directly from the tray menu
 
 ### License
 GNU General Public License v3.0 - see [LICENSE](LICENSE) for more details
@@ -21,7 +22,7 @@ For now the easiest and most reliable way to install this is to build it from so
 To do that, please see the Getting started section below.
 
 If you're feeling adventurous, you can download the latest deb release and give that a try, but there are known issues with it.
-**_NOTE:_** The deb package that is made as part of the release is not yet working as intended. 
+**_NOTE:_** The deb package that is made as part of the release _might not_ working as intended. 
 I'm working on fixing this. And if you know how to package for Debian and Ubuntu, feel free to help out. See https://github.com/SneWs/tail-tray/issues/12 for details
 
 ### Getting started

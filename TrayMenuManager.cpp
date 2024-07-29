@@ -146,18 +146,29 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                 action = netDevs->addAction(name + " (offline)");
             }
             else {
-                action = netDevs->addAction(name);
-            }
+                const auto& ipAddresses = dev->tailscaleIPs;
+                QString ipStr;
 
-            connect(action, &QAction::triggered, this, [this, dev](bool) {
-                QClipboard* clipboard = QApplication::clipboard();
-                QString str = dev->tailscaleIPs.first();
-                qDebug() << str;
-                clipboard->setText(str, QClipboard::Clipboard);
-                if (clipboard->supportsSelection()) {
-                    clipboard->setText(str, QClipboard::Selection);
+                if (ipAddresses.count() > 0) {
+                    ipStr = " (" + ipAddresses.first() + ")";
                 }
-            });
+
+                action = netDevs->addAction(name + ipStr);
+
+                connect(action, &QAction::triggered, this, [this, dev, name, ipStr](bool) {
+                    QClipboard* clipboard = QApplication::clipboard();
+                    const auto& str = dev->tailscaleIPs.first();
+                    qDebug() << str;
+                    clipboard->setText(str, QClipboard::Clipboard);
+                    if (clipboard->supportsSelection()) {
+                        clipboard->setText(str, QClipboard::Selection);
+                    }
+
+                    pSysTray->showMessage("IP address copied",
+                        "IP Address " + ipStr + " for " + name + " have been copied to the clipboard!",
+                        QSystemTrayIcon::Information, 5000);
+                });
+            }
         }
     }
 

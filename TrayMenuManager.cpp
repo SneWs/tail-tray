@@ -144,6 +144,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             QAction* action;
             if (!dev->online) {
                 action = netDevs->addAction(name + " (offline)");
+                action->setEnabled(false);
             }
             else {
                 const auto& ipAddresses = dev->tailscaleIPs;
@@ -165,7 +166,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                     }
 
                     pSysTray->showMessage("IP address copied",
-                        "IP Address " + ipStr + " for " + name + " have been copied to the clipboard!",
+                        "IP Address " + ipStr + " for " + name + " have been copied to clipboard!",
                         QSystemTrayIcon::Information, 5000);
                 });
             }

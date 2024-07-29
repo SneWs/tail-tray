@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
     connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
     connect(pCurrentExecution.get(), &TailRunner::driveListed, this, &MainWindow::drivesListed);
+    connect(pCurrentExecution.get(), &TailRunner::fileSent, this, &MainWindow::fileSentToDevice);
 
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
@@ -238,6 +239,22 @@ void MainWindow::fixTailDriveDavFsSetup() const {
     QMessageBox::information(nullptr, "Tail Tray", "davfs2 config has been written");
 
     ui->btnTailDriveFixDavFsMountSetup->setEnabled(isTailDriveFileAlreadySetup());
+}
+
+void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* userData) const {
+    if (!success) {
+        pTrayManager->trayIcon()->showMessage("Failed to send file", errorMsg, QSystemTrayIcon::MessageIcon::Critical, 5000);
+    }
+
+    if (userData == nullptr) {
+        return;
+    }
+
+    auto userDataStr = static_cast<QString*>(userData);
+    pTrayManager->trayIcon()->showMessage("File sent", *userDataStr, QSystemTrayIcon::MessageIcon::Information, 5000);
+
+    // We need to delete this here
+    delete userDataStr;
 }
 
 bool MainWindow::isTailDriveFileAlreadySetup() {

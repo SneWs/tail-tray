@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
+#include <QFileDialog>
 
 #include "TrayMenuManager.h"
 
@@ -155,8 +156,8 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                     ipStr = " (" + ipAddresses.first() + ")";
                 }
 
-                action = netDevs->addAction(name + ipStr);
-
+                auto* deviceMenu = netDevs->addMenu(name + ipStr);
+                action = deviceMenu->addAction("Copy IP address");
                 connect(action, &QAction::triggered, this, [this, dev, name, ipStr](bool) {
                     QClipboard* clipboard = QApplication::clipboard();
                     const auto& str = dev->tailscaleIPs.first();
@@ -169,6 +170,28 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                     pSysTray->showMessage("IP address copied",
                         "IP Address " + ipStr + " for " + name + " have been copied to clipboard!",
                         QSystemTrayIcon::Information, 5000);
+                });
+
+                deviceMenu->addSeparator();
+                auto* sendFileAction = deviceMenu->addAction("Send file");
+                connect(sendFileAction, &QAction::triggered, this, [this, name](bool) {
+                    // TODO: Open file dialog and send file via tailscale file cp ... target-device:
+                    QFileDialog dialog(nullptr, "Send file to " + name, QDir::homePath(), "All files (*)");
+                    dialog.setFileMode(QFileDialog::ExistingFiles);
+                    dialog.setViewMode(QFileDialog::Detail);
+                    auto result = dialog.exec();
+                    if (result != QDialog::Accepted)
+                        return;
+
+                    if (dialog.selectedFiles().count() < 1)
+                        return;
+
+                    const QString file = dialog.selectedFiles().first();
+                    qDebug() << "Will send file " << file << " to " << name;
+
+                    // The user data will be cleaned up when the signal is triggered back to us
+                    pTailRunner->sendFile(name, file,
+                        new QString("File " + file + " sent to " + name));
                 });
             }
         }

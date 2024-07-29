@@ -128,7 +128,7 @@ void TailRunner::renameDrive(const TailDriveInfo &drive, const QString &newName)
 }
 
 void TailRunner::removeDrive(const TailDriveInfo& drive) {
-eCommand = Command::DriveRemove;
+    eCommand = Command::DriveRemove;
 
     QStringList args;
     args << "unshare";
@@ -137,7 +137,18 @@ eCommand = Command::DriveRemove;
     runCommand("drive", args, false);
 }
 
-void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec) {
+void TailRunner::sendFile(const QString& targetDevice, const QString& localFilePath, void* userData) {
+    eCommand = Command::SendFile;
+
+    QStringList args;
+    args << "cp";
+    args << localFilePath;
+    args << targetDevice + ":";
+
+    runCommand("file", args, false, false, userData);
+}
+
+void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec, void* userData) {
     if (pProcess != nullptr) {
         if (pProcess->state() == QProcess::Running) {
             qDebug() << "Process already running!" << "Will queue up " << cmd << args << "command";
@@ -149,7 +160,7 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
     }
 
     pProcess = std::make_unique<QProcess>(this);
-    connect(pProcess.get(), &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus status) {
+    connect(pProcess.get(), &QProcess::finished, this, [this, userData](int exitCode, QProcess::ExitStatus status) {
         qDebug() << "Process exit code " << exitCode << " - " << status;
 
         if (exitCode != 0) {
@@ -182,6 +193,9 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
                     start(true);
                 }
             }
+            else if (eCommand == Command::SendFile) {
+                emit fileSent(false, QString(pProcess->readAllStandardError()), userData);
+            }
         }
         else {
             if (eCommand == Command::SwitchAccount || eCommand == Command::Login) {
@@ -189,6 +203,9 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
             }
             else if (eCommand == Command::ListAccounts) {
                 checkStatus();
+            }
+            else if (eCommand == Command::SendFile) {
+                emit fileSent(true, QString{}, userData);
             }
             else if (eCommand != Command::Status && eCommand != Command::Logout && eCommand != Command::Drive) {
                 QTimer::singleShot(1000, this, [this]() {
@@ -219,7 +236,7 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
                         });
                     }
                     else {
-                        QRegularExpression regex(R"(https:\/\/login\.tailscale\.com\/a\/[a-zA-Z0-9]+)");
+                        static QRegularExpression regex(R"(https:\/\/login\.tailscale\.com\/a\/[a-zA-Z0-9]+)");
                         QRegularExpressionMatch match = regex.match(message);
                         if (match.hasMatch()) {
                             QString url = match.captured(0);

@@ -32,6 +32,8 @@ public:
     void renameDrive(const TailDriveInfo& drive, const QString& newName);
     void removeDrive(const TailDriveInfo& drive);
 
+    void sendFile(const QString& targetDevice, const QString& localFilePath, void* userData = nullptr);
+
 private:
     const TailSettings& settings;
     std::unique_ptr<QProcess> pProcess;
@@ -47,7 +49,8 @@ private:
         Drive,
         DriveAdd,
         DriveRename,
-        DriveRemove
+        DriveRemove,
+        SendFile,
     };
 
     Command eCommand;
@@ -57,9 +60,10 @@ signals:
     void statusUpdated(TailStatus* newStatus);
     void loginFlowCompleted();
     void driveListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);
+    void fileSent(bool success, const QString& errorMsg, void* userData);
 
 private:
-    void runCommand(const QString& cmd, QStringList args, bool jsonResult = false, bool usePkExec = false);
+    void runCommand(const QString& cmd, QStringList args, bool jsonResult = false, bool usePkExec = false, void* userData = nullptr);
     void onProcessCanReadStdOut();
 
     void parseStatusResponse(const QJsonObject& obj);

@@ -54,8 +54,10 @@ private slots:
     void addTailDriveButtonClicked() const;
     void removeTailDriveButtonClicked() const;
     void selectTailDriveMountPath() const;
-
     void fixTailDriveDavFsSetup() const;
+
+    // Send file
+    void fileSentToDevice(bool success, const QString& errorMsg, void* userData) const;
 
 private:
     // Switch to the new state and return the prev (old) state back to caller

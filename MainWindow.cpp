@@ -226,7 +226,7 @@ void MainWindow::selectTailDriveMountPath() const {
     }
 }
 
-void MainWindow::fixTailDriveDavFsSetup() {
+void MainWindow::fixTailDriveDavFsSetup() const {
     auto homeDir = getHomeDir();
     auto homeDavFsSecret = getTailDriveFilePath();
 
@@ -248,6 +248,8 @@ void MainWindow::fixTailDriveDavFsSetup() {
     davFsSecret.close();
 
     QMessageBox::information(nullptr, "Tail Tray", "davfs2 config has been written");
+
+    ui->btnTailDriveFixDavFsMountSetup->setEnabled(isTailDriveFileAlreadySetup());
 }
 
 bool MainWindow::isTailDriveFileAlreadySetup() {

@@ -55,7 +55,7 @@ private slots:
     void removeTailDriveButtonClicked() const;
     void selectTailDriveMountPath() const;
 
-    static void fixTailDriveDavFsSetup();
+    void fixTailDriveDavFsSetup() const;
 
 private:
     // Switch to the new state and return the prev (old) state back to caller

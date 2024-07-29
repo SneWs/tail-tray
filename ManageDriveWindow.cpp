@@ -51,6 +51,10 @@ void ManageDriveWindow::selectFolder() {
     if (result == QFileDialog::Accepted) {
         const auto& selection = dlg.selectedFiles();
         ui->txtPath->setText(selection.first());
+        if (ui->txtName->text().isEmpty()) {
+            const QDir dir(selection.first());
+            ui->txtName->setText(dir.dirName());
+        }
     }
 }
 

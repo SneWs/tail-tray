@@ -6,8 +6,15 @@
 
 #include <QDebug>
 
-void SysCommand::refreshDns()
-{
+void SysCommand::restartTailscaleDaemon() {
+    QStringList args;
+    args << "restart";
+    args << "tailscaled";
+
+    runCommand("systemctl", args, false, true);
+}
+
+void SysCommand::refreshDns() {
     QStringList args;
     args << "restart";
     args << "systemd-resolved";
@@ -75,8 +82,7 @@ bool SysCommand::copyFile(const QString& fromFile, const QString& toFile, bool u
     return pProcess->exitCode() == 0;
 }
 
-void SysCommand::runCommand(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec)
-{
+void SysCommand::runCommand(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec) {
     pProcess = std::make_unique<QProcess>(this);
     connect(pProcess.get(), &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus status) {
         qDebug() << "Process exit code " << exitCode << " - " << status;

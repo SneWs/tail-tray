@@ -44,7 +44,8 @@ private:
     std::unique_ptr<QAction> pAbout;
     std::unique_ptr<QAction> pThisDevice;
     std::unique_ptr<QAction> pExitNodeNone;
-    std::unique_ptr<QAction> pRefreshLocalDns;  
+    std::unique_ptr<QAction> pRefreshLocalDns;
+    std::unique_ptr<QAction> pRestartTailscale;
     std::unique_ptr<SysCommand> pSysCommand;
 
 private:

@@ -11,6 +11,7 @@ class SysCommand : public QObject
 {
     Q_OBJECT
 public:
+    void restartTailscaleDaemon();
     void refreshDns();
     void makeDir(const QString& path, bool usePkExec = false);
     void mountFs(const QString& remote, const QString& path, const QString& fsType, const QString& options = "", bool usePkExec = false);

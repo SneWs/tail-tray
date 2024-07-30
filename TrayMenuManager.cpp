@@ -51,6 +51,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     pExitNodeNone->setChecked(true);
     pExitNodeNone->setEnabled(false);
     pRefreshLocalDns = std::make_unique<QAction>("Refresh Local DNS");
+    pRestartTailscale = std::make_unique<QAction>("Restart Tailscale");
 
     setupWellKnownActions();
 
@@ -114,6 +115,7 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
         pThisDevice->setText(pTailStatus->user->loginName);
     pTrayMenu->addAction(pThisDevice.get());
     auto* actions = pTrayMenu->addMenu("Custom Actions");
+    actions->addAction(pRestartTailscale.get());
     actions->addAction(pRefreshLocalDns.get());
     pTrayMenu->addSeparator();
     pTrayMenu->addAction(pPreferences.get());
@@ -265,6 +267,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     pTrayMenu->addSeparator();
 
     auto* actions = pTrayMenu->addMenu("Custom Actions");
+    actions->addAction(pRestartTailscale.get());
     actions->addAction(pRefreshLocalDns.get());
 
     pTrayMenu->addSeparator();
@@ -397,6 +400,10 @@ void TrayMenuManager::setupWellKnownActions() const {
             }
         }
     );
+
+    connect(pRestartTailscale.get(), &QAction::triggered, this, [this](bool) {
+        pSysCommand->restartTailscaleDaemon();
+    });
 
     connect(pRefreshLocalDns.get(), &QAction::triggered, this, [this](bool) {
         pSysCommand->refreshDns();

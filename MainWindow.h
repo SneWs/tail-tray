@@ -18,7 +18,6 @@ class AccountsTabUiManager;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     explicit MainWindow(QWidget* parent = nullptr);
 
@@ -70,6 +69,9 @@ private:
     [[nodiscard]] static bool isTailDriveFileAlreadySetup();
 
     void tailDrivesToUi() const;
+
+protected:
+    void showEvent(QShowEvent *event) override;
 };
 
 #endif // MAINWINDOW_H

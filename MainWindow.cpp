@@ -304,6 +304,13 @@ void MainWindow::tailDrivesToUi() const {
     }
 }
 
+void MainWindow::showEvent(QShowEvent *event) {
+    QMainWindow::showEvent(event);
+
+    // Getting accounts will also trigger a fetch of status
+    pCurrentExecution->getAccounts();
+}
+
 TailState MainWindow::changeToState(TailState newState)
 {
     auto retVal = eCurrentState;

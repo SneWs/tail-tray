@@ -328,10 +328,6 @@ TailState MainWindow::changeToState(TailState newState)
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
 
     auto isOnline = eCurrentState == TailState::Connected;
-    ui->tabSettings->setEnabled(isOnline);
-    ui->tabTailDrive->setEnabled(isOnline);
-    ui->tabAccount->setEnabled(isOnline);
-
     if (isOnline) {
         if (settings.tailDriveEnabled()) {
             pCurrentExecution->listDrives();

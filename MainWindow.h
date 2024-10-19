@@ -6,6 +6,8 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QNetworkInformation>
+#include <QMap>
+#include <QDateTime>
 
 #include "TailRunner.h"
 #include "TailSettings.h"
@@ -40,6 +42,8 @@ private:
     TailState eCurrentState;
     TailSettings settings;
     QList<TailAccountInfo> accounts;
+
+    QMap<QString, QDateTime> seenWarnings;
 
 private slots:
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);

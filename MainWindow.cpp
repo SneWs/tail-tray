@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget* parent)
     , eCurrentState(TailState::NoAccount)
     , pCurrentExecution(nullptr)
     , pTailStatus(nullptr)
+    , seenWarnings()
 {
     ui->setupUi(this);
 
@@ -347,13 +348,34 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 
         if (pTailStatus->health.count() > 0)
         {
+            QDateTime now = QDateTime::currentDateTime();
             QString str;
             for (const auto& s : pTailStatus->health)
-                str += s + "\n";
+            {
+                if (seenWarnings.contains(s))
+                {
+                    auto lastSeen = seenWarnings[s];
+                    auto daysSinceLastSeen = lastSeen.secsTo(now);
+                    if (daysSinceLastSeen < (60 * 60) * 6) // 6 hours before showing the same health info again
+                        continue; // No point in showing
 
-            pTrayManager->trayIcon()->showMessage("Warning",
-                str,
-                QSystemTrayIcon::Warning, 5000);
+                    // Update to now
+                    seenWarnings[s] = now;
+                }
+                else
+                {
+                    seenWarnings.insert(s, now);
+                }
+
+                str += s + "\n";
+            }
+
+            if (str.length() > 1)
+            {
+                pTrayManager->trayIcon()->showMessage("Warning",
+                  str,
+                  QSystemTrayIcon::Warning, 5000);
+            }
         }
 
         auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));

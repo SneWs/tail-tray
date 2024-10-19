@@ -343,11 +343,18 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 
     if (pTailStatus->user->id > 0)
     {
-        // Logged in
-        if (pTailStatus->health.count() < 1)
-            changeToState(TailState::Connected);
-        else
-            changeToState(TailState::NotConnected);
+        changeToState(TailState::Connected);
+
+        if (pTailStatus->health.count() > 0)
+        {
+            QString str;
+            for (const auto& s : pTailStatus->health)
+                str += s + "\n";
+
+            pTrayManager->trayIcon()->showMessage("Warning",
+                str,
+                QSystemTrayIcon::Warning, 5000);
+        }
 
         auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));
         ui->lblVersionNumber->setText("Version " + formattedVersion);

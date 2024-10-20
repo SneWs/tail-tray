@@ -49,7 +49,7 @@ private slots:
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void settingsClosed();
     void loginFlowCompleted() const;
-    void onNetworkRechabilityChanged(QNetworkInformation::Reachability newReachability);
+    void onNetworkReachabilityChanged(QNetworkInformation::Reachability newReachability);
 
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const;
 

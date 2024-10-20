@@ -37,6 +37,7 @@ public:
 private:
     const TailSettings& settings;
     std::unique_ptr<QProcess> pProcess;
+    void* pUserData;
     enum class Command {
         ListAccounts,
         SwitchAccount,
@@ -64,9 +65,13 @@ signals:
 
 private:
     void runCommand(const QString& cmd, QStringList args, bool jsonResult = false, bool usePkExec = false, void* userData = nullptr);
-    void onProcessCanReadStdOut();
 
     void parseStatusResponse(const QJsonObject& obj);
+
+private slots:
+    void onProcessCanReadStdOut();
+    void onProcessCanReadStandardError();
+    void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 #endif // TAILRUNNER_H

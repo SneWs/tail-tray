@@ -124,8 +124,8 @@ void MainWindow::loginFlowCompleted() const {
     pCurrentExecution->start();
 }
 
-void MainWindow::onNetworkRechabilityChanged(QNetworkInformation::Reachability newReachability) {
-    qDebug() << "onNetworkRechabilityChanged -> " << newReachability;
+void MainWindow::onNetworkReachabilityChanged(QNetworkInformation::Reachability newReachability) {
+    qDebug() << "onNetworkReachabilityChanged -> " << newReachability;
 
     if (newReachability == QNetworkInformation::Reachability::Online) {
         // Fetch accounts and then get the status info after that
@@ -297,11 +297,8 @@ void MainWindow::tailDrivesToUi() const {
         const auto& drive = drives[i];
         qDebug() << "Drive: " << drive.name << " (" << drive.path << ")";
 
-        auto nameItem = new QTableWidgetItem(drive.name);
-        ui->twSharedDrives->setItem(i, 0, nameItem);
-
-        auto pathItem = new QTableWidgetItem(drive.path);
-        ui->twSharedDrives->setItem(i, 1, pathItem);
+        ui->twSharedDrives->setItem(i, 0, new QTableWidgetItem(drive.name));
+        ui->twSharedDrives->setItem(i, 1, new QTableWidgetItem(drive.path));
     }
 }
 
@@ -414,7 +411,7 @@ void MainWindow::setupNetworkCallbacks() const {
     }
 
     connect(inst, &QNetworkInformation::reachabilityChanged,
-        this, &MainWindow::onNetworkRechabilityChanged);
+        this, &MainWindow::onNetworkReachabilityChanged);
 }
 
 void MainWindow::syncSettingsToUi() const {

@@ -26,6 +26,16 @@ If you're feeling adventurous, you can download the latest deb release and give 
 **_NOTE:_** The deb package that is made as part of the release _might not_ working as intended. 
 I'm working on fixing this. And if you know how to package for Debian and Ubuntu, feel free to help out. See https://github.com/SneWs/tail-tray/issues/12 for details
 
+### Prerequisites
+* Tailscale installed and running - https://tailscale.com 
+* davfs2 installed and configured (If you plan on using Tail drives or accessing Tail drives. Tail Tray also helps you to automatically configure this) - https://wiki.archlinux.org/title/Davfs2
+
+
+### Supported architectures
+* x86_64
+* ARM64
+* Any other architecture that QT 6 supports and where you can compile this project
+
 ### Getting started
 1. Install the following dependencies
    * Git, QT 6, cmake and a c++ compiler, for example:

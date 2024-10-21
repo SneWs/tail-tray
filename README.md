@@ -1,4 +1,4 @@
-# tail-tray
+# Tail Tray
 Tailscale tray menu and UI for Plasma Desktop
 
 **Disclaimer** Please note that I have _no_ association whatsoever with Tailscale Inc. 
@@ -34,7 +34,7 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
 ### Supported architectures
 * x86_64
 * ARM64
-* Any other architecture that QT 6 supports and where you can compile this project
+* Any other architecture that QT 6 supports and where you can compile this project and where Tailscale runs
 
 ### Getting started
 1. Install the following dependencies

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>610</width>
-    <height>628</height>
+    <width>596</width>
+    <height>560</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -573,7 +573,7 @@
        <attribute name="title">
         <string>Settings</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_24">
+       <layout class="QVBoxLayout" name="verticalLayout_27">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="sizeConstraint">
@@ -1077,6 +1077,48 @@
             </item>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_23"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_24">
+          <item>
+           <widget class="QLabel" name="label_11">
+            <property name="font">
+             <font>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Default file save location for files shared from other devices</string>
+            </property>
+            <property name="buddy">
+             <cstring>txtTailDriveDefaultMountPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_30">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QLineEdit" name="txtTailFilesDefaultSavePath"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnSelectTailFileDefaultSaveLocation">
+              <property name="maximumSize">
+               <size>
+                <width>42</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>

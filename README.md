@@ -13,6 +13,7 @@ This is a personal project and is not endorsed by Tailscale Inc. in any shape or
 - [X] Proper multi account handling 
 - [X] Tail drive support - Working with davfs2 support + additional help setting up davfs2 and mounting etc
 - [X] Send files to any device on your Tailnet directly from the tray menu
+- [X] Get notified and receive files from any device on your Tailnet to a pre-defined location on disk
 
 ### License
 GNU General Public License v3.0 - see [LICENSE](LICENSE) for more details
@@ -65,6 +66,8 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
 ![Screenshot](screenshots/disconnected-tray.png)
 
 ![Screenshot](screenshots/settings-ui.png)
+
+![Screenshot](screenshots/file-sharing.png)
 
 ![Screenshot](screenshots/tail-drives01.png)
 

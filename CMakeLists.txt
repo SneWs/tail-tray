@@ -28,13 +28,18 @@ set(PROJECT_SOURCES
         SysCommand.cpp
         SysCommand.h
         KnownValues.h
+        TailFileReceiver.cpp
+        TailFileReceiver.h
+        TailRunner.h
+        TailRunner.cpp
+        ManageDriveWindow.h
+        ManageDriveWindow.cpp
+        ManageDriveWindow.ui
 )
 
 qt_add_executable(tail-tray
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
-    TailRunner.h TailRunner.cpp
-    ManageDriveWindow.h ManageDriveWindow.cpp ManageDriveWindow.ui
 )
 
 target_link_libraries(tail-tray PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)

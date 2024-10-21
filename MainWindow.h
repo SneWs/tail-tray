@@ -13,6 +13,7 @@
 #include "TailSettings.h"
 #include "TrayMenuManager.h"
 #include "AccountsTabUiManager.h"
+#include "TailFileReceiver.h"
 #include "./ui_MainWindow.h"
 
 class AccountsTabUiManager;
@@ -38,6 +39,7 @@ private:
     std::unique_ptr<TrayMenuManager> pTrayManager;
     std::unique_ptr<TailRunner> pCurrentExecution;
     std::unique_ptr<TailStatus> pTailStatus;
+    std::unique_ptr<TailFileReceiver> pFileReceiver;
 
     TailState eCurrentState;
     TailSettings settings;
@@ -61,6 +63,9 @@ private slots:
 
     // Send file
     void fileSentToDevice(bool success, const QString& errorMsg, void* userData) const;
+    void startListeningForIncomingFiles();
+    void onTailnetFileReceived(QString filePath) const;
+    void onShowTailFileSaveLocationPicker();
 
 private:
     // Switch to the new state and return the prev (old) state back to caller
@@ -71,7 +76,6 @@ private:
     void setupNetworkCallbacks() const;
 
     [[nodiscard]] static bool isTailDriveFileAlreadySetup();
-
     void tailDrivesToUi() const;
 
 protected:

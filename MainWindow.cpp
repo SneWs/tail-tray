@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget* parent)
     , eCurrentState(TailState::NoAccount)
     , pCurrentExecution(nullptr)
     , pTailStatus(nullptr)
+    , pFileReceiver(nullptr)
     , seenWarnings()
 {
     ui->setupUi(this);
@@ -61,6 +62,9 @@ MainWindow::MainWindow(QWidget* parent)
         ui->btnTailDriveFixDavFsMountSetup->setEnabled(false);
         ui->btnTailDriveFixDavFsMountSetup->setText("Configured and ready");
     }
+
+    connect(ui->btnSelectTailFileDefaultSaveLocation, &QPushButton::clicked,
+        this, &MainWindow::onShowTailFileSaveLocationPicker);
 
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
@@ -258,6 +262,45 @@ void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* u
     delete userDataStr;
 }
 
+void MainWindow::startListeningForIncomingFiles() {
+    if (pFileReceiver != nullptr)
+        pFileReceiver.reset();
+
+    pFileReceiver = std::make_unique<TailFileReceiver>(settings.tailFilesDefaultSavePath(), this);
+    connect(pFileReceiver.get(), &TailFileReceiver::fileReceived,
+        this, &MainWindow::onTailnetFileReceived);
+
+    connect(pFileReceiver.get(), &TailFileReceiver::errorListening,
+        this, [this](const QString& errorMsg) {
+            pTrayManager->trayIcon()->showMessage("Error", errorMsg,
+                QSystemTrayIcon::MessageIcon::Critical, 5000);
+        });
+}
+
+void MainWindow::onTailnetFileReceived(QString filePath) const {
+    const QFileInfo file(filePath);
+    const QString msg("File " + file.fileName() + " was received and saved in " + file.absolutePath());
+
+    pTrayManager->trayIcon()->showMessage("File received", msg,
+        QSystemTrayIcon::MessageIcon::Information, 8000);
+}
+
+void MainWindow::onShowTailFileSaveLocationPicker() {
+    QFileDialog dlg(this, "Select folder", ui->txtTailFilesDefaultSavePath->text());
+    dlg.setFileMode(QFileDialog::FileMode::Directory);
+    dlg.setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
+    dlg.setOption(QFileDialog::Option::ShowDirsOnly, true);
+
+    auto result = dlg.exec();
+    if (result == QFileDialog::Accepted) {
+        const auto& selection = dlg.selectedFiles();
+        ui->txtTailFilesDefaultSavePath->setText(selection.first().trimmed());
+        settings.tailFilesDefaultSavePath(selection.first().trimmed());
+    }
+
+    startListeningForIncomingFiles();
+}
+
 bool MainWindow::isTailDriveFileAlreadySetup() {
     auto homeDavFsSecret = KnownValues::getTailDriveFilePath();
 
@@ -327,6 +370,8 @@ TailState MainWindow::changeToState(TailState newState)
 
     auto isOnline = eCurrentState == TailState::Connected;
     if (isOnline) {
+        startListeningForIncomingFiles();
+
         if (settings.tailDriveEnabled()) {
             pCurrentExecution->listDrives();
         }
@@ -425,6 +470,7 @@ void MainWindow::syncSettingsToUi() const {
     ui->chkStartOnLogin->setChecked(false);
     ui->chkUseTailDrive->setChecked(settings.tailDriveEnabled());
     ui->txtTailDriveDefaultMountPath->setText(settings.tailDriveMountPath());
+    ui->txtTailFilesDefaultSavePath->setText(settings.tailFilesDefaultSavePath());
 
     // Do we have a startup entry?
     auto configDir = QDir::home();
@@ -449,6 +495,12 @@ void MainWindow::syncSettingsFromUi() {
     settings.startOnLogin(ui->chkStartOnLogin->isChecked());
     settings.tailDriveEnabled(ui->chkUseTailDrive->isChecked());
     settings.tailDriveMountPath(ui->txtTailDriveDefaultMountPath->text().trimmed());
+
+    const QDir dir(ui->txtTailFilesDefaultSavePath->text().trimmed());
+    if (dir.exists()) {
+        settings.tailFilesDefaultSavePath(ui->txtTailFilesDefaultSavePath->text().trimmed());
+        startListeningForIncomingFiles();
+    }
 
     auto homeDir = QDir::home();
     auto targetFile = homeDir.absolutePath() + "/.config/autostart/tail-tray.desktop";

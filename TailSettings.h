@@ -45,6 +45,9 @@ public:
     [[nodiscard]] bool tailDriveEnabled() const;
     void tailDriveEnabled(bool enabled);
 
+    [[nodiscard]] QString tailFilesDefaultSavePath() const;
+    void tailFilesDefaultSavePath(const QString &path);
+
 private:
     QSettings settings;
 };

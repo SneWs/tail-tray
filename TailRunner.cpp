@@ -182,7 +182,7 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
         pProcess->start("tailscale", args);
     }
 
-    // We need to handle the login by reading as soon as ther is output available since
+    // We need to handle the login by reading as soon as there is output available since
     // the process will be running until the login flow have completed
     if (eCommand == Command::Login) {
         pProcess->waitForReadyRead();

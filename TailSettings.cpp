@@ -4,6 +4,7 @@
 
 #include "TailSettings.h"
 
+#include <QDir>
 #include <QSettings>
 
 TailSettings::TailSettings(QObject* parent)
@@ -88,6 +89,21 @@ bool TailSettings::tailDriveEnabled() const {
 }
 
 void TailSettings::tailDriveEnabled(bool enabled) {
-    settings.setValue("tailDriveEnabled", enabled);
+    settings.setValue("tailFilesDefaultSavePath", enabled);
 }
 
+QString TailSettings::tailFilesDefaultSavePath() const {
+    auto defaultSaveDir = QDir::home();
+    if (!defaultSaveDir.cd("Downloads"))
+        defaultSaveDir = QDir::home();
+
+    auto savePath = settings.value("tailFilesDefaultSavePath", defaultSaveDir.absolutePath()).toString();
+    if (!QDir(savePath).exists())
+        return QDir::homePath();
+
+    return savePath;
+}
+
+void TailSettings::tailFilesDefaultSavePath(const QString& path) {
+    settings.setValue("tailFilesDefaultSavePath", path);
+}

@@ -13,30 +13,30 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
 
 set(PROJECT_SOURCES
-        main.cpp
-        MainWindow.cpp
-        MainWindow.h
-        MainWindow.ui
+        src/main.cpp
+        src/MainWindow.cpp
+        src/MainWindow.h
+        src/MainWindow.ui
         resources.qrc
-        models.h
-        TrayMenuManager.cpp
-        TrayMenuManager.h
-        TailSettings.cpp
-        TailSettings.h
-        AccountsTabUiManager.cpp
-        AccountsTabUiManager.h
-        SysCommand.cpp
-        SysCommand.h
-        KnownValues.h
-        TailFileReceiver.cpp
-        TailFileReceiver.h
-        TailRunner.h
-        TailRunner.cpp
-        ManageDriveWindow.h
-        ManageDriveWindow.cpp
-        ManageDriveWindow.ui
-        NetworkStateMonitor.cpp
-        NetworkStateMonitor.h
+        src/models.h
+        src/TrayMenuManager.cpp
+        src/TrayMenuManager.h
+        src/TailSettings.cpp
+        src/TailSettings.h
+        src/AccountsTabUiManager.cpp
+        src/AccountsTabUiManager.h
+        src/SysCommand.cpp
+        src/SysCommand.h
+        src/KnownValues.h
+        src/TailFileReceiver.cpp
+        src/TailFileReceiver.h
+        src/TailRunner.h
+        src/TailRunner.cpp
+        src/ManageDriveWindow.h
+        src/ManageDriveWindow.cpp
+        src/ManageDriveWindow.ui
+        src/NetworkStateMonitor.cpp
+        src/NetworkStateMonitor.h
 )
 
 qt_add_executable(tail-tray

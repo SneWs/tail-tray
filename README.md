@@ -9,6 +9,7 @@ This is a personal project and is not endorsed by Tailscale Inc. in any shape or
 - [X] Control your Tailscale connection from the tray
 - [X] Show IPs
 - [X] Show current connection status of your devices
+- [X] Overview of your network and network status
 - [X] Set and change your Tailscale exit node
 - [X] Proper multi account handling 
 - [X] Tail drive support - Working with davfs2 support + additional help setting up davfs2 and mounting etc
@@ -76,6 +77,8 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
 ![Screenshot](screenshots/disconnected-tray.png)
 
 ![Screenshot](screenshots/settings-ui.png)
+
+![Screenshot](screenshots/network-status.png)
 
 ![Screenshot](screenshots/file-sharing.png)
 

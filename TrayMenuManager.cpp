@@ -21,7 +21,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     , pTailRunner(runner)
     , pSysCommand(std::make_unique<SysCommand>())
 {
-    pTrayMenu = std::make_unique<QMenu>("Tailscale");
+    pTrayMenu = std::make_unique<QMenu>("Tail Tray");
 
     // Make sure to restart the status check timer when the menu is shown
     // since this will give us some time before it will try to re-fresh the menu etc

@@ -15,6 +15,7 @@
 #include "AccountsTabUiManager.h"
 #include "TailFileReceiver.h"
 #include "./ui_MainWindow.h"
+#include "NetworkStateMonitor.h"
 
 class AccountsTabUiManager;
 
@@ -27,6 +28,7 @@ public:
     void showSettingsTab();
     void showAccountsTab();
     void showAboutTab();
+    void showNetworkStatusTab();
 
     void syncSettingsToUi() const;
     void syncSettingsFromUi();
@@ -40,6 +42,7 @@ private:
     std::unique_ptr<TailRunner> pCurrentExecution;
     std::unique_ptr<TailStatus> pTailStatus;
     std::unique_ptr<TailFileReceiver> pFileReceiver;
+    std::unique_ptr<NetworkStateMonitor> pNetworkStateMonitor;
 
     TailState eCurrentState;
     TailSettings settings;
@@ -66,6 +69,9 @@ private slots:
     void startListeningForIncomingFiles();
     void onTailnetFileReceived(QString filePath) const;
     void onShowTailFileSaveLocationPicker();
+
+    // Network reports
+    void netCheckCompleted(bool success, const QMap<QString, QString>& results, QList<QPair<QString, float>>& latencies) const;
 
 private:
     // Switch to the new state and return the prev (old) state back to caller

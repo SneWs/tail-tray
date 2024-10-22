@@ -51,7 +51,7 @@ private:
         DriveAdd,
         DriveRename,
         DriveRemove,
-        SendFile,
+        SendFile
     };
 
     Command eCommand;
@@ -65,7 +65,6 @@ signals:
 
 private:
     void runCommand(const QString& cmd, QStringList args, bool jsonResult = false, bool usePkExec = false, void* userData = nullptr);
-
     void parseStatusResponse(const QJsonObject& obj);
 
 private slots:

@@ -35,6 +35,8 @@ set(PROJECT_SOURCES
         ManageDriveWindow.h
         ManageDriveWindow.cpp
         ManageDriveWindow.ui
+        NetworkStateMonitor.cpp
+        NetworkStateMonitor.h
 )
 
 qt_add_executable(tail-tray

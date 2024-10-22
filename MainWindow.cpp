@@ -3,6 +3,8 @@
 
 #include "MainWindow.h"
 
+#include <QList>
+#include <QPair>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -14,11 +16,11 @@ MainWindow::MainWindow(QWidget* parent)
     , ui(std::make_unique<Ui::MainWindow>())
     , accountsTabUi(nullptr)
     , pTrayManager(nullptr)
-    , eCurrentState(TailState::NoAccount)
     , pCurrentExecution(nullptr)
     , pTailStatus(nullptr)
     , pFileReceiver(nullptr)
-    , seenWarnings()
+    , eCurrentState(TailState::NoAccount)
+    , pNetworkStateMonitor(std::make_unique<NetworkStateMonitor>(this))
 {
     ui->setupUi(this);
 
@@ -27,7 +29,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Make sure to adjust tail drive based on the check state
     if (settings.tailDriveEnabled()) {
-        ui->tabWidget->insertTab(2, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
+        ui->tabWidget->insertTab(3, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
     }
 
     connect(ui->btnAddTailDrive, &QPushButton::clicked,
@@ -42,10 +44,10 @@ MainWindow::MainWindow(QWidget* parent)
             settings.tailDriveEnabled(checked);
 
             if (checked) {
-                ui->tabWidget->insertTab(2, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
+                ui->tabWidget->insertTab(3, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
             }
             else {
-                ui->tabWidget->removeTab(2);
+                ui->tabWidget->removeTab(3);
             }
     });
 
@@ -72,6 +74,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
     connect(pCurrentExecution.get(), &TailRunner::driveListed, this, &MainWindow::drivesListed);
     connect(pCurrentExecution.get(), &TailRunner::fileSent, this, &MainWindow::fileSentToDevice);
+    connect(pNetworkStateMonitor.get(), &NetworkStateMonitor::netCheckCompleted, this, &MainWindow::netCheckCompleted);
 
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
@@ -101,11 +104,16 @@ void MainWindow::showAccountsTab() {
 }
 
 void MainWindow::showAboutTab() {
-    auto tabIndex = 2;
+    auto tabIndex = 3;
     if (settings.tailDriveEnabled())
-        tabIndex = 3;
+        tabIndex = 4;
 
     ui->tabWidget->setCurrentIndex(tabIndex);
+    show();
+}
+
+void MainWindow::showNetworkStatusTab() {
+    ui->tabWidget->setCurrentIndex(2);
     show();
 }
 
@@ -301,6 +309,48 @@ void MainWindow::onShowTailFileSaveLocationPicker() {
     startListeningForIncomingFiles();
 }
 
+void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& results, QList<QPair<QString, float>>& latencies) const {
+    ui->twNetworkStatus->clearContents();
+    ui->twNetworkStatus->setColumnCount(2);
+    ui->twNetworkStatus->setHorizontalHeaderLabels(QStringList() << "Property" << "Value");
+    ui->twNetworkStatus->setRowCount(static_cast<int>(results.count() + latencies.count() + 1));
+
+    int i = 0;
+    for (auto it = results.begin(); it != results.end(); ++it) {
+        const auto& key = it.key();
+        const auto& value = it.value();
+        ui->twNetworkStatus->setItem(i, 0, new QTableWidgetItem(key));
+        ui->twNetworkStatus->setItem(i, 1, new QTableWidgetItem(value));
+        ++i;
+    }
+
+    // Add DERP header
+    ui->twNetworkStatus->setItem(i, 0, new QTableWidgetItem("DERP Latencies"));
+    ui->twNetworkStatus->setItem(i, 1, new QTableWidgetItem(""));
+    ++i;
+
+    // For latencies, we want to sort on lowest latencies first
+    // Sort the list based on the second element (the value)
+    std::sort(latencies.begin(), latencies.end(), [](const QPair<QString, float>& a, const QPair<QString, float>& b) {
+        return a.second < b.second;
+    });
+
+    for (auto it = latencies.begin(); it != latencies.end(); ++it) {
+        const auto& key = it->first;
+        const auto& value = it->second;
+        ui->twNetworkStatus->setItem(i, 0, new QTableWidgetItem(key));
+
+        QString val;
+        if (value >= 999999)
+            val = "-";
+        else
+            val = QString::number(value) + "ms";
+
+        ui->twNetworkStatus->setItem(i, 1, new QTableWidgetItem(val));
+        ++i;
+    }
+}
+
 bool MainWindow::isTailDriveFileAlreadySetup() {
     auto homeDavFsSecret = KnownValues::getTailDriveFilePath();
 
@@ -369,7 +419,7 @@ TailState MainWindow::changeToState(TailState newState)
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
 
     auto isOnline = eCurrentState == TailState::Connected;
-    if (isOnline) {
+    if (isOnline && retVal != TailState::Connected) {
         startListeningForIncomingFiles();
 
         if (settings.tailDriveEnabled()) {

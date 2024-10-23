@@ -89,7 +89,7 @@ bool TailSettings::tailDriveEnabled() const {
 }
 
 void TailSettings::tailDriveEnabled(bool enabled) {
-    settings.setValue("tailFilesDefaultSavePath", enabled);
+    settings.setValue("tailDriveEnabled", enabled);
 }
 
 QString TailSettings::tailFilesDefaultSavePath() const {

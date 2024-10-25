@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>596</width>
-    <height>560</height>
+    <width>694</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,7 +41,7 @@
    <string>Tail Tray</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset resource="../resources.qrc">
     <normaloff>:/icons/tray-off.png</normaloff>:/icons/tray-off.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -52,7 +52,7 @@
        <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <property name="iconSize">
        <size>
@@ -188,7 +188,7 @@
                     <string/>
                    </property>
                    <property name="pixmap">
-                    <pixmap resource="resources.qrc">:/icons/tray-on.png</pixmap>
+                    <pixmap resource="../resources.qrc">:/icons/tray-on.png</pixmap>
                    </property>
                    <property name="scaledContents">
                     <bool>true</bool>
@@ -409,7 +409,7 @@
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>
-                   <height>24</height>
+                   <height>16777215</height>
                   </size>
                  </property>
                  <property name="text">
@@ -422,7 +422,7 @@
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>
-                   <height>24</height>
+                   <height>16777215</height>
                   </size>
                  </property>
                  <property name="text">
@@ -520,7 +520,7 @@
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>
-                   <height>24</height>
+                   <height>16777215</height>
                   </size>
                  </property>
                  <property name="text">
@@ -1485,7 +1485,7 @@
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/icons/tray-on.png</pixmap>
+               <pixmap resource="../resources.qrc">:/icons/tray-on.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -1826,7 +1826,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

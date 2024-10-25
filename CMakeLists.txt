@@ -63,6 +63,7 @@ else ()
     qt_add_executable(tail-tray
             MANUAL_FINALIZATION
             ${PROJECT_SOURCES}
+
     )
 endif ()
 

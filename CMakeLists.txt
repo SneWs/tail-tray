@@ -39,20 +39,34 @@ set(PROJECT_SOURCES
         src/NetworkStateMonitor.h
 )
 
-qt_add_executable(tail-tray
-    MANUAL_FINALIZATION
-    ${PROJECT_SOURCES}
-)
+if(APPLE)
+    set(MACOSX_BUNDLE_ICON_FILE tailscale.icns)
+
+    # And the following tells CMake where to find and install the file itself.
+    set(app_icon_macos "${CMAKE_CURRENT_SOURCE_DIR}/icons/tailscale.icns")
+    set_source_files_properties(${app_icon_macos} PROPERTIES
+            MACOSX_PACKAGE_LOCATION "Resources")
+
+    qt_add_executable(tail-tray
+            MACOSX_BUNDLE ${app_icon_macos}
+            MANUAL_FINALIZATION
+            ${PROJECT_SOURCES}
+    )
+
+    set_target_properties(tail-tray PROPERTIES
+            ${BUNDLE_ID_OPTION}
+            MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+            MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+            MACOSX_BUNDLE TRUE
+    )
+else ()
+    qt_add_executable(tail-tray
+            MANUAL_FINALIZATION
+            ${PROJECT_SOURCES}
+    )
+endif ()
 
 target_link_libraries(tail-tray PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
-
-set_target_properties(tail-tray PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
-)
 
 include(GNUInstallDirs)
 install(TARGETS tail-tray
@@ -61,14 +75,14 @@ install(TARGETS tail-tray
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install(FILES tail-tray.desktop
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
-)
+if (UNIX AND NOT APPLE)
+    install(FILES tail-tray.desktop
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
+    )
 
-install(FILES icons/tailscale.png
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps
-)
+    install(FILES icons/tailscale.png
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps
+    )
+endif ()
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(tail-tray)
-endif()
+qt_finalize_executable(tail-tray)

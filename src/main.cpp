@@ -9,6 +9,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("tail-tray");
 
     QApplication a(argc, argv);
+    QApplication::setQuitOnLastWindowClosed(false);
+
     MainWindow w;
     w.hide();
 

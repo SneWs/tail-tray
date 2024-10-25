@@ -41,8 +41,8 @@ void TailFileReceiver::startListening() {
     args << "file";
     args << "get";
     args << "--wait";
+    args << "--loop";
     args << "--conflict=rename";
-    args << "--verbose";
     args << m_savePath;
     m_process->start("tailscale", args);
 }

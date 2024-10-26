@@ -56,6 +56,7 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
         # For davfs2 we need to use the AUR
         yay -S davfs2
         ```
+      * If you are running Gnome and not using Ubuntu, make sure to install AppIndicator so you can see your tray icons. See https://extensions.gnome.org/extension/615/appindicator-support/
 2. Clone the repo
 3. cd into the repo `cd tail-tray`
 4. Make a build directory `mkdir build`

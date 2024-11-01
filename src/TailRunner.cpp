@@ -37,7 +37,9 @@ void TailRunner::switchAccount(const QString& accountId) {
 void TailRunner::login() {
     eCommand = Command::Login;
     QStringList args;
+#if !defined(WINDOWS_BUILD)
     args << "--operator" << qEnvironmentVariable("USER");
+#endif
 
     runCommand("login", args, false, true);
 }
@@ -53,7 +55,11 @@ void TailRunner::start(bool usePkExec) {
     QStringList args;
 
     args << "--reset";
+#if !defined(WINDOWS_BUILD)
     args << "--operator" << qEnvironmentVariable("USER");
+#else
+    args << "--unattended";
+#endif
 
     if (settings.useTailscaleDns())
         args << "--accept-dns";
@@ -174,6 +180,9 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
         args << "--json";
 
     args.insert(0, cmd);
+
+    // No pkexec on windows like systems
+#if !defined(WINDOWS_BUILD)
     if (usePkExec) {
         args.insert(0, "tailscale");
         pProcess->start("/usr/bin/pkexec", args);
@@ -181,6 +190,9 @@ void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResul
     else {
         pProcess->start("tailscale", args);
     }
+#else
+    pProcess->start("tailscale", args);
+#endif
 
     // We need to handle the login by reading as soon as there is output available since
     // the process will be running until the login flow have completed

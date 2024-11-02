@@ -46,7 +46,7 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
          ```
      * On Fedora
         ```bash
-        sudo dnf -y git g++ clang cmake install qt6-qtbase-devel qt6-qttools-devel qt6-qtbase-private-devel davfs2
+        sudo dnf install -y git g++ clang cmake qt6-qtbase-devel qt6-qttools-devel qt6-qtbase-private-devel davfs2
         ```
       * On Arch Linux
          ```bash

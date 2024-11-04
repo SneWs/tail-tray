@@ -10,10 +10,20 @@
 #include <QTimer>
 
 TailRunner::TailRunner(const TailSettings& s, QObject* parent)
-: QObject(parent)
+    : QObject(parent)
     , settings(s)
+    , pUserData(nullptr)
     , eCommand(Command::Status)
-{ }
+{
+}
+
+void TailRunner::setOperator() {
+    eCommand = Command::SetOperator;
+
+    QStringList args;
+    args << "--operator=" + qEnvironmentVariable("USER");
+    runCommand("set", args, false, true);
+}
 
 void TailRunner::checkStatus() {
     eCommand = Command::Status;
@@ -290,6 +300,15 @@ void TailRunner::onProcessCanReadStandardError() {
         QString errorInfo(pProcess->readAllStandardError());
         if (!errorInfo.isEmpty()) {
             qDebug() << errorInfo;
+
+            // Scan the output and look for sudo indicators
+            // If detected, it means we need to elevate to complete the command and/or
+            // the user hasn't set itself as operator yet
+            static QRegularExpression regex(R"(sudo\s+tailscale(?:\s+\S*)?)");
+            const QRegularExpressionMatch match = regex.match(errorInfo);
+            if (match.hasMatch()) {
+                emit commandError(errorInfo, true);
+            }
         }
     }
 }

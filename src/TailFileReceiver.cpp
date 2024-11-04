@@ -31,25 +31,39 @@ void TailFileReceiver::startListening() {
     m_processFinishedConnection = connect(m_process.get(), &QProcess::finished,
         this, &TailFileReceiver::processFinished);
 
-    connect(m_process.get(), &QProcess::readyReadStandardOutput,
-        this, &TailFileReceiver::processReadStdOut);
-
-    connect(m_process.get(), &QProcess::readyReadStandardError,
-        this, &TailFileReceiver::processReadStdErr);
-
     QStringList args;
     args << "file";
     args << "get";
+    args << "--verbose";
     args << "--wait";
-    args << "--loop";
     args << "--conflict=rename";
     args << m_savePath;
     m_process->start("tailscale", args);
 }
 
-void TailFileReceiver::processReadStdOut() {
+void TailFileReceiver::processFinished(int exitCode, QProcess::ExitStatus exitStatus) {
+    if (exitCode != 0) {
+        qDebug() << "Process finished: " << exitCode;
+    }
+
+    if (!QFile::exists(m_savePath)) {
+        // If the save path have stopped existing for example, just bail.
+        QString msg("The path " + m_savePath + " does not exist, will not continue to listen for file receive events!");
+        qDebug() << msg;
+        
+        emit errorListening(msg);
+        return;
+    }
+
     auto data = m_process->readAllStandardOutput();
+    if (data.length() < 1) {
+        data = m_process->readAllStandardError();
+    }
     auto lines = QString::fromUtf8(data).split('\n');
+
+    if (exitCode != 0 || exitStatus != QProcess::NormalExit) {
+        emit errorListening(QString(data));
+    }
 
     QRegularExpression regex(R"(as\s+([^\s]+)\s+\()");
     for (const auto& line : lines) {
@@ -65,30 +79,6 @@ void TailFileReceiver::processReadStdOut() {
                 emit fileReceived(filePath);
             }
         }
-    }
-}
-
-void TailFileReceiver::processReadStdErr() {
-    auto data = m_process->readAllStandardOutput();
-    auto output = QString::fromUtf8(data);
-    if (output.length() > 0) {\
-        qDebug() << "STDERR: " << output;
-        emit errorListening(output);
-    }
-}
-
-void TailFileReceiver::processFinished(int exitCode, QProcess::ExitStatus exitStatus) {
-    if (exitCode != 0) {
-        qDebug() << "Process finished: " << exitCode;
-    }
-
-    if (!QFile::exists(m_savePath)) {
-        // If the save path have stopped existing for example, just bail.
-        QString msg("The path " + m_savePath + " does not exist, will not continue to listen for file receive events!");
-        qDebug() << msg;
-        
-        emit errorListening(msg);
-        return;
     }
 
     m_process.reset();

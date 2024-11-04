@@ -21,8 +21,6 @@ private:
     void startListening();
 
 private slots:
-    void processReadStdOut();
-    void processReadStdErr();
     void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:

@@ -4,7 +4,6 @@
 #include "MainWindow.h"
 
 #include <QList>
-#include <QPair>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -69,11 +68,13 @@ MainWindow::MainWindow(QWidget* parent)
         this, &MainWindow::onShowTailFileSaveLocationPicker);
 
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
+    connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
+    connect(pCurrentExecution.get(), &TailRunner::commandError, this, &MainWindow::onCommandError);
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
     connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
-    connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
     connect(pCurrentExecution.get(), &TailRunner::driveListed, this, &MainWindow::drivesListed);
     connect(pCurrentExecution.get(), &TailRunner::fileSent, this, &MainWindow::fileSentToDevice);
+
     connect(pNetworkStateMonitor.get(), &NetworkStateMonitor::netCheckCompleted, this, &MainWindow::netCheckCompleted);
 
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
@@ -124,6 +125,22 @@ void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
 
     accountsTabUi->onAccountsListed(foundAccounts);
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
+}
+
+void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
+    if (isSudoRequired)
+    {
+        const auto response = QMessageBox::warning(this, "Sudo required",
+            error + "\n\nTo use Tail Tray you need to be set as operator. Do you want to set yourself as operator now?",
+            QMessageBox::Ok | QMessageBox::Cancel);
+
+        if (response == QMessageBox::Ok)
+            pCurrentExecution->setOperator();
+
+        return;
+    }
+
+    QMessageBox::warning(this, "Error running tailscale", error);
 }
 
 void MainWindow::settingsClosed() {

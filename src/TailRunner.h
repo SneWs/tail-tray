@@ -17,6 +17,7 @@ class TailRunner : public QObject
 public:
     explicit TailRunner(const TailSettings& s, QObject* parent = nullptr);
 
+    void setOperator();
     void checkStatus();
     void getAccounts();
     void switchAccount(const QString& accountId);
@@ -39,6 +40,7 @@ private:
     std::unique_ptr<QProcess> pProcess;
     void* pUserData;
     enum class Command {
+        SetOperator,
         ListAccounts,
         SwitchAccount,
         Login,
@@ -62,6 +64,8 @@ signals:
     void loginFlowCompleted();
     void driveListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);
     void fileSent(bool success, const QString& errorMsg, void* userData);
+
+    void commandError(const QString& errorMsg, bool requiresSudoError);
 
 private:
     void runCommand(const QString& cmd, QStringList args, bool jsonResult = false, bool usePkExec = false, void* userData = nullptr);

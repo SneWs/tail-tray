@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("grenangen");
     QCoreApplication::setOrganizationDomain("grenangen.se");
-    QCoreApplication::setApplicationName("tail-tray");
+    QCoreApplication::setApplicationName("Tail Tray");
 
     QApplication a(argc, argv);
     QApplication::setQuitOnLastWindowClosed(false);

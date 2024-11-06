@@ -44,6 +44,7 @@ void TailFileReceiver::startListening() {
 void TailFileReceiver::processFinished(int exitCode, QProcess::ExitStatus exitStatus) {
     if (exitCode != 0) {
         qDebug() << "Process finished: " << exitCode;
+        return;
     }
 
     if (!QFile::exists(m_savePath)) {
@@ -61,7 +62,7 @@ void TailFileReceiver::processFinished(int exitCode, QProcess::ExitStatus exitSt
     }
     auto lines = QString::fromUtf8(data).split('\n');
 
-    if (exitCode != 0 || exitStatus != QProcess::NormalExit) {
+    if (exitStatus != QProcess::NormalExit) {
         emit errorListening(QString(data));
     }
 

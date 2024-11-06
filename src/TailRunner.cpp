@@ -3,57 +3,79 @@
 #include <QProcess>
 #include <QMessageBox>
 #include <QDebug>
-#include <QByteArray>
 #include <QDesktopServices>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTimer>
 
+namespace
+{
+    static QString commandToString(const Command cmd) {
+        switch (cmd) {
+            case Command::SetOperator: return "SetOperator";
+            case Command::ListAccounts: return "ListAccounts";
+            case Command::SwitchAccount: return "SwitchAccount";
+            case Command::Login: return "Login";
+            case Command::Logout: return "Logout";
+            case Command::Connect: return "Connect";
+            case Command::Disconnect: return "Disconnect";
+            case Command::SettingsChange: return "SettingsChange";
+            case Command::Status: return "Status";
+            case Command::Drive: return "Drive";
+            case Command::DriveAdd: return "DriveAdd";
+            case Command::DriveRename: return "DriveRename";
+            case Command::DriveRemove: return "DriveRemove";
+            case Command::SendFile: return "SendFile";
+        }
+
+        return "Unknown (Not mapped) command (" + QString::number(static_cast<int>(cmd)) + ")";
+    }
+
+}
+
 TailRunner::TailRunner(const TailSettings& s, QObject* parent)
-: QObject(parent)
+    : QObject(parent)
     , settings(s)
-    , eCommand(Command::Status)
+    , processes()
 { }
 
+void TailRunner::setOperator() {
+    QStringList args;
+    args << "--operator=" + qEnvironmentVariable("USER");
+    runCommand(Command::SetOperator, "set", args, false, true);
+}
+
 void TailRunner::checkStatus() {
-    eCommand = Command::Status;
-    runCommand("status", QStringList(), true);
+    runCommand(Command::Status, "status", QStringList(), true);
 }
 
 void TailRunner::getAccounts() {
-    eCommand = Command::ListAccounts;
     QStringList args;
     args << "--list";
-    runCommand("switch", args);
+    runCommand(Command::ListAccounts, "switch", args);
 }
 
 void TailRunner::switchAccount(const QString& accountId) {
-    eCommand = Command::SwitchAccount;
     QStringList args;
     args << accountId;
-    runCommand("switch", args);
+    runCommand(Command::SwitchAccount, "switch", args);
 }
 
 void TailRunner::login() {
-    eCommand = Command::Login;
     QStringList args;
 #if !defined(WINDOWS_BUILD)
     args << "--operator" << qEnvironmentVariable("USER");
 #endif
 
-    runCommand("login", args, false, true);
+    runCommand(Command::Login, "login", args, false, true);
 }
 
 void TailRunner::logout() {
-    eCommand = Command::Logout;
-    QStringList args;
-    runCommand("logout", args, false, true);
+    runCommand(Command::Logout, "logout", QStringList(), false, true);
 }
 
-void TailRunner::start(bool usePkExec) {
-    eCommand = Command::Connect;
+void TailRunner::start(const bool usePkExec) {
     QStringList args;
-
     args << "--reset";
 #if !defined(WINDOWS_BUILD)
     args << "--operator" << qEnvironmentVariable("USER");
@@ -81,7 +103,7 @@ void TailRunner::start(bool usePkExec) {
     }
     else {
         // Check if we have a exit node that we should use
-        auto exitNode = settings.exitNodeInUse();
+        const auto exitNode = settings.exitNodeInUse();
         if (!exitNode.isEmpty()) {
             qDebug() << "Will use exit node" << exitNode;
             args << "--exit-node" << exitNode;
@@ -97,121 +119,83 @@ void TailRunner::start(bool usePkExec) {
         }
     }
 
-    runCommand("up", args, false, usePkExec);
+    runCommand(Command::Connect, "up", args, false, usePkExec);
 }
 
 void TailRunner::stop() {
-    eCommand = Command::Disconnect;
-    runCommand("down", QStringList());
+    runCommand(Command::Disconnect, "down", QStringList());
 }
 
 void TailRunner::listDrives() {
-    eCommand = Command::Drive;
-
     QStringList args;
     args << "list";
-    runCommand("drive", args, false);
+    runCommand(Command::Drive, "drive", args, false);
 }
 
 void TailRunner::addDrive(const TailDriveInfo& drive) {
-    eCommand = Command::DriveAdd;
-
     QStringList args;
     args << "share";
     args << drive.name << drive.path;
 
-    runCommand("drive", args, false);
+    runCommand(Command::DriveAdd, "drive", args, false);
 }
 
 void TailRunner::renameDrive(const TailDriveInfo &drive, const QString &newName) {
-    eCommand = Command::DriveRename;
-
     QStringList args;
     args << "rename";
     args << drive.name << newName;
 
-    runCommand("drive", args, false);
+    runCommand(Command::DriveRename, "drive", args, false);
 }
 
 void TailRunner::removeDrive(const TailDriveInfo& drive) {
-    eCommand = Command::DriveRemove;
-
     QStringList args;
     args << "unshare";
     args << drive.name;
 
-    runCommand("drive", args, false);
+    runCommand(Command::DriveRemove, "drive", args, false);
 }
 
 void TailRunner::sendFile(const QString& targetDevice, const QString& localFilePath, void* userData) {
-    eCommand = Command::SendFile;
-
     QStringList args;
     args << "cp";
     args << localFilePath;
     args << targetDevice + ":";
 
-    runCommand("file", args, false, false, userData);
+    runCommand(Command::SendFile, "file", args, false, false, userData);
 }
 
-void TailRunner::runCommand(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec, void* userData) {
-    if (pProcess != nullptr) {
-        if (pProcess->state() == QProcess::Running) {
-            qDebug() << "Process already running!" << "Will queue up " << cmd << args << "command";
-            QTimer::singleShot(500, this, [this, cmd, args, jsonResult, usePkExec]() {
-                runCommand(cmd, args, jsonResult, usePkExec);
-            });
-            return;
-        }
-    }
+void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QStringList& args, const bool jsonResult, const bool usePkExec, void* userData) {
+    auto wrapper = new ProcessWrapper(cmdType, this);
+    processes.emplace_back(wrapper);
 
-    pProcess = std::make_unique<QProcess>(this);
-    pUserData = userData;
-    connect(pProcess.get(), &QProcess::finished,
+    connect(wrapper, &ProcessWrapper::processFinished,
         this, &TailRunner::onProcessFinished);
 
-    connect(pProcess.get(), &QProcess::readyReadStandardOutput,
+    connect(wrapper, &ProcessWrapper::processCanReadStdOut,
         this, &TailRunner::onProcessCanReadStdOut);
 
-    connect(pProcess.get(), &QProcess::readyReadStandardError,
+    connect(wrapper, &ProcessWrapper::processCanReadStandardError,
         this, &TailRunner::onProcessCanReadStandardError);
 
-    if (jsonResult)
-        args << "--json";
-
-    args.insert(0, cmd);
-
-    // No pkexec on windows like systems
-#if !defined(WINDOWS_BUILD)
-    if (usePkExec) {
-        args.insert(0, "tailscale");
-        pProcess->start("/usr/bin/pkexec", args);
-    }
-    else {
-        pProcess->start("tailscale", args);
-    }
-#else
-    pProcess->start("tailscale", args);
-#endif
+    wrapper->start(cmd, args, jsonResult, usePkExec, userData);
 
     // We need to handle the login by reading as soon as there is output available since
     // the process will be running until the login flow have completed
-    if (eCommand == Command::Login) {
-        pProcess->waitForReadyRead();
+    if (cmdType == Command::Login) {
+        wrapper->process()->waitForReadyRead();
     }
 }
 
-void TailRunner::onProcessCanReadStdOut() {
-    assert(pProcess != nullptr);
-
-    auto data = pProcess->readAllStandardOutput();
+void TailRunner::onProcessCanReadStdOut(const ProcessWrapper* wrapper) {
+    const auto data = wrapper->process()->readAllStandardOutput();
 
     // Parse the status object
 
-    switch (eCommand) {
+    switch (wrapper->command()) {
         case Command::Status: {
             QJsonParseError parseError;
-            QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+            const QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
             if (parseError.error != QJsonParseError::NoError)
             {
@@ -237,7 +221,7 @@ void TailRunner::onProcessCanReadStdOut() {
         case Command::Connect: {
             // Will be a simple json string with backend state
             QJsonParseError parseError;
-            QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+            const QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
             if (parseError.error != QJsonParseError::NoError)
             {
@@ -245,7 +229,7 @@ void TailRunner::onProcessCanReadStdOut() {
                 return;
             }
 
-            QJsonObject obj = doc.object();
+            const QJsonObject obj = doc.object();
             if (obj.contains("BackendState")) {
                 //auto newState = obj["BackendState"].toString();
             }
@@ -258,13 +242,13 @@ void TailRunner::onProcessCanReadStdOut() {
     }
 }
 
-void TailRunner::onProcessCanReadStandardError() {
-    assert(pProcess != nullptr);
+void TailRunner::onProcessCanReadStandardError(const ProcessWrapper* wrapper) {
+    const auto commandInfo = wrapper->command();
 
     // NOTE! For whatever reason, the login command output is not captured by the readyReadStandardOutput signal
     // and arrives as a error output, so we need to check for that here.
-    if (eCommand == Command::Login) {
-        QString message(pProcess->readAllStandardError());
+    if (commandInfo == Command::Login) {
+        const QString message(wrapper->process()->readAllStandardError());
         if (!message.isEmpty()) {
             qDebug() << message;
             if (message.startsWith("Success", Qt::CaseSensitivity::CaseInsensitive)) {
@@ -277,11 +261,11 @@ void TailRunner::onProcessCanReadStandardError() {
             }
             else {
                 static QRegularExpression regex(R"(https:\/\/login\.tailscale\.com\/a\/[a-zA-Z0-9]+)");
-                QRegularExpressionMatch match = regex.match(message);
+                const QRegularExpressionMatch match = regex.match(message);
                 if (match.hasMatch()) {
-                    QString url = match.captured(0);
-                    auto res = QMessageBox::information(nullptr, "Login", "To login you will have to visit " + url + "\n\nPress OK to open the URL",
-                        QMessageBox::Ok, QMessageBox::Ok);
+                    const QString url = match.captured(0);
+                    const auto res = QMessageBox::information(nullptr, "Login", "To login you will have to visit " + url + "\n\nPress OK to open the URL",
+                                                              QMessageBox::Ok, QMessageBox::Ok);
                     if (res == QMessageBox::Ok)
                         QDesktopServices::openUrl(QUrl(url));
                 }
@@ -293,34 +277,48 @@ void TailRunner::onProcessCanReadStandardError() {
             }
         }
     }
-    else if (eCommand == Command::Drive) {
+    else if (commandInfo == Command::Drive) {
         // ACL not allowing drives most likely
-        QString errorInfo(pProcess->readAllStandardError());
+        const QString errorInfo(wrapper->process()->readAllStandardError());
         emit driveListed(QList<TailDriveInfo>(), true, errorInfo);
     }
     else {
-        QString errorInfo(pProcess->readAllStandardError());
+        const QString errorInfo(wrapper->process()->readAllStandardError());
         if (!errorInfo.isEmpty()) {
             qDebug() << errorInfo;
+
+            // Scan the output and look for sudo indicators
+            // If detected, it means we need to elevate to complete the command and/or
+            // the user hasn't set itself as operator yet
+            static QRegularExpression regex(R"(sudo\s+tailscale(?:\s+\S*)?)");
+            const QRegularExpressionMatch match = regex.match(errorInfo);
+            if (match.hasMatch()) {
+                emit commandError(errorInfo, true);
+            }
         }
     }
 }
 
-void TailRunner::onProcessFinished(int exitCode, QProcess::ExitStatus status) {
-    qDebug() << "Process exit code " << exitCode << " - " << status;
+void TailRunner::onProcessFinished(const ProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
+    qDebug() << "Process exit code " << exitCode << " - " << exitStatus;
 
+    // Cleanup processes that has completed, this will not include this current process that invoked the signal
+    // as it's not flagged as completed until after we return from this call
+    runCompletedCleanup();
+
+    const auto commandInfo = process->command();
     if (exitCode != 0) {
-        if (eCommand == Command::Connect || eCommand == Command::Disconnect) {
+        if (commandInfo == Command::Connect || commandInfo == Command::Disconnect) {
             // If we failed to connect or disconnect we probably need to invoke pkexec
             // and change the operator to current user since we won't be able to control it otherwise
             // as a regular user
 
-            auto response = QMessageBox::warning(nullptr,
-                "Failed to run command",
-                "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
-                QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+            const auto response = QMessageBox::warning(nullptr,
+               "Failed to run command",
+               "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
+               QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
 
-            const QString info(pProcess->readAllStandardOutput());
+            const QString info(process->process()->readAllStandardOutput());
             if (info.contains("https://login.tailscale.com")) {
                 static QRegularExpression regex(R"(https:\/\/login\.tailscale\.com\/a\/[a-zA-Z0-9]+)");
                 const QRegularExpressionMatch match = regex.match(info);
@@ -335,25 +333,25 @@ void TailRunner::onProcessFinished(int exitCode, QProcess::ExitStatus status) {
             }
 
             if (response == QMessageBox::Ok) {
-                pProcess->close();
+                process->process()->close();
                 start(true);
             }
         }
-        else if (eCommand == Command::SendFile) {
-            emit fileSent(false, QString(pProcess->readAllStandardError()), pUserData);
+        else if (commandInfo == Command::SendFile) {
+            emit fileSent(false, QString(process->process()->readAllStandardError()), process->userData());
         }
     }
     else {
-        if (eCommand == Command::SwitchAccount || eCommand == Command::Login) {
+        if (commandInfo == Command::SwitchAccount || commandInfo == Command::Login) {
             getAccounts();
         }
-        else if (eCommand == Command::ListAccounts) {
+        else if (commandInfo == Command::ListAccounts) {
             checkStatus();
         }
-        else if (eCommand == Command::SendFile) {
-            emit fileSent(true, QString{}, pUserData);
+        else if (commandInfo == Command::SendFile) {
+            emit fileSent(true, QString{}, process->userData());
         }
-        else if (eCommand != Command::Status && eCommand != Command::Logout && eCommand != Command::Drive) {
+        else if (commandInfo != Command::Status && commandInfo != Command::Logout && commandInfo != Command::Drive) {
             QTimer::singleShot(1000, this, [this]() {
                 checkStatus();
             });
@@ -363,4 +361,86 @@ void TailRunner::onProcessFinished(int exitCode, QProcess::ExitStatus status) {
 
 void TailRunner::parseStatusResponse(const QJsonObject& obj) {
     emit statusUpdated(TailStatus::parse(obj));
+}
+
+bool TailRunner::hasPendingCommandOfType(const Command cmdType) const {
+    for (const auto* process : processes) {
+        if (process->command() == cmdType && !process->isCompleted())
+            return true;
+    }
+
+    return false;
+}
+
+void TailRunner::runCompletedCleanup() {
+    for (auto it = processes.begin(); it != processes.end();) {
+        if ((*it)->isCompleted()) {
+            const auto cmd = commandToString((*it)->command());
+            qDebug() << "Cleaning up process " << cmd;
+
+            (*it)->deleteLater();
+            it = processes.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// ProcessWrapper impl
+
+ProcessWrapper::ProcessWrapper(const Command cmd, QObject* parent)
+    : QObject(parent)
+    , proc(std::make_unique<QProcess>(this))
+    , pUserData(nullptr)
+    , eCommand(cmd)
+    , completed(false)
+{
+    connect(proc.get(), &QProcess::finished,
+            this, &ProcessWrapper::onProcessFinished);
+
+    connect(proc.get(), &QProcess::readyReadStandardOutput,
+            this, &ProcessWrapper::onProcessCanReadStdOut);
+
+    connect(proc.get(), &QProcess::readyReadStandardError,
+            this, &ProcessWrapper::onProcessCanReadStandardError);
+}
+
+void ProcessWrapper::start(const QString& cmd, QStringList args, const bool jsonResult, const bool usePkExec, void* userData) {
+    pUserData = userData;
+
+    if (jsonResult)
+        args << "--json";
+
+    args.insert(0, cmd);
+
+#if !defined(WINDOWS_BUILD)
+    if (usePkExec) {
+        args.insert(0, "tailscale");
+        proc->start("/usr/bin/pkexec", args);
+    }
+    else {
+        proc->start("tailscale", args);
+    }
+#else
+    // Windows don't have pkexec etc and we don't need to set operator
+    proc->start("tailscale", args);
+#endif
+}
+
+void ProcessWrapper::onProcessCanReadStdOut() {
+    emit processCanReadStdOut(this);
+}
+
+void ProcessWrapper::onProcessCanReadStandardError() {
+    emit processCanReadStandardError(this);
+}
+
+void ProcessWrapper::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
+    emit processFinished(this, exitCode, exitStatus);
+
+    // Should always be after emitting returns
+    completed = true;
 }

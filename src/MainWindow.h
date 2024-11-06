@@ -52,6 +52,7 @@ private:
 
 private slots:
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
+    void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();
     void loginFlowCompleted() const;
     void onNetworkReachabilityChanged(QNetworkInformation::Reachability newReachability);

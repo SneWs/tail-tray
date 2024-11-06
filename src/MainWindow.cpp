@@ -145,7 +145,8 @@ void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
 
 void MainWindow::settingsClosed() {
     syncSettingsFromUi();
-    pCurrentExecution->start();
+    if (eCurrentState == TailState::Connected)
+        pCurrentExecution->start();
     hide();
 }
 
@@ -453,7 +454,10 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 
     if (pTailStatus->user->id > 0)
     {
-        changeToState(TailState::Connected);
+        if (pTailStatus->self->online)
+            changeToState(TailState::Connected);
+        else
+            changeToState(TailState::NotConnected);
 
         if (pTailStatus->health.count() > 0)
         {

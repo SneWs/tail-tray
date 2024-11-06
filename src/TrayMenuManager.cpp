@@ -359,6 +359,9 @@ void TrayMenuManager::setupWellKnownActions() const {
     });
 
     connect(pConnect.get(), &QAction::triggered, this, [this](bool) {
+        pSysTray->showMessage("Please wait", "Connecting to your Tailscale network",
+            QSystemTrayIcon::MessageIcon::Information, 3000);
+
         pTailRunner->start();
     });
 

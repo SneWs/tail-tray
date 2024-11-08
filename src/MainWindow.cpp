@@ -333,12 +333,29 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
     ui->twNetworkStatus->setHorizontalHeaderLabels(QStringList() << "Property" << "Value");
     ui->twNetworkStatus->setRowCount(static_cast<int>(results.count() + latencies.count() + 1));
 
+    // For latencies, we want to sort on lowest latencies first
+    // Sort the list based on the second element (the value)
+    std::sort(latencies.begin(), latencies.end(), [](const QPair<QString, float>& a, const QPair<QString, float>& b) {
+        return a.second < b.second;
+    });
+
     int i = 0;
     for (auto it = results.begin(); it != results.end(); ++it) {
         const auto& key = it.key();
         const auto& value = it.value();
         ui->twNetworkStatus->setItem(i, 0, new QTableWidgetItem(key));
         ui->twNetworkStatus->setItem(i, 1, new QTableWidgetItem(value));
+
+        if (key == "Nearest DERP") {
+            // Find the DERP Latency
+            for (const auto& derp : latencies) {
+                if (derp.first == value) {
+                    ui->twNetworkStatus->item(i, 1)->setText(value + " (" + QString::number(derp.second) + "ms)");
+                    break;
+                }
+            }
+        }
+
         ++i;
     }
 
@@ -346,12 +363,6 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
     ui->twNetworkStatus->setItem(i, 0, new QTableWidgetItem("DERP Latencies"));
     ui->twNetworkStatus->setItem(i, 1, new QTableWidgetItem(""));
     ++i;
-
-    // For latencies, we want to sort on lowest latencies first
-    // Sort the list based on the second element (the value)
-    std::sort(latencies.begin(), latencies.end(), [](const QPair<QString, float>& a, const QPair<QString, float>& b) {
-        return a.second < b.second;
-    });
 
     for (auto it = latencies.begin(); it != latencies.end(); ++it) {
         const auto& key = it->first;
@@ -521,7 +532,7 @@ void MainWindow::setupNetworkCallbacks() const {
 
         inst = QNetworkInformation::instance();
         if (inst == nullptr) {
-            qDebug() << "No noetwork information stack available";
+            qDebug() << "No network information stack available";
             return;
         }
     }

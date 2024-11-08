@@ -9,6 +9,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if (WIN32)
+    add_definitions(-DWINDOWS_BUILD)
+endif (WIN32)
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
 
@@ -39,7 +43,7 @@ set(PROJECT_SOURCES
         src/NetworkStateMonitor.h
 )
 
-if(APPLE)
+if (APPLE)
     set(MACOSX_BUNDLE_ICON_FILE tailscale.icns)
 
     # And the following tells CMake where to find and install the file itself.
@@ -57,8 +61,7 @@ if(APPLE)
             ${BUNDLE_ID_OPTION}
             MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
             MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-            MACOSX_BUNDLE TRUE
-    )
+            MACOSX_BUNDLE TRUE)
 else ()
     qt_add_executable(tail-tray
             MANUAL_FINALIZATION
@@ -69,7 +72,10 @@ endif ()
 
 target_link_libraries(tail-tray PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
 
-include(GNUInstallDirs)
+if (UNIX AND NOT APPLE)
+    include(GNUInstallDirs)
+endif ()
+
 install(TARGETS tail-tray
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -87,3 +93,4 @@ if (UNIX AND NOT APPLE)
 endif ()
 
 qt_finalize_executable(tail-tray)
+

@@ -1,25 +1,29 @@
-//
-// Created by marcus on 2024-07-18.
-//
-
 #include "SysCommand.h"
 
 #include <QDebug>
 
 void SysCommand::restartTailscaleDaemon() {
+    // cmd /c "net stop /y "Service Name" & sc start "Service Name""
     QStringList args;
-    args << "restart";
-    args << "tailscaled";
+    args << "-command";
+    args << "Restart-Service Tailscale -Force";
 
-    runCommand("systemctl", args, false, true);
+    runCommand("powershell", args, false, true);
 }
 
 void SysCommand::refreshDns() {
+#if defined(WINDOWS_BUILD)
+    QStringList args;
+    args << "/flushdns";
+
+    runCommand("ipconfig", args, false, true);
+#else
     QStringList args;
     args << "restart";
     args << "systemd-resolved";
 
     runCommand("systemctl", args, false, true);
+#endif
 }
 
 void SysCommand::makeDir(const QString& path, bool usePkExec) {
@@ -63,25 +67,6 @@ QString SysCommand::readFile(const QString &filePath, bool usePkExec) {
     return QString(data);
 }
 
-bool SysCommand::copyFile(const QString& fromFile, const QString& toFile, bool usePkExec) {
-    QStringList args;
-    args << fromFile;
-    args << toFile;
-
-    pProcess = std::make_unique<QProcess>(this);
-    if (usePkExec) {
-        args.insert(0, "cp");
-        pProcess->start("/usr/bin/pkexec", args);
-    }
-    else {
-        pProcess->start("cp", args);
-    }
-
-    pProcess->waitForFinished();
-    qDebug() << QString(pProcess->readAllStandardError());
-    return pProcess->exitCode() == 0;
-}
-
 void SysCommand::runCommand(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec) {
     pProcess = std::make_unique<QProcess>(this);
     connect(pProcess.get(), &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus status) {
@@ -94,7 +79,12 @@ void SysCommand::runCommand(const QString& cmd, QStringList args, bool jsonResul
 
     if (usePkExec) {
         args.insert(0, cmd);
+#if defined(WINDOWS_BUILD)
+        // NOTE: Windows 11 24H2 comes with sudo command and needs to be enabled under System > Developer Settings
+        pProcess->start("sudo", args);
+#else
         pProcess->start("/usr/bin/pkexec", args);
+#endif
     }
     else {
         pProcess->start(cmd, args);

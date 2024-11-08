@@ -63,7 +63,9 @@ void TailRunner::switchAccount(const QString& accountId) {
 
 void TailRunner::login() {
     QStringList args;
+#if !defined(WINDOWS_BUILD)
     args << "--operator" << qEnvironmentVariable("USER");
+#endif
 
     runCommand(Command::Login, "login", args, false, true);
 }
@@ -75,7 +77,11 @@ void TailRunner::logout() {
 void TailRunner::start(const bool usePkExec) {
     QStringList args;
     args << "--reset";
+#if !defined(WINDOWS_BUILD)
     args << "--operator" << qEnvironmentVariable("USER");
+#else
+    args << "--unattended";
+#endif
 
     if (settings.useTailscaleDns())
         args << "--accept-dns";
@@ -409,6 +415,8 @@ void ProcessWrapper::start(const QString& cmd, QStringList args, const bool json
         args << "--json";
 
     args.insert(0, cmd);
+
+#if !defined(WINDOWS_BUILD)
     if (usePkExec) {
         args.insert(0, "tailscale");
         proc->start("/usr/bin/pkexec", args);
@@ -416,6 +424,10 @@ void ProcessWrapper::start(const QString& cmd, QStringList args, const bool json
     else {
         proc->start("tailscale", args);
     }
+#else
+    // Windows don't have pkexec etc and we don't need to set operator
+    proc->start("tailscale", args);
+#endif
 }
 
 void ProcessWrapper::onProcessCanReadStdOut() {

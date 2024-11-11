@@ -143,6 +143,17 @@ public:
     bool inEngine;
     QDateTime keyExpiry;
 
+    [[nodiscard]] QString getShortDnsName() const {
+        static QRegularExpression regex("^[^.]+");  // Match everything before the first dot
+        QRegularExpressionMatch match = regex.match(dnsName);
+
+        if (match.hasMatch()) {
+            return match.captured(0);  // Return the matched hostname part
+        }
+
+        return dnsName;
+    }
+
     static std::unique_ptr<TailDeviceInfo> parse(const QJsonObject& obj)
     {
         auto self = std::make_unique<TailDeviceInfo>();

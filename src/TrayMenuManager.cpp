@@ -274,12 +274,15 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     exitNodes->addAction(pExitNodeNone.get());
     for (int i = 0; i < pTailStatus->peers.count(); i++) {
         const auto& dev = pTailStatus->peers[i];
-        if (dev->online && dev->id != pTailStatus->self->id && dev->exitNodeOption) {
+        if (dev->id != pTailStatus->self->id && dev->exitNodeOption) {
             auto name = dev->getShortDnsName();
+            if (!dev->online)
+                name += " (offline)";
             auto* action = exitNodes->addAction(name);
             action->setCheckable(true);
             action->setChecked(dev->exitNode);
             action->setData(name);
+            action->setEnabled(dev->online);
 
             connect(action, &QAction::triggered, this, [this, action](bool) {
                 if (action->isChecked()) {

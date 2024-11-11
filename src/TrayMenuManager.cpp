@@ -140,17 +140,10 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     pThisDevice->setText(pTailStatus->user->loginName);
     pTrayMenu->addAction(pThisDevice.get());
 
-    auto dnsSuffix = pTailStatus->magicDnsSuffix.trimmed();
-    if (dnsSuffix.endsWith('.'))
-        dnsSuffix.chop(1);
-
     auto* netDevs = pTrayMenu->addMenu("Network devices");
     for (const auto& dev : pTailStatus->peers) {
         if (dev->id != pTailStatus->self->id) {
-            auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "").trimmed();
-            while (name.endsWith('.'))
-                name.chop(1);
-
+            auto name = dev->getShortDnsName();
             QAction* action;
             if (!dev->online) {
                 action = netDevs->addAction(name + " (offline)");
@@ -282,8 +275,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     for (int i = 0; i < pTailStatus->peers.count(); i++) {
         const auto& dev = pTailStatus->peers[i];
         if (dev->online && dev->id != pTailStatus->self->id && dev->exitNodeOption) {
-            auto name = dev->dnsName.replace(pTailStatus->magicDnsSuffix, "");
-            name.chop(2);
+            auto name = dev->getShortDnsName();
             auto* action = exitNodes->addAction(name);
             action->setCheckable(true);
             action->setChecked(dev->exitNode);

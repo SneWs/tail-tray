@@ -132,9 +132,6 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnected.get());
     pTrayMenu->addAction(pDisconnect.get());
-    pTrayMenu->addSeparator();
-    pThisDevice->setText(pTailStatus->user->loginName);
-    pTrayMenu->addAction(pThisDevice.get());
 
     pTrayMenu->addSeparator();
     pThisDevice->setText(pTailStatus->user->loginName);

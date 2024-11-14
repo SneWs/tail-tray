@@ -10,7 +10,7 @@
 
 #include "./ui_MainWindow.h"
 #include "MainWindow.h"
-#include "models.h"
+#include "models/Models.h"
 
 AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner, QObject* parent)
     : QObject(parent)

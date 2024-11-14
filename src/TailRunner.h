@@ -8,7 +8,7 @@
 #include <QList>
 #include <QProcess>
 
-#include "models.h"
+#include "models/Models.h"
 #include "TailSettings.h"
 
 enum class Command {

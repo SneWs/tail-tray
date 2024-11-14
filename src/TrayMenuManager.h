@@ -11,7 +11,7 @@
 #include <QMenu>
 #include <QString>
 
-#include "models.h"
+#include "models/Models.h"
 #include "TailRunner.h"
 #include "TailSettings.h"
 #include "SysCommand.h"

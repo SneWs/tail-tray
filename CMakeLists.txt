@@ -22,7 +22,14 @@ set(PROJECT_SOURCES
         src/MainWindow.h
         src/MainWindow.ui
         resources.qrc
-        src/models.h
+        src/models/TailAccountInfo.h
+        src/models/TailDeviceInfo.h
+        src/models/TailUser.h
+        src/models/TailNetInfo.h
+        src/models/TailDriveInfo.h
+        src/models/TailStatus.h
+        src/models/TailState.h
+        src/models/Models.h
         src/TrayMenuManager.cpp
         src/TrayMenuManager.h
         src/TailSettings.cpp

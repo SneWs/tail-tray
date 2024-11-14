@@ -447,6 +447,12 @@ TailState MainWindow::changeToState(TailState newState)
     pTrayManager->stateChangedTo(newState, pTailStatus.get());
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
 
+    if (eCurrentState == TailState::NotConnected) {
+        // Try to start
+        pCurrentExecution->start();
+        return retVal;
+    }
+
     auto isOnline = eCurrentState == TailState::Connected;
     if (isOnline && retVal != TailState::Connected) {
         startListeningForIncomingFiles();

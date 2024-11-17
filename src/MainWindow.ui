@@ -52,7 +52,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <property name="iconSize">
        <size>
@@ -642,6 +642,9 @@
                </item>
                <item>
                 <spacer name="horizontalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>40</width>
@@ -1295,7 +1298,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Important information&lt;br/&gt;&lt;/span&gt;On Linux, to be able to mount shares from other machines you will need to do some setup first:&lt;/p&gt;&lt;p&gt;Make sure to add http://100.100.100.100:8080 to your ~/.davfs2/secrets file&lt;/p&gt;&lt;p&gt;The file itself contains documentation on how to define this. For username you can enter Guest and leave password empty. Read more over at &lt;a href=&quot;https://wiki.archlinux.org/title/Davfs2&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#7636dd;&quot;&gt;https://wiki.archlinux.org/title/Davfs2&lt;/span&gt;&lt;/a&gt; and at Tailscale &lt;a href=&quot;https://tailscale.com/kb/1369/taildrive?tab=linux&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#7636dd;&quot;&gt;https://tailscale.com/kb/1369/taildrive?tab=linux&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textFormat">
-           <enum>Qt::PlainText</enum>
+           <enum>Qt::RichText</enum>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -1458,6 +1461,9 @@
            <layout class="QVBoxLayout" name="verticalLayout_19">
             <item>
              <spacer name="verticalSpacer_12">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeType">
                <enum>QSizePolicy::Preferred</enum>
               </property>
@@ -1490,6 +1496,9 @@
             </item>
             <item>
              <spacer name="verticalSpacer_13">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeType">
                <enum>QSizePolicy::Preferred</enum>
               </property>

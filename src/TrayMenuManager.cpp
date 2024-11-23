@@ -36,22 +36,22 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
     pSysTray->setVisible(true);
 
-    pQuitAction = std::make_unique<QAction>("Quit");
-    pLoginAction = std::make_unique<QAction>("Login");
-    pLogoutAction = std::make_unique<QAction>("Logout");
-    pPreferences = std::make_unique<QAction>("Preferences");
-    pAbout = std::make_unique<QAction>("About...");
-    pConnected = std::make_unique<QAction>("Connected");
+    pQuitAction = std::make_unique<QAction>(tr("Quit"));
+    pLoginAction = std::make_unique<QAction>(tr("Login"));
+    pLogoutAction = std::make_unique<QAction>(tr("Logout"));
+    pPreferences = std::make_unique<QAction>(tr("Preferences"));
+    pAbout = std::make_unique<QAction>(tr("About..."));
+    pConnected = std::make_unique<QAction>(tr("Connected"));
     pConnected->setEnabled(false);
-    pConnect = std::make_unique<QAction>("Connect");
-    pDisconnect = std::make_unique<QAction>("Disconnect");
-    pThisDevice = std::make_unique<QAction>("This device");
-    pExitNodeNone = std::make_unique<QAction>("None");
+    pConnect = std::make_unique<QAction>(tr("Connect"));
+    pDisconnect = std::make_unique<QAction>(tr("Disconnect"));
+    pThisDevice = std::make_unique<QAction>(tr("This device"));
+    pExitNodeNone = std::make_unique<QAction>(tr("None"));
     pExitNodeNone->setCheckable(true);
     pExitNodeNone->setChecked(true);
     pExitNodeNone->setEnabled(false);
-    pRefreshLocalDns = std::make_unique<QAction>("Refresh Local DNS");
-    pRestartTailscale = std::make_unique<QAction>("Restart Tailscale");
+    pRefreshLocalDns = std::make_unique<QAction>(tr("Refresh Local DNS"));
+    pRestartTailscale = std::make_unique<QAction>(tr("Restart Tailscale"));
 
     setupWellKnownActions();
 
@@ -114,7 +114,7 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
     if (pTailStatus != nullptr && pTailStatus->user != nullptr)
         pThisDevice->setText(pTailStatus->user->loginName);
     pTrayMenu->addAction(pThisDevice.get());
-    auto* actions = pTrayMenu->addMenu("Custom Actions");
+    auto* actions = pTrayMenu->addMenu(tr("Custom Actions"));
     actions->addAction(pRestartTailscale.get());
     actions->addAction(pRefreshLocalDns.get());
     pTrayMenu->addSeparator();
@@ -137,13 +137,13 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     pThisDevice->setText(pTailStatus->user->loginName);
     pTrayMenu->addAction(pThisDevice.get());
 
-    auto* netDevs = pTrayMenu->addMenu("Network devices");
+    auto* netDevs = pTrayMenu->addMenu(tr("Network devices"));
     for (const auto& dev : pTailStatus->peers) {
         if (dev->id != pTailStatus->self->id) {
             auto name = dev->getShortDnsName();
             QAction* action;
             if (!dev->online) {
-                action = netDevs->addAction(name + " (offline)");
+                action = netDevs->addAction(name + tr(" (offline)"));
                 action->setEnabled(false);
             }
             else {
@@ -155,7 +155,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                 }
 
                 auto* deviceMenu = netDevs->addMenu(name + ipStr);
-                action = deviceMenu->addAction("Copy IP address");
+                action = deviceMenu->addAction(tr("Copy IP address"));
                 connect(action, &QAction::triggered, this, [this, dev, name, ipStr](bool) {
                     QClipboard* clipboard = QApplication::clipboard();
                     const auto& str = dev->tailscaleIPs.first();
@@ -165,13 +165,13 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                         clipboard->setText(str, QClipboard::Selection);
                     }
 
-                    pSysTray->showMessage("IP address copied",
+                    pSysTray->showMessage(tr("IP address copied"),
                         "IP Address " + ipStr + " for " + name + " have been copied to clipboard!",
                         QSystemTrayIcon::Information, 5000);
                 });
 
                 deviceMenu->addSeparator();
-                auto* sendFileAction = deviceMenu->addAction("Send file");
+                auto* sendFileAction = deviceMenu->addAction(tr("Send file"));
                 connect(sendFileAction, &QAction::triggered, this, [this, name](bool) {
                     // TODO: Open file dialog and send file via tailscale file cp ... target-device:
                     QFileDialog dialog(nullptr, "Send file to " + name, QDir::homePath(), "All files (*)");
@@ -197,16 +197,16 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
 
     // Tail drives
     if (settings.tailDriveEnabled()) {
-        auto* drives = pTrayMenu->addMenu("Drives");
+        auto* drives = pTrayMenu->addMenu(tr("Drives"));
         if (!pTailStatus->drivesConfigured && pTailStatus->drives.count() < 1) {
-            auto* action = drives->addAction("Not configured, click to configure");
+            auto* action = drives->addAction(tr("Not configured, click to configure"));
             connect(action, &QAction::triggered, this, [this](bool) {
                 // Open help link in browser
                 QDesktopServices::openUrl(QUrl("https://tailscale.com/kb/1369/taildrive"));
             });
         }
         else {
-            auto* addAction = drives->addAction("Add drive");
+            auto* addAction = drives->addAction(tr("Add drive"));
             connect(addAction, &QAction::triggered, this, [this](bool) {
                 ManageDriveWindow wnd(TailDriveInfo{}, reinterpret_cast<QWidget*>(this->parent()));
                 auto result = wnd.exec();
@@ -215,7 +215,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                 }
             });
 
-            auto* mountAction = drives->addAction("Mount remote drives");
+            auto* mountAction = drives->addAction(tr("Mount remote drives"));
             connect(mountAction, &QAction::triggered, this, [this](bool) {
                 static QString remote(KnownValues::tailDavFsUrl);
                 static QString fsType("davfs");
@@ -240,7 +240,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             for (const auto& drive : pTailStatus->drives) {
                 auto* driveMenu = drives->addMenu(drive.name);
 
-                auto* renameAction = driveMenu->addAction("Rename");
+                auto* renameAction = driveMenu->addAction(tr("Rename"));
                 connect(renameAction, &QAction::triggered, this, [this, drive](bool) {
                     ManageDriveWindow wnd(drive, reinterpret_cast<QWidget*>(this->parent()));
                     auto result = wnd.exec();
@@ -252,7 +252,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                     }
                 });
 
-                auto* removeAction = driveMenu->addAction("Stop Sharing");
+                auto* removeAction = driveMenu->addAction(tr("Stop Sharing"));
                 connect(removeAction, &QAction::triggered, this, [this, drive](bool) {
                     pTailRunner->removeDrive(drive);
                 });
@@ -262,19 +262,19 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
 
     pTrayMenu->addSeparator();
 
-    auto* actions = pTrayMenu->addMenu("Custom Actions");
+    auto* actions = pTrayMenu->addMenu(tr("Custom Actions"));
     actions->addAction(pRestartTailscale.get());
     actions->addAction(pRefreshLocalDns.get());
 
     pTrayMenu->addSeparator();
-    auto* exitNodes = pTrayMenu->addMenu("Exit nodes");
+    auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
     exitNodes->addAction(pExitNodeNone.get());
     for (int i = 0; i < pTailStatus->peers.count(); i++) {
         const auto& dev = pTailStatus->peers[i];
         if (dev->id != pTailStatus->self->id && dev->exitNodeOption) {
             auto name = dev->getShortDnsName();
             if (!dev->online)
-                name += " (offline)";
+                name += tr(" (offline)");
             auto* action = exitNodes->addAction(name);
             action->setCheckable(true);
             action->setChecked(dev->exitNode);
@@ -298,7 +298,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
         }
     }
     exitNodes->addSeparator();
-    QAction* runExitNode = exitNodes->addAction("Run as exit node");
+    QAction* runExitNode = exitNodes->addAction(tr("Run as exit node"));
     runExitNode->setCheckable(true);
     runExitNode->setChecked(settings.advertiseAsExitNode());
     connect(runExitNode, &QAction::triggered, this, [this, runExitNode](bool) {
@@ -307,7 +307,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
         pTailRunner->start();
     });
 
-    QAction* exitNodeAllowNwAccess = exitNodes->addAction("Allow local network access");
+    QAction* exitNodeAllowNwAccess = exitNodes->addAction(tr("Allow local network access"));
     exitNodeAllowNwAccess->setCheckable(true);
     exitNodeAllowNwAccess->setChecked(settings.exitNodeAllowLanAccess());
     exitNodeAllowNwAccess->setEnabled(settings.advertiseAsExitNode());
@@ -357,7 +357,7 @@ void TrayMenuManager::setupWellKnownActions() const {
     });
 
     connect(pConnect.get(), &QAction::triggered, this, [this](bool) {
-        pSysTray->showMessage("Please wait", "Connecting to your Tailscale network",
+        pSysTray->showMessage(tr("Please wait"), tr("Connecting to your Tailscale network"),
             QSystemTrayIcon::MessageIcon::Information, 3000);
 
         pTailRunner->start();

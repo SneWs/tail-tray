@@ -16,6 +16,9 @@ endif (WIN32)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
 
+# Translations
+find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
+
 set(PROJECT_SOURCES
         src/main.cpp
         src/MainWindow.cpp
@@ -75,7 +78,15 @@ else ()
             ${PROJECT_SOURCES}
 
     )
+
 endif ()
+
+qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE)
+
+qt_add_translations(tail-tray TS_FILES
+    tail_tray_sv_SE.ts
+    tail_tray_en_US.ts
+)
 
 target_link_libraries(tail-tray PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
 
@@ -92,6 +103,10 @@ install(TARGETS tail-tray
 if (UNIX AND NOT APPLE)
     install(FILES tail-tray.desktop
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
+    )
+
+    install(FILES tail_tray_en_US.ts tail_tray_sv_SE.ts
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/tail-tray
     )
 
     install(FILES icons/tailscale.png

@@ -13,6 +13,13 @@ if (WIN32)
     add_definitions(-DWINDOWS_BUILD)
 endif (WIN32)
 
+get_filename_component(FULL_LIBDIR_PATH
+        "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/tail-tray" ABSOLUTE)
+
+add_definitions(-DTRANSLATIONS_DIR="${FULL_LIBDIR_PATH}")
+
+message(STATUS "Full path of translations install path: ${FULL_LIBDIR_PATH}")
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
 
@@ -76,17 +83,15 @@ else ()
     qt_add_executable(tail-tray
             MANUAL_FINALIZATION
             ${PROJECT_SOURCES}
-
     )
 
 endif ()
 
-qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE)
-
 qt_add_translations(tail-tray TS_FILES
-    tail_tray_sv_SE.ts
-    tail_tray_en_US.ts
+        translations/tail_tray_sv_SE.ts
+        translations/tail_tray_en_US.ts
 )
+qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE)
 
 target_link_libraries(tail-tray PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
 
@@ -105,9 +110,9 @@ if (UNIX AND NOT APPLE)
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
     )
 
-    install(FILES tail_tray_en_US.ts tail_tray_sv_SE.ts
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/tail-tray
-    )
+    install(FILES "${CMAKE_BINARY_DIR}/tail_tray_en_US.qm"
+            "${CMAKE_BINARY_DIR}/tail_tray_sv_SE.qm"
+            DESTINATION "${FULL_LIBDIR_PATH}")
 
     install(FILES icons/tailscale.png
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps

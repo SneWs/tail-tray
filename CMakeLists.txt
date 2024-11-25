@@ -88,10 +88,12 @@ else ()
 endif ()
 
 qt_add_translations(tail-tray TS_FILES
-        translations/tail_tray_sv_SE.ts
         translations/tail_tray_en_US.ts
+        translations/tail_tray_sv_SE.ts
+        translations/tail_tray_de_DE.ts
+        translations/tail_tray_fr_FR.ts
 )
-qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE)
+qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
 target_link_libraries(tail-tray PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
 
@@ -112,6 +114,8 @@ if (UNIX AND NOT APPLE)
 
     install(FILES "${CMAKE_BINARY_DIR}/tail_tray_en_US.qm"
             "${CMAKE_BINARY_DIR}/tail_tray_sv_SE.qm"
+            "${CMAKE_BINARY_DIR}/tail_tray_fr_FR.qm"
+            "${CMAKE_BINARY_DIR}/tail_tray_de_DE.qm"
             DESTINATION "${FULL_LIBDIR_PATH}")
 
     install(FILES icons/tailscale.png

@@ -55,13 +55,13 @@ MainWindow::MainWindow(QWidget* parent)
 
     if (!isTailDriveFileAlreadySetup()) {
         ui->btnTailDriveFixDavFsMountSetup->setEnabled(true);
-        ui->btnTailDriveFixDavFsMountSetup->setText("Fix it for me");
+        ui->btnTailDriveFixDavFsMountSetup->setText(tr("Fix it for me"));
         connect(ui->btnTailDriveFixDavFsMountSetup, &QPushButton::clicked,
                 this, &MainWindow::fixTailDriveDavFsSetup);
     }
     else {
         ui->btnTailDriveFixDavFsMountSetup->setEnabled(false);
-        ui->btnTailDriveFixDavFsMountSetup->setText("Configured and ready");
+        ui->btnTailDriveFixDavFsMountSetup->setText(tr("Configured and ready"));
     }
 
     connect(ui->btnSelectTailFileDefaultSaveLocation, &QPushButton::clicked,
@@ -130,8 +130,8 @@ void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
 void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
     if (isSudoRequired)
     {
-        const auto response = QMessageBox::warning(this, "Sudo required",
-            error + "\n\nTo use Tail Tray you need to be set as operator. Do you want to set yourself as operator now?",
+        const auto response = QMessageBox::warning(this, tr("Sudo required"),
+            error + tr("\n\nTo use Tail Tray you need to be set as operator. Do you want to set yourself as operator now?"),
             QMessageBox::Ok | QMessageBox::Cancel);
 
         if (response == QMessageBox::Ok)
@@ -140,7 +140,7 @@ void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
         return;
     }
 
-    QMessageBox::warning(this, "Error running tailscale", error);
+    QMessageBox::warning(this, tr("Error running tailscale"), error);
 }
 
 void MainWindow::settingsClosed() {
@@ -178,8 +178,8 @@ void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, co
         qDebug() << "To read more about configuring taill drives, see https://tailscale.com/kb/1369/taildrive";
 
         QMessageBox::information(nullptr,
-            "Tail Drive - Error",
-            "Tail drives needs to be enabled in ACL. Please go to the admin dashboard.\n\n" + errorMsg,
+            tr("Tail Drive - Error"),
+            tr("Tail drives needs to be enabled in ACL. Please go to the admin dashboard.\n\n") + errorMsg,
             QMessageBox::Ok);
 
         return; // Nothing more to do here
@@ -218,8 +218,8 @@ void MainWindow::removeTailDriveButtonClicked() const {
     const auto& drive = pTailStatus->drives[row];
 
     auto answer = QMessageBox::question(nullptr,
-        "Are you sure?",
-        "Do you really want to remove the share " + drive.path + "?",
+        tr("Are you sure?"),
+        tr("Do you really want to remove the share ") + drive.path + "?",
         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
     if (answer != QMessageBox::Yes) {
@@ -233,7 +233,7 @@ void MainWindow::removeTailDriveButtonClicked() const {
 }
 
 void MainWindow::selectTailDriveMountPath() const {
-    QFileDialog dlg(nullptr, "Select mount path", ui->txtTailDriveDefaultMountPath->text());
+    QFileDialog dlg(nullptr, tr("Select mount path"), ui->txtTailDriveDefaultMountPath->text());
     dlg.setOption(QFileDialog::Option::ShowDirsOnly, true);
     dlg.setFileMode(QFileDialog::FileMode::Directory);
 
@@ -267,14 +267,14 @@ void MainWindow::fixTailDriveDavFsSetup() const {
 
     davFsSecret.close();
 
-    QMessageBox::information(nullptr, "Tail Tray", "davfs2 config has been written");
+    QMessageBox::information(nullptr, "Tail Tray", tr("davfs2 config has been written"));
 
     ui->btnTailDriveFixDavFsMountSetup->setEnabled(isTailDriveFileAlreadySetup());
 }
 
 void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* userData) const {
     if (!success) {
-        pTrayManager->trayIcon()->showMessage("Failed to send file", errorMsg, QSystemTrayIcon::MessageIcon::Critical, 5000);
+        pTrayManager->trayIcon()->showMessage(tr("Failed to send file"), errorMsg, QSystemTrayIcon::MessageIcon::Critical, 5000);
     }
 
     if (userData == nullptr) {
@@ -282,7 +282,7 @@ void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* u
     }
 
     auto userDataStr = static_cast<QString*>(userData);
-    pTrayManager->trayIcon()->showMessage("File sent", *userDataStr, QSystemTrayIcon::MessageIcon::Information, 5000);
+    pTrayManager->trayIcon()->showMessage(tr("File sent"), *userDataStr, QSystemTrayIcon::MessageIcon::Information, 5000);
 
     // We need to delete this here
     delete userDataStr;
@@ -298,7 +298,7 @@ void MainWindow::startListeningForIncomingFiles() {
 
     connect(pFileReceiver.get(), &TailFileReceiver::errorListening,
         this, [this](const QString& errorMsg) {
-            pTrayManager->trayIcon()->showMessage("Error", errorMsg,
+            pTrayManager->trayIcon()->showMessage(tr("Error"), errorMsg,
                 QSystemTrayIcon::MessageIcon::Critical, 5000);
         });
 }
@@ -307,12 +307,12 @@ void MainWindow::onTailnetFileReceived(QString filePath) const {
     const QFileInfo file(filePath);
     const QString msg("File " + file.fileName() + " was received and saved in " + file.absolutePath());
 
-    pTrayManager->trayIcon()->showMessage("File received", msg,
+    pTrayManager->trayIcon()->showMessage(tr("File received"), msg,
         QSystemTrayIcon::MessageIcon::Information, 8000);
 }
 
 void MainWindow::onShowTailFileSaveLocationPicker() {
-    QFileDialog dlg(this, "Select folder", ui->txtTailFilesDefaultSavePath->text());
+    QFileDialog dlg(this, tr("Select folder"), ui->txtTailFilesDefaultSavePath->text());
     dlg.setFileMode(QFileDialog::FileMode::Directory);
     dlg.setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
     dlg.setOption(QFileDialog::Option::ShowDirsOnly, true);
@@ -330,7 +330,7 @@ void MainWindow::onShowTailFileSaveLocationPicker() {
 void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& results, QList<QPair<QString, float>>& latencies) const {
     ui->twNetworkStatus->clearContents();
     ui->twNetworkStatus->setColumnCount(2);
-    ui->twNetworkStatus->setHorizontalHeaderLabels(QStringList() << "Property" << "Value");
+    ui->twNetworkStatus->setHorizontalHeaderLabels(QStringList() << tr("Property") << tr("Value"));
     ui->twNetworkStatus->setRowCount(static_cast<int>(results.count() + latencies.count() + 1));
 
     // For latencies, we want to sort on lowest latencies first
@@ -412,7 +412,7 @@ void MainWindow::tailDrivesToUi() const {
 
     ui->twSharedDrives->clearContents();
     ui->twSharedDrives->setColumnCount(2);
-    ui->twSharedDrives->setHorizontalHeaderLabels(QStringList() << "Name" << "Path");
+    ui->twSharedDrives->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Path"));
     ui->twSharedDrives->setRowCount(static_cast<int>(drives.count()));
 
     for (int i = 0; i < drives.count(); i++) {
@@ -502,14 +502,14 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 
             if (str.length() > 1)
             {
-                pTrayManager->trayIcon()->showMessage("Warning",
+                pTrayManager->trayIcon()->showMessage(tr("Warning"),
                   str,
                   QSystemTrayIcon::Warning, 5000);
             }
         }
 
         auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));
-        ui->lblVersionNumber->setText("Version " + formattedVersion);
+        ui->lblVersionNumber->setText(tr("Version ") + formattedVersion);
     }
     else {
         changeToState(TailState::NotLoggedIn);

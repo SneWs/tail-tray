@@ -42,7 +42,7 @@ TailDriveInfo ManageDriveWindow::driveInfo() const {
 }
 
 void ManageDriveWindow::selectFolder() {
-    QFileDialog dlg(this, "Select folder", ui->txtPath->text());
+    QFileDialog dlg(this, tr("Select folder"), ui->txtPath->text());
     dlg.setFileMode(QFileDialog::FileMode::Directory);
     dlg.setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
     dlg.setOption(QFileDialog::Option::ShowDirsOnly, true);
@@ -61,18 +61,18 @@ void ManageDriveWindow::selectFolder() {
 void ManageDriveWindow::acceptButtonClicked() {
     QString error;
     if (ui->txtName->text().isEmpty()) {
-        error = "Name must be set";
+        error = tr("Name must be set");
         setResult(QDialog::Rejected);
     }
 
     const QDir dir(ui->txtPath->text());
     if (ui->txtPath->text().isEmpty() || !dir.exists()) {
-        error = "Path must be set and exist";
+        error = tr("Path must be set and exist");
         setResult(QDialog::Rejected);
     }
 
     if (!error.isEmpty()) {
-        QMessageBox::warning(this, "Error", error, QMessageBox::Ok);
+        QMessageBox::warning(this, tr("Error"), error, QMessageBox::Ok);
         return;
     }
 

@@ -49,7 +49,7 @@ void TailFileReceiver::processFinished(int exitCode, QProcess::ExitStatus exitSt
 
     if (!QFile::exists(m_savePath)) {
         // If the save path have stopped existing for example, just bail.
-        QString msg("The path " + m_savePath + " does not exist, will not continue to listen for file receive events!");
+        QString msg(tr("The path ") + m_savePath + tr(" does not exist, will not continue to listen for file receive events!"));
         qDebug() << msg;
         
         emit errorListening(msg);

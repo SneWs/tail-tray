@@ -92,6 +92,11 @@ this, &MainWindow::settingsClosed);
     ui->tabWidget->setCurrentIndex(1);
 
     setupNetworkCallbacks();
+
+#if defined(WINDOWS_BUILD)
+    // On windows this looks like crap, so don't use it
+    ui->twNetworkStatus->setAlternatingRowColors(false);
+#endif
 }
 
 void MainWindow::showSettingsTab() {

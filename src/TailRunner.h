@@ -65,6 +65,7 @@ class TailRunner : public QObject
     Q_OBJECT
 public:
     explicit TailRunner(const TailSettings& s, QObject* parent = nullptr);
+    virtual ~TailRunner();
 
     void setOperator();
     void checkStatus();

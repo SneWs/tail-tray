@@ -39,6 +39,11 @@ TailRunner::TailRunner(const TailSettings& s, QObject* parent)
     , processes()
 { }
 
+TailRunner::~TailRunner()
+{
+    runCompletedCleanup();
+}
+
 void TailRunner::setOperator() {
     QStringList args;
     args << "--operator=" + qEnvironmentVariable("USER");

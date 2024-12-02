@@ -56,6 +56,8 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
         # For davfs2 we need to use the AUR
         yay -S davfs2
         ```
+      * On Windows (Unsupported but currently working)
+        Make sure to download and install QT binaries
       * If you are running Gnome and not using Ubuntu, make sure to install AppIndicator so you can see your tray icons. See https://extensions.gnome.org/extension/615/appindicator-support/
 2. Clone the repo
 3. cd into the repo `cd tail-tray`
@@ -65,6 +67,17 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
 7. Run `make`
 8. Run `sudo make install`
 9. It will now be installed to `/usr/local/bin/tail-tray` and can be started by running `tail-tray` in a terminal or by clicking the Tail Tray icon in the launcher.
+
+### Building on Windows (Experimental)
+1. Clone the repo
+2. cd  into the repo `cd tail-tray`
+3. Make a build directory `mkdir build`
+4. cd into the build directory `cd build`
+5. Run `cmake -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_PREFIX_PATH:PATH=C:/Qt/6.8.0/msvc2022_64 ../`
+6. Make sure to replace the QT install path and version for what you have installed and intend to build with from above command
+7. Run `msbuild tail-tray.sln` make sure that you have msbuild etc in your path or it will not work
+8. You can now hopefully run it from that folder by launching the exe file `tail-tray.exe` 
+9. This is still in an unsupported state but usually works, feel free to contribute to the windows builds if you have the know how. 
 
 ### Participating & Filing bugs
 * If you would like to participate in the development of this project, feel free to fork the repo and submit a pull request.

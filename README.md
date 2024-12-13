@@ -49,6 +49,8 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
         sudo dnf install -y git g++ clang cmake qt6-qtbase-devel qt6-qttools-devel qt6-qtbase-private-devel davfs2
         ```
       * On Arch Linux
+        * You can use the AUR package from here https://aur.archlinux.org/packages/tail-tray-git provided by @HeavenVolkoff
+        * or, build it from source yourself:
          ```bash
          sudo pacman -S git clang cmake qt6-base qt6-tools
          ```
@@ -59,14 +61,14 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
       * On Windows (Unsupported but currently working)
         Make sure to download and install QT binaries
       * If you are running Gnome and not using Ubuntu, make sure to install AppIndicator so you can see your tray icons. See https://extensions.gnome.org/extension/615/appindicator-support/
-2. Clone the repo
-3. cd into the repo `cd tail-tray`
-4. Make a build directory `mkdir build`
-5. cd into the build directory `cd build`
-6. Run `cmake ../`
-7. Run `make`
-8. Run `sudo make install`
-9. It will now be installed to `/usr/local/bin/tail-tray` and can be started by running `tail-tray` in a terminal or by clicking the Tail Tray icon in the launcher.
+3. Clone the repo
+4. cd into the repo `cd tail-tray`
+5. Make a build directory `mkdir build`
+6. cd into the build directory `cd build`
+7. Run `cmake ../`
+8. Run `make`
+9. Run `sudo make install`
+10. It will now be installed to `/usr/local/bin/tail-tray` and can be started by running `tail-tray` in a terminal or by clicking the Tail Tray icon in the launcher.
 
 ### Building on Windows (Experimental)
 1. Clone the repo

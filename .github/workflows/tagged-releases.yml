@@ -2,7 +2,7 @@
 # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
 name: CMake on Ubuntu
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 on:

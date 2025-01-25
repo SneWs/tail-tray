@@ -14,6 +14,10 @@
 #include "TailUser.h"
 #include "TailDriveInfo.h"
 
+#include "JsonHelpers.h"
+
+using namespace JsonHelpers;
+
 class TailStatus final : public QObject
 {
     Q_OBJECT
@@ -39,54 +43,63 @@ public:
 
     static TailStatus* parse(const QJsonObject& obj) {
         const auto newStatus = new TailStatus{};
-        newStatus->version = obj["Version"].toString("");
-        newStatus->tun = obj["TUN"].toBool(false);
-        newStatus->backendState = obj["BackendState"].toString("");
-        newStatus->haveNodeKey = obj["HaveNodeKey"].toBool(false);
-        newStatus->authUrl = obj["AuthURL"].toString("");
+        newStatus->version = safeReadStr(obj, "Version");
+        newStatus->tun = safeReadBool(obj, "TUN");
+        newStatus->backendState = safeReadStr(obj, "BackendState");
+        newStatus->haveNodeKey = safeReadBool(obj, "HaveNodeKey");
+        newStatus->authUrl = safeReadStr(obj, "AuthURL");
 
         // Will be null when not logged in for example
         if (!obj["TailscaleIPs"].isNull()) {
             for (const auto& ab : obj["TailscaleIPs"].toArray()) {
+                if (ab.isNull())
+                    continue;
                 newStatus->tailscaleIPs.emplace_back(ab.toString(""));
             }
         }
 
-        if (!obj["Health"].isNull())
+        if (obj.contains("Health") && !obj["Health"].isNull())
         {
             for (const auto& ab : obj["Health"].toArray()) {
+                if (ab.isNull())
+                    continue;
                 newStatus->health.emplace_back(ab.toString(""));
             }
         }
 
-        newStatus->magicDnsSuffix = obj["MagicDNSSuffix"].toString("");
+        if (obj.contains("MagicDNSSuffix"))
+            newStatus->magicDnsSuffix = safeReadStr(obj, "MagicDNSSuffix");
 
         if (obj.contains("CurrentTailnet") && !obj["CurrentTailnet"].isNull()) {
             newStatus->currentTailNet = TailNetInfo::parse(obj["CurrentTailnet"].toObject());
         }
 
-        if (!obj["CertDomains"].isNull()) {
+        if (obj.contains("CertDomains") && !obj["CertDomains"].isNull()) {
             for (const auto& ab : obj["CertDomains"].toArray()) {
                 newStatus->certDomains.emplace_back(ab.toString(""));
             }
         }
 
-        if (!obj["ClientVersion"].isNull()) {
+        if (obj.contains("ClientVersion") && !obj["ClientVersion"].isNull()) {
             newStatus->clientVersion = obj["ClientVersion"].toString("");
         }
 
-        newStatus->self = TailDeviceInfo::parse(obj["Self"].toObject());
-        if (obj["User"].isNull()) {
-            newStatus->user = std::make_unique<TailUser>();
+        if (obj.contains("Self") && !obj["Self"].isNull())
+            newStatus->self = TailDeviceInfo::parse(obj["Self"].toObject());
+
+        if (obj.contains("User") && !obj["User"].isNull()) {
+            newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self->userId);
         }
         else {
-            newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self->userId);
+            newStatus->user = std::make_unique<TailUser>();
         }
 
         // Peers
-        if (!obj["Peer"].isNull()) {
+        if (obj.contains("Peer") && !obj["Peer"].isNull()) {
             auto peerObj = obj["Peer"].toObject();
             for (const auto& child : peerObj) {
+                if (child.isNull())
+                    continue;
                 newStatus->peers.emplace_back(TailDeviceInfo::parse(child.toObject()));
             }
         }

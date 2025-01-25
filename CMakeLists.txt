@@ -39,6 +39,7 @@ set(PROJECT_SOURCES
         src/models/TailDriveInfo.h
         src/models/TailStatus.h
         src/models/TailState.h
+        src/models/JsonHelpers.h
         src/models/Models.h
         src/TrayMenuManager.cpp
         src/TrayMenuManager.h

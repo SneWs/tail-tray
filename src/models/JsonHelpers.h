@@ -5,45 +5,45 @@
 #include <QJsonObject>
 
 namespace JsonHelpers {
-static QString safeReadStr(const QJsonObject& obj, const QString& key) {
-    if (!obj.contains(key))
-        return QString{};
+    static QString safeReadStr(const QJsonObject& obj, const QString& key) {
+        if (!obj.contains(key))
+            return QString{};
 
-    if (obj[key].isNull())
-        return QString{};
+        if (obj[key].isNull())
+            return QString{};
 
-    return obj[key].toString("");
-}
+        return obj[key].toString("");
+    }
 
-static int safeReadInt(const QJsonObject& obj, const QString& key) {
-    if (!obj.contains(key))
-        return 0;
+    static int safeReadInt(const QJsonObject& obj, const QString& key) {
+        if (!obj.contains(key))
+            return 0;
 
-    if (obj[key].isNull())
-        return 0;
+        if (obj[key].isNull())
+            return 0;
 
-    return obj[key].toInt();
-}
+        return obj[key].toInt();
+    }
 
-static long long safeReadLong(const QJsonObject& obj, const QString& key) {
-    if (!obj.contains(key))
-        return 0;
+    static long long safeReadLong(const QJsonObject& obj, const QString& key) {
+        if (!obj.contains(key))
+            return 0;
 
-    if (obj[key].isNull())
-        return 0;
+        if (obj[key].isNull())
+            return 0;
 
-    return obj[key].toInteger();
-}
+        return obj[key].toInteger();
+    }
 
-static bool safeReadBool(const QJsonObject& obj, const QString& key) {
-    if (!obj.contains(key))
-        return false;
+    static bool safeReadBool(const QJsonObject& obj, const QString& key) {
+        if (!obj.contains(key))
+            return false;
 
-    if (obj[key].isNull())
-        return false;
+        if (obj[key].isNull())
+            return false;
 
-    return obj[key].toBool();
-}
+        return obj[key].toBool();
+    }
 }
 
 #endif // JSONHELPERS_H

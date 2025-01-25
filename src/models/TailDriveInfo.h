@@ -14,7 +14,7 @@ public:
     QString path;
     QString as;
 
-    TailDriveInfo(QString n = QString(), QString p = QString(), QString a = QString())
+    explicit TailDriveInfo(QString n = QString(), QString p = QString(), QString a = QString())
         : QObject()
         , name(std::move(n))
         , path(std::move(p))
@@ -63,4 +63,4 @@ public:
     }
 };
 
-#endif //TAILDRIVEINFO_H
+#endif // TAILDRIVEINFO_H

@@ -67,8 +67,8 @@ public:
             }
         }
 
-        if (obj.contains("MagicDNSSuffix"))
-            newStatus->magicDnsSuffix = safeReadStr(obj, "MagicDNSSuffix");
+        newStatus->magicDnsSuffix = safeReadStr(obj, "MagicDNSSuffix");
+        newStatus->clientVersion = safeReadStr(obj, "ClientVersion");
 
         if (obj.contains("CurrentTailnet") && !obj["CurrentTailnet"].isNull()) {
             newStatus->currentTailNet = TailNetInfo::parse(obj["CurrentTailnet"].toObject());
@@ -78,10 +78,6 @@ public:
             for (const auto& ab : obj["CertDomains"].toArray()) {
                 newStatus->certDomains.emplace_back(ab.toString(""));
             }
-        }
-
-        if (obj.contains("ClientVersion") && !obj["ClientVersion"].isNull()) {
-            newStatus->clientVersion = obj["ClientVersion"].toString("");
         }
 
         if (obj.contains("Self") && !obj["Self"].isNull())
@@ -108,4 +104,4 @@ public:
     }
 };
 
-#endif //TAILSTATUS_H
+#endif // TAILSTATUS_H

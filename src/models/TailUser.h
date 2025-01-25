@@ -9,6 +9,8 @@
 #include <memory>
 #include <utility>
 
+#include "JsonHelpers.h"
+
 class TailUser final : public QObject
 {
     Q_OBJECT
@@ -32,20 +34,16 @@ public:
 
         user->id = userId;
 
-        if (thisUser.contains("LoginName") && !thisUser["LoginName"].isNull())
-            user->loginName = thisUser["LoginName"].toString("");
-
-        if (thisUser.contains("DisplayName") && !thisUser["DisplayName"].isNull())
-            user->displayName = thisUser["DisplayName"].toString("");
-
-        if (thisUser.contains("ProfilePicURL") && !thisUser["ProfilePicURL"].isNull())
-            user->profilePicUrl = thisUser["ProfilePicURL"].toString("");
+        user->loginName = safeReadStr(thisUser, "LoginName");
+        user->displayName = safeReadStr(thisUser, "DisplayName");
+        user->profilePicUrl = safeReadStr(thisUser, "ProfilePicUrl");
 
         if (thisUser.contains("roles"))
         {
             for (const auto& ab : thisUser["roles"].toArray()) {
                 if (ab.isNull())
                     continue;
+
                 user->roles.emplace_back(ab.toString(""));
             }
         }

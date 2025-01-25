@@ -3,8 +3,7 @@
 
 #include <QObject>
 #include <QString>
-#include <QJsonObject>
-#include <QJsonArray>
+#include "JsonHelpers.h"
 
 class TailNetInfo final : public QObject
 {
@@ -36,17 +35,13 @@ public:
 
     static TailNetInfo parse(const QJsonObject& obj) {
         TailNetInfo retVal;
-        if (obj.contains("Name") && !obj["Name"].isNull())
-            retVal.name = obj["Name"].toString();
 
-        if (obj.contains("MagicDNSSuffix") && !obj["MagicDNSSuffix"].isNull())
-            retVal.magicDnsSuffix = obj["MagicDNSSuffix"].toString();
-
-        if (obj.contains("MagicDNSEnabled") && !obj["MagicDNSEnabled"].isNull())
-            retVal.magicDnsEnabled = obj["MagicDNSEnabled"].toBool();
+        retVal.name = safeReadStr(obj, "Name");
+        retVal.magicDnsSuffix = safeReadStr(obj, "MagicDnsSuffix");
+        retVal.magicDnsEnabled = safeReadBool(obj, "MagicDnsEnabled");
 
         return retVal;
     }
 };
 
-#endif //TAILNETINFO_H
+#endif // TAILNETINFO_H

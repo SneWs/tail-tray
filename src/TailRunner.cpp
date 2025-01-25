@@ -197,6 +197,12 @@ void TailRunner::onProcessCanReadStdOut(const ProcessWrapper* wrapper) {
 
     // Parse the status object
 
+    qDebug() << "===== START DBG =====";
+    qDebug() << "COMMAND " << commandToString(wrapper->command());
+    qDebug() << "OUTPUT:";
+    qDebug() << data;
+    qDebug() << "===== END DBG =====";
+
     switch (wrapper->command()) {
         case Command::Status: {
             QJsonParseError parseError;

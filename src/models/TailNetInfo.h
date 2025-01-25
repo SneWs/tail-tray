@@ -36,9 +36,14 @@ public:
 
     static TailNetInfo parse(const QJsonObject& obj) {
         TailNetInfo retVal;
-        retVal.name = obj["Name"].toString();
-        retVal.magicDnsSuffix = obj["MagicDNSSuffix"].toString();
-        retVal.magicDnsEnabled = obj["MagicDNSEnabled"].toBool();
+        if (obj.contains("Name") && !obj["Name"].isNull())
+            retVal.name = obj["Name"].toString();
+
+        if (obj.contains("MagicDNSSuffix") && !obj["MagicDNSSuffix"].isNull())
+            retVal.magicDnsSuffix = obj["MagicDNSSuffix"].toString();
+
+        if (obj.contains("MagicDNSEnabled") && !obj["MagicDNSEnabled"].isNull())
+            retVal.magicDnsEnabled = obj["MagicDNSEnabled"].toBool();
 
         return retVal;
     }

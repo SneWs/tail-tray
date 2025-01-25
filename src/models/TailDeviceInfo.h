@@ -10,6 +10,10 @@
 
 #include <memory>
 
+#include "JsonHelpers.h"
+
+using namespace JsonHelpers;
+
 class TailDeviceInfo final : public QObject
 {
     Q_OBJECT
@@ -52,23 +56,26 @@ public:
     {
         auto self = std::make_unique<TailDeviceInfo>();
 
-        self->id = obj["ID"].toString("");
-        self->publicKey = obj["PublicKey"].toString("");
-        self->hostName = obj["HostName"].toString("");
-        self->dnsName = obj["DNSName"].toString("");
-        self->os = obj["OS"].toString("");
-        self->userId = obj["UserID"].toInteger();
-        self->exitNode = obj["ExitNode"].toBool();
-        self->exitNodeOption = obj["ExitNodeOption"].toBool();
-        self->online = obj["Online"].toBool();
-        self->active = obj["Active"].toBool();
+        self->id = safeReadStr(obj, "ID");
+        self->publicKey = safeReadStr(obj, "PublicKey");
+        self->hostName = safeReadStr(obj, "HostName");
+        self->dnsName = safeReadStr(obj, "DNSName");
+        self->os = safeReadStr(obj, "OS");
+        self->userId = safeReadLong(obj, "UserID");
+        self->exitNode = safeReadBool(obj, "ExitNode");
+        self->exitNodeOption = safeReadBool(obj, "ExitNodeOption");
+        self->online = safeReadBool(obj, "Online");
+        self->active = safeReadBool(obj, "Active");
 
-        if (!obj["KeyExpiry"].isNull()) {
+        if (obj.contains("KeyExpiry") && !obj["KeyExpiry"].isNull()) {
             self->keyExpiry = QDateTime::fromString(obj["KeyExpiry"].toString(), Qt::DateFormat::ISODate);
         }
 
-        if (!obj["TailscaleIPs"].isNull()) {
+        if (obj.contains("TailscaleIPs") && !obj["TailscaleIPs"].isNull()) {
             for (const auto& ab : obj["TailscaleIPs"].toArray()) {
+                if (ab.isNull())
+                    continue;
+
                 self->tailscaleIPs.emplace_back(ab.toString(""));
             }
         }

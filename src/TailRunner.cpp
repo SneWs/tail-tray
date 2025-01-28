@@ -412,11 +412,11 @@ ProcessWrapper::ProcessWrapper(const Command cmd, QObject* parent)
     connect(proc.get(), &QProcess::finished,
             this, &ProcessWrapper::onProcessFinished);
 
-    connect(proc.get(), &QProcess::readyReadStandardOutput,
-            this, &ProcessWrapper::onProcessCanReadStdOut);
-
-    connect(proc.get(), &QProcess::readyReadStandardError,
-            this, &ProcessWrapper::onProcessCanReadStandardError);
+    // connect(proc.get(), &QProcess::readyReadStandardOutput,
+    //         this, &ProcessWrapper::onProcessCanReadStdOut);
+    //
+    // connect(proc.get(), &QProcess::readyReadStandardError,
+    //         this, &ProcessWrapper::onProcessCanReadStandardError);
 }
 
 void ProcessWrapper::start(const QString& cmd, QStringList args, const bool jsonResult, const bool usePkExec, void* userData) {
@@ -442,14 +442,17 @@ void ProcessWrapper::start(const QString& cmd, QStringList args, const bool json
 }
 
 void ProcessWrapper::onProcessCanReadStdOut() {
-    emit processCanReadStdOut(this);
+    //emit processCanReadStdOut(this);
 }
 
 void ProcessWrapper::onProcessCanReadStandardError() {
-    emit processCanReadStandardError(this);
+    //emit processCanReadStandardError(this);
 }
 
 void ProcessWrapper::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
+    emit processCanReadStdOut(this);
+    emit processCanReadStandardError(this);
+
     emit processFinished(this, exitCode, exitStatus);
 
     // Should always be after emitting returns

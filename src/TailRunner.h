@@ -29,11 +29,11 @@ enum class Command {
 };
 
 /// Simple way of abstracting away and be able to lazily delete and reference a process and it's states
-class ProcessWrapper : public QObject
+class BufferedProcessWrapper : public QObject
 {
     Q_OBJECT
 public:
-    explicit ProcessWrapper(Command cmd, QObject* parent = nullptr);
+    explicit BufferedProcessWrapper(Command cmd, QObject* parent = nullptr);
 
     /// Start the process with the given command and arguments
     void start(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec, void* userData);
@@ -44,9 +44,9 @@ public:
     [[nodiscard]] bool isCompleted() const { return completed; }
 
 signals:
-    void processCanReadStdOut(ProcessWrapper* process);
-    void processCanReadStandardError(ProcessWrapper* process);
-    void processFinished(ProcessWrapper* process, int exitCode, QProcess::ExitStatus exitStatus);
+    void processCanReadStdOut(BufferedProcessWrapper* process);
+    void processCanReadStandardError(BufferedProcessWrapper* process);
+    void processFinished(BufferedProcessWrapper* process, int exitCode, QProcess::ExitStatus exitStatus);
 
 private slots:
     void onProcessCanReadStdOut();
@@ -58,6 +58,8 @@ private:
     void* pUserData;
     Command eCommand;
     bool completed;
+    bool didReceiveStdErr;
+    bool didReceiveStdOut;
 };
 
 class TailRunner : public QObject
@@ -87,7 +89,7 @@ public:
 
 private:
     const TailSettings& settings;
-    std::vector<ProcessWrapper*> processes;
+    std::vector<BufferedProcessWrapper*> processes;
 
 signals:
     void accountsListed(const QList<TailAccountInfo>& accounts);
@@ -106,9 +108,9 @@ private:
     void runCompletedCleanup();
 
 private slots:
-    void onProcessCanReadStdOut(const ProcessWrapper* wrapper);
-    void onProcessCanReadStandardError(const ProcessWrapper* wrapper);
-    void onProcessFinished(const ProcessWrapper* wrapper, int exitCode, QProcess::ExitStatus exitStatus);
+    void onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper);
+    void onProcessCanReadStandardError(const BufferedProcessWrapper* wrapper);
+    void onProcessFinished(const BufferedProcessWrapper* wrapper, int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 #endif // TAILRUNNER_H

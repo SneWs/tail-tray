@@ -171,16 +171,16 @@ void TailRunner::sendFile(const QString& targetDevice, const QString& localFileP
 }
 
 void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QStringList& args, const bool jsonResult, const bool usePkExec, void* userData) {
-    auto wrapper = new ProcessWrapper(cmdType, this);
+    auto wrapper = new BufferedProcessWrapper(cmdType, this);
     processes.emplace_back(wrapper);
 
-    connect(wrapper, &ProcessWrapper::processFinished,
+    connect(wrapper, &BufferedProcessWrapper::processFinished,
         this, &TailRunner::onProcessFinished);
 
-    connect(wrapper, &ProcessWrapper::processCanReadStdOut,
+    connect(wrapper, &BufferedProcessWrapper::processCanReadStdOut,
         this, &TailRunner::onProcessCanReadStdOut);
 
-    connect(wrapper, &ProcessWrapper::processCanReadStandardError,
+    connect(wrapper, &BufferedProcessWrapper::processCanReadStandardError,
         this, &TailRunner::onProcessCanReadStandardError);
 
     wrapper->start(cmd, args, jsonResult, usePkExec, userData);
@@ -192,7 +192,7 @@ void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QSt
     }
 }
 
-void TailRunner::onProcessCanReadStdOut(const ProcessWrapper* wrapper) {
+void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
     const auto data = wrapper->process()->readAllStandardOutput();
 
     // Parse the status object
@@ -253,7 +253,7 @@ void TailRunner::onProcessCanReadStdOut(const ProcessWrapper* wrapper) {
     }
 }
 
-void TailRunner::onProcessCanReadStandardError(const ProcessWrapper* wrapper) {
+void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wrapper) {
     const auto commandInfo = wrapper->command();
 
     // NOTE! For whatever reason, the login command output is not captured by the readyReadStandardOutput signal
@@ -310,7 +310,7 @@ void TailRunner::onProcessCanReadStandardError(const ProcessWrapper* wrapper) {
     }
 }
 
-void TailRunner::onProcessFinished(const ProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
+void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
     qDebug() << "Process exit code " << exitCode << " - " << exitStatus;
 
     // Cleanup processes that has completed, this will not include this current process that invoked the signal
@@ -402,24 +402,28 @@ void TailRunner::runCompletedCleanup() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // ProcessWrapper impl
 
-ProcessWrapper::ProcessWrapper(const Command cmd, QObject* parent)
+BufferedProcessWrapper::BufferedProcessWrapper(const Command cmd, QObject* parent)
     : QObject(parent)
     , proc(std::make_unique<QProcess>(this))
     , pUserData(nullptr)
     , eCommand(cmd)
     , completed(false)
+    , didReceiveStdErr(false)
+    , didReceiveStdOut(false)
 {
     connect(proc.get(), &QProcess::finished,
-            this, &ProcessWrapper::onProcessFinished);
+            this, &BufferedProcessWrapper::onProcessFinished);
 
-    // connect(proc.get(), &QProcess::readyReadStandardOutput,
-    //         this, &ProcessWrapper::onProcessCanReadStdOut);
-    //
-    // connect(proc.get(), &QProcess::readyReadStandardError,
-    //         this, &ProcessWrapper::onProcessCanReadStandardError);
+    connect(proc.get(), &QProcess::readyReadStandardOutput,
+            this, &BufferedProcessWrapper::onProcessCanReadStdOut);
+
+    connect(proc.get(), &QProcess::readyReadStandardError,
+            this, &BufferedProcessWrapper::onProcessCanReadStandardError);
 }
 
-void ProcessWrapper::start(const QString& cmd, QStringList args, const bool jsonResult, const bool usePkExec, void* userData) {
+void BufferedProcessWrapper::start(const QString& cmd, QStringList args, const bool jsonResult, const bool usePkExec, void* userData) {
+    didReceiveStdErr = false;
+    didReceiveStdOut = false;
     pUserData = userData;
 
     if (jsonResult)
@@ -441,17 +445,20 @@ void ProcessWrapper::start(const QString& cmd, QStringList args, const bool json
 #endif
 }
 
-void ProcessWrapper::onProcessCanReadStdOut() {
-    //emit processCanReadStdOut(this);
+void BufferedProcessWrapper::onProcessCanReadStdOut() {
+    didReceiveStdOut = true;
 }
 
-void ProcessWrapper::onProcessCanReadStandardError() {
-    //emit processCanReadStandardError(this);
+void BufferedProcessWrapper::onProcessCanReadStandardError() {
+    didReceiveStdErr = true;
 }
 
-void ProcessWrapper::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
-    emit processCanReadStdOut(this);
-    emit processCanReadStandardError(this);
+void BufferedProcessWrapper::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
+    if (didReceiveStdOut)
+        emit processCanReadStdOut(this);
+
+    if (didReceiveStdErr)
+        emit processCanReadStandardError(this);
 
     emit processFinished(this, exitCode, exitStatus);
 

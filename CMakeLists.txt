@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Use Davfs or not
-option(DAVFS_ENABLED "Enable DAVFS" OFF)
+option(DAVFS_ENABLED "Enable DAVFS" ON)
 if (DAVFS_ENABLED)
     message("DAVFS Has been enabled!")
     add_definitions(-DDAVFS_ENABLED)

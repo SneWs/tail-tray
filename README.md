@@ -66,7 +66,7 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
 5. Make a build directory `mkdir build`
 6. cd into the build directory `cd build`
 7. Run `cmake ../`
-    * If you want to enable DAVFS: `cmake -DDAVFS_ENABLED=ON`
+    * If you want to enable DAVFS: `cmake -DDAVFS_ENABLED=ON ../`
 8. Run `make`
 9. Run `sudo make install`
 10. It will now be installed to `/usr/local/bin/tail-tray` and can be started by running `tail-tray` in a terminal or by clicking the Tail Tray icon in the launcher.

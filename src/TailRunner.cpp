@@ -21,11 +21,13 @@ namespace
             case Command::Disconnect: return "Disconnect";
             case Command::SettingsChange: return "SettingsChange";
             case Command::Status: return "Status";
+            case Command::SendFile: return "SendFile";
+#if defined(DAVFS_ENABLED)
             case Command::Drive: return "Drive";
             case Command::DriveAdd: return "DriveAdd";
             case Command::DriveRename: return "DriveRename";
             case Command::DriveRemove: return "DriveRemove";
-            case Command::SendFile: return "SendFile";
+#endif
         }
 
         return "Unknown (Not mapped) command (" + QString::number(static_cast<int>(cmd)) + ")";
@@ -131,6 +133,7 @@ void TailRunner::stop() {
     runCommand(Command::Disconnect, "down", QStringList());
 }
 
+#if defined(DAVFS_ENABLED)
 void TailRunner::listDrives() {
     QStringList args;
     args << "list";
@@ -160,6 +163,7 @@ void TailRunner::removeDrive(const TailDriveInfo& drive) {
 
     runCommand(Command::DriveRemove, "drive", args, false);
 }
+#endif
 
 void TailRunner::sendFile(const QString& targetDevice, const QString& localFilePath, void* userData) {
     QStringList args;
@@ -196,13 +200,6 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
     const auto data = wrapper->process()->readAllStandardOutput();
 
     // Parse the status object
-
-    qDebug() << "===== START DBG =====";
-    qDebug() << "COMMAND " << commandToString(wrapper->command());
-    qDebug() << "OUTPUT:";
-    qDebug() << data;
-    qDebug() << "===== END DBG =====";
-
     switch (wrapper->command()) {
         case Command::Status: {
             QJsonParseError parseError;
@@ -224,11 +221,6 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
             emit accountsListed(accounts);
             break;
         }
-        case Command::Drive: {
-            const QString raw(data);
-            const QList<TailDriveInfo> drives = TailDriveInfo::parse(raw);
-            emit driveListed(drives, false, QString());
-        }
         case Command::Connect: {
             // Will be a simple json string with backend state
             QJsonParseError parseError;
@@ -246,6 +238,13 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
             }
             break;
         }
+#if defined(DAVFS_ENABLED)
+        case Command::Drive: {
+            const QString raw(data);
+            const QList<TailDriveInfo> drives = TailDriveInfo::parse(raw);
+            emit driveListed(drives, false, QString());
+        }
+#endif
         default:
             // Just echo out to console for now
             qDebug() << QString(data);
@@ -288,11 +287,13 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
             }
         }
     }
+#if defined(DAVFS_ENABLED)
     else if (commandInfo == Command::Drive) {
         // ACL not allowing drives most likely
         const QString errorInfo(wrapper->process()->readAllStandardError());
         emit driveListed(QList<TailDriveInfo>(), true, errorInfo);
     }
+#endif
     else {
         const QString errorInfo(wrapper->process()->readAllStandardError());
         if (!errorInfo.isEmpty()) {
@@ -362,7 +363,12 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
         else if (commandInfo == Command::SendFile) {
             emit fileSent(true, QString{}, process->userData());
         }
-        else if (commandInfo != Command::Status && commandInfo != Command::Logout && commandInfo != Command::Drive) {
+        else if (commandInfo != Command::Status && commandInfo != Command::Logout
+#if defined(DAVFS_ENABLED)
+                 && commandInfo != Command::Drive
+#endif
+            )
+        {
             QTimer::singleShot(1000, this, [this]() {
                 checkStatus();
             });

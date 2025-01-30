@@ -1,5 +1,7 @@
 #include "ManageDriveWindow.h"
 
+#if defined(DAVFS_ENABLED)
+
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPushButton>
@@ -79,3 +81,5 @@ void ManageDriveWindow::acceptButtonClicked() {
     setResult(QDialog::Accepted);
     accept();
 }
+
+#endif

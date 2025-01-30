@@ -1,6 +1,8 @@
 #ifndef MANAGEDRIVEWINDOW_H
 #define MANAGEDRIVEWINDOW_H
 
+#if defined(DAVFS_ENABLED)
+
 #include <memory>
 
 #include <QDialog>
@@ -29,3 +31,5 @@ private slots:
 };
 
 #endif // MANAGEDRIVEWINDOW_H
+
+#endif

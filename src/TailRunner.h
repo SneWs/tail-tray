@@ -21,11 +21,13 @@ enum class Command {
     Disconnect,
     SettingsChange,
     Status,
+    SendFile,
+#if defined(DAVFS_ENABLED)
     Drive,
     DriveAdd,
     DriveRename,
     DriveRemove,
-    SendFile
+#endif
 };
 
 /// Simple way of abstracting away and be able to lazily delete and reference a process and it's states
@@ -80,10 +82,12 @@ public:
     void start(bool usePkExec = false);
     void stop();
 
+#if defined(DAVFS_ENABLED)
     void listDrives();
     void addDrive(const TailDriveInfo& drive);
     void renameDrive(const TailDriveInfo& drive, const QString& newName);
     void removeDrive(const TailDriveInfo& drive);
+#endif
 
     void sendFile(const QString& targetDevice, const QString& localFilePath, void* userData = nullptr);
 

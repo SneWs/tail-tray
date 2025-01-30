@@ -206,6 +206,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             });
         }
         else {
+#if defined(DAVFS_ENABLED)
             auto* addAction = drives->addAction(tr("Add drive"));
             connect(addAction, &QAction::triggered, this, [this](bool) {
                 ManageDriveWindow wnd(TailDriveInfo{}, reinterpret_cast<QWidget*>(this->parent()));
@@ -257,6 +258,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                     pTailRunner->removeDrive(drive);
                 });
             }
+#endif
         }
     }
 

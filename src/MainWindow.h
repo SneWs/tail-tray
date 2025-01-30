@@ -57,6 +57,7 @@ private slots:
     void loginFlowCompleted() const;
     void onNetworkReachabilityChanged(QNetworkInformation::Reachability newReachability);
 
+#if defined(DAVFS_ENABLED)
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const;
 
     // Tail drive
@@ -64,6 +65,7 @@ private slots:
     void removeTailDriveButtonClicked() const;
     void selectTailDriveMountPath() const;
     void fixTailDriveDavFsSetup() const;
+#endif
 
     // Send file
     void fileSentToDevice(bool success, const QString& errorMsg, void* userData) const;
@@ -83,7 +85,10 @@ private:
     void setupNetworkCallbacks() const;
 
     [[nodiscard]] static bool isTailDriveFileAlreadySetup();
+
+#if defined(DAVFS_ENABLED)
     void tailDrivesToUi() const;
+#endif
 
 protected:
     void showEvent(QShowEvent *event) override;

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.21)
 
 project(tail-tray VERSION 0.2.8 LANGUAGES CXX)
 
@@ -8,6 +8,13 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Use Davfs or not
+option(DAVFS_ENABLED "Enable DAVFS" OFF)
+if (DAVFS_ENABLED)
+    message("DAVFS Has been enabled!")
+    add_definitions(-DDAVFS_ENABLED)
+endif (DAVFS_ENABLED)
 
 if (WIN32)
     add_definitions(-DWINDOWS_BUILD)

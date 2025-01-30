@@ -23,35 +23,39 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
+    pCurrentExecution = std::make_unique<TailRunner>(settings, this);
+
     // Remove the tail drive tab by default
     ui->tabWidget->removeTab(2);
 
+// Davfs or not
+#if defined(DAVFS_ENABLED)
     // Make sure to adjust tail drive based on the check state
     if (settings.tailDriveEnabled()) {
         ui->tabWidget->insertTab(3, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
     }
 
     connect(ui->btnAddTailDrive, &QPushButton::clicked,
-        this, &MainWindow::addTailDriveButtonClicked);
+            this, &MainWindow::addTailDriveButtonClicked);
 
     connect(ui->btnRemoveSelectedTailDrive, &QPushButton::clicked,
-        this, &MainWindow::removeTailDriveButtonClicked);
+            this, &MainWindow::removeTailDriveButtonClicked);
 
     connect(ui->chkUseTailDrive, &QCheckBox::clicked,
-        this, [this]() {
-            auto checked = ui->chkUseTailDrive->isChecked();
-            settings.tailDriveEnabled(checked);
+            this, [this]() {
+                auto checked = ui->chkUseTailDrive->isChecked();
+                settings.tailDriveEnabled(checked);
 
-            if (checked) {
-                ui->tabWidget->insertTab(3, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
-            }
-            else {
-                ui->tabWidget->removeTab(3);
-            }
-    });
+                if (checked) {
+                    ui->tabWidget->insertTab(3, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
+                }
+                else {
+                    ui->tabWidget->removeTab(3);
+                }
+            });
 
     connect(ui->btnSelectTailDriveMountPath, &QPushButton::clicked,
-        this, &MainWindow::selectTailDriveMountPath);
+            this, &MainWindow::selectTailDriveMountPath);
 
     if (!isTailDriveFileAlreadySetup()) {
         ui->btnTailDriveFixDavFsMountSetup->setEnabled(true);
@@ -64,15 +68,22 @@ MainWindow::MainWindow(QWidget* parent)
         ui->btnTailDriveFixDavFsMountSetup->setText(tr("Configured and ready"));
     }
 
+    connect(pCurrentExecution.get(), &TailRunner::driveListed, this, &MainWindow::drivesListed);
+#else
+    settings.tailDriveEnabled(false);
+    ui->chkUseTailDrive->setChecked(false);
+    ui->chkUseTailDrive->setVisible(false);
+    ui->lblTailDrive->setVisible(false);
+    ui->tailDriveLayoutRow->parentWidget()->layout()->removeItem(ui->tailDriveLayoutRow);
+#endif
+
     connect(ui->btnSelectTailFileDefaultSaveLocation, &QPushButton::clicked,
         this, &MainWindow::onShowTailFileSaveLocationPicker);
 
-    pCurrentExecution = std::make_unique<TailRunner>(settings, this);
     connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
     connect(pCurrentExecution.get(), &TailRunner::commandError, this, &MainWindow::onCommandError);
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
     connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
-    connect(pCurrentExecution.get(), &TailRunner::driveListed, this, &MainWindow::drivesListed);
     connect(pCurrentExecution.get(), &TailRunner::fileSent, this, &MainWindow::fileSentToDevice);
 
     connect(pNetworkStateMonitor.get(), &NetworkStateMonitor::netCheckCompleted, this, &MainWindow::netCheckCompleted);
@@ -83,8 +94,7 @@ MainWindow::MainWindow(QWidget* parent)
     changeToState(TailState::NotLoggedIn);
     pCurrentExecution->getAccounts();
 
-    connect(ui->btnSettingsClose, &QPushButton::clicked,
-this, &MainWindow::settingsClosed);
+    connect(ui->btnSettingsClose, &QPushButton::clicked, this, &MainWindow::settingsClosed);
 
     syncSettingsToUi();
 
@@ -176,6 +186,7 @@ void MainWindow::onNetworkReachabilityChanged(QNetworkInformation::Reachability 
         changeToState(TailState::NotConnected);
 }
 
+#if defined(DAVFS_ENABLED)
 void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const {
     if (error) {
         pTailStatus->drivesConfigured = false;
@@ -276,6 +287,7 @@ void MainWindow::fixTailDriveDavFsSetup() const {
 
     ui->btnTailDriveFixDavFsMountSetup->setEnabled(isTailDriveFileAlreadySetup());
 }
+#endif
 
 void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* userData) const {
     if (!success) {
@@ -408,6 +420,7 @@ bool MainWindow::isTailDriveFileAlreadySetup() {
     return false;
 }
 
+#if defined(DAVFS_ENABLED)
 void MainWindow::tailDrivesToUi() const {
     if (pTailStatus == nullptr) {
         return;
@@ -428,6 +441,7 @@ void MainWindow::tailDrivesToUi() const {
         ui->twSharedDrives->setItem(i, 1, new QTableWidgetItem(drive.path));
     }
 }
+#endif
 
 void MainWindow::showEvent(QShowEvent *event) {
     QMainWindow::showEvent(event);
@@ -462,9 +476,11 @@ TailState MainWindow::changeToState(TailState newState)
     if (isOnline && retVal != TailState::Connected) {
         startListeningForIncomingFiles();
 
+#if defined(DAVFS_ENABLED)
         if (settings.tailDriveEnabled()) {
             pCurrentExecution->listDrives();
         }
+#endif
     }
 
     return retVal;
@@ -522,7 +538,9 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
 
+#if defined(DAVFS_ENABLED)
     tailDrivesToUi();
+#endif
 }
 
 bool MainWindow::shallowCheckForNetworkAvailable() {

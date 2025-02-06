@@ -58,7 +58,7 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
         # For davfs2 we need to use the AUR
         yay -S davfs2
         ```
-      * On openSUSE Tumbleweed and Leap there is a RPM in the repos already. See https://software.opensuse.org/download/package?package=tail-tray&project=openSUSE%3AFactory and https://build.opensuse.org/package/show/network:vpn/tail-tray for details and updates in Factory. A big thank you to @yankov-pt for setting up the RPM builds!
+      * On openSUSE Tumbleweed and Leap there is a RPM in the repos already. See https://software.opensuse.org/download/package?package=tail-tray&project=openSUSE%3AFactory and https://build.opensuse.org/package/show/network:vpn/tail-tray for details and updates in Factory. A big thank you to Johannes Kastl for setting up the RPM builds!
       * On Windows (Unsupported but currently working)
         Make sure to download and install QT binaries
       * If you are running Gnome and not using Ubuntu, make sure to install AppIndicator so you can see your tray icons. See https://extensions.gnome.org/extension/615/appindicator-support/

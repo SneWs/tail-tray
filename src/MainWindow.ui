@@ -52,7 +52,7 @@
        <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <property name="iconSize">
        <size>
@@ -1159,11 +1159,14 @@
             <height>100</height>
            </size>
           </property>
+          <property name="tabKeyNavigation">
+           <bool>false</bool>
+          </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+           <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
           </property>
           <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
+           <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
           </property>
           <property name="iconSize">
            <size>

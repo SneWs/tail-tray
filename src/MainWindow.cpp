@@ -204,7 +204,7 @@ void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, co
     pTailStatus->drivesConfigured = true;
 
     // Store available drives
-    pTailStatus->drives = drives;
+    pTailStatus->drives = QList(drives);
 
     // Refresh the tray icon menus
     pTrayManager->stateChangedTo(eCurrentState, pTailStatus.get());
@@ -243,9 +243,13 @@ void MainWindow::removeTailDriveButtonClicked() const {
     }
 
     pCurrentExecution->removeDrive(drive);
+
+    pTailStatus->drives.removeAt(row);
     ui->twSharedDrives->removeRow(row);
     if (row > 0)
         ui->twSharedDrives->selectRow(row - 1);
+
+    tailDrivesToUi();
 }
 
 void MainWindow::selectTailDriveMountPath() const {
@@ -488,7 +492,14 @@ TailState MainWindow::changeToState(TailState newState)
 
 void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 {
+    // NOTE: Make sure to capture any stored drive data from prev drive listing
+    //       if not we will lose track of the drives
+    QList<TailDriveInfo> drives;
+    if (pTailStatus != nullptr) {
+        drives = pTailStatus->drives;
+    }
     pTailStatus.reset(pNewStatus);
+    pTailStatus->drives = QList(drives);
 
     if (pTailStatus->user->id > 0)
     {

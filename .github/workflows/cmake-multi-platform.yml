@@ -46,13 +46,23 @@ jobs:
       if: runner.os == 'Windows'
       run: |
         echo "Running Windows build"
+        echo "Build output directory: ${{ steps.strings.outputs.build-output-dir }}" 
         cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -S ${{ github.workspace }} -G "Visual Studio 17 2022"
       shell: pwsh
 
     - name: Build
+      if: runner.os == 'Linux'
       run: |
+        echo "Building on Linux"
         cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
       shell: bash
+
+    - name: Build on Windows
+      if: runner.os == 'Windows'
+      run: |
+        echo "Building with Visual Studio"
+        cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+      shell: pwsh
 
     - name: Package Windows Build
       if: runner.os == 'Windows'

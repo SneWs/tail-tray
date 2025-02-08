@@ -32,11 +32,6 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Install Visual Studio Build Tools (Windows only)
-      if: runner.os == 'Windows'
-      run: |
-        choco install visualstudio2019buildtools --package-parameters "--includeRecommended --add-to-path"
-
     - name: Configure CMake
       run: |
         if [ "$RUNNER_OS" == "Windows" ]; then
@@ -61,7 +56,7 @@ jobs:
       shell: bash
       run: |
         mkdir -p ${{ steps.strings.outputs.build-output-dir }}/installer
-        windeployqt ${{ steps.strings.outputs.build-output-dir }}/my_app.exe --dir ${{ steps.strings.outputs.build-output-dir }}/installer
+        windeployqt ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.exe --dir ${{ steps.strings.outputs.build-output-dir }}/installer
         zip -r Tail-Tray.zip ${{ steps.strings.outputs.build-output-dir }}/installer
 
     - name: Package DEB file

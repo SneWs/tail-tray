@@ -37,7 +37,7 @@ jobs:
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
-        -G "Visual Studio 16 2019" # Required for Windows with Visual Studio (for multi-config build)
+        -G "Visual Studio 17 2022" # Required for Windows with Visual Studio (for multi-config build)
 
     - name: Build
       run: |

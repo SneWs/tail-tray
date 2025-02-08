@@ -65,19 +65,19 @@ jobs:
       shell: pwsh
 
     - name: Package Windows Build
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
       shell: pwsh  # Ensure PowerShell is used here on Windows.
       run: |
         mkdir -p ${{ steps.strings.outputs.build-output-dir }}/installer
-        windeployqt ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.exe --dir ${{ steps.strings.outputs.build-output-dir }}/installer
-        zip -r Tail-Tray.zip ${{ steps.strings.outputs.build-output-dir }}/installer
+        windeployqt ${{ steps.strings.outputs.build-output-dir }}/tail-tray.exe --dir ${{ steps.strings.outputs.build-output-dir }}/installer
+        Compress-Archive -Path ${{ steps.strings.outputs.build-output-dir }}/installer -DestinationPath ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
 
     - name: Package DEB file
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      shell: bash
       run: |
          chmod +x ./build-deb.sh
          ./build-deb.sh ${{ steps.strings.outputs.build-output-dir }}
-      shell: bash
 
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:

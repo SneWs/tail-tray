@@ -471,8 +471,7 @@ TailState MainWindow::changeToState(TailState newState)
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
 
     if (eCurrentState == TailState::NotConnected) {
-        // Try to start
-        pCurrentExecution->start();
+        // Nothing more to do
         return retVal;
     }
 

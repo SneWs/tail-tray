@@ -2,7 +2,7 @@ name: CMake on Ubuntu and Windows
 
 on:
   push:
-    branches: [ "master", "prod" ]
+    branches: [ "master", "develop", "prod" ]
   pull_request:
     branches: [ "master" ]
 
@@ -32,16 +32,22 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Install Visual Studio Build Tools (Windows only)
+      if: runner.os == 'Windows'
+      run: |
+        choco install visualstudio2019buildtools --package-parameters "--includeRecommended --add-to-path"
+
     - name: Configure CMake
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
-        -G "Visual Studio 17 2022" # Required for Windows with Visual Studio (for multi-config build)
+        -G "Visual Studio 17 2022" # Use Visual Studio 2022 instead of 2019
 
     - name: Build
+      shell: bash
       run: |
-        if [[ $RUNNER_OS == "Windows" ]]; then
+        if [ "$RUNNER_OS" == "Windows" ]; then
           cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
         else
           cmake --build ${{ steps.strings.outputs.build-output-dir }}
@@ -49,11 +55,11 @@ jobs:
 
     - name: Package Windows Build
       if: runner.os == 'Windows'
+      shell: bash
       run: |
         mkdir -p ${{ steps.strings.outputs.build-output-dir }}/installer
         windeployqt ${{ steps.strings.outputs.build-output-dir }}/my_app.exe --dir ${{ steps.strings.outputs.build-output-dir }}/installer
         zip -r Tail-Tray.zip ${{ steps.strings.outputs.build-output-dir }}/installer
-      shell: bash
 
     - name: Package DEB file
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')

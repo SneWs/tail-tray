@@ -35,25 +35,30 @@ jobs:
     - name: Configure CMake
       run: |
         if [ "$RUNNER_OS" == "Windows" ]; then
+          # For Windows, run PowerShell
+          echo "Running Windows build"
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -S ${{ github.workspace }} \
             -G "Visual Studio 17 2022"
         else
+          # For Linux (Ubuntu), use Bash
+          echo "Running Linux build"
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -S ${{ github.workspace }} \
             -G "Unix Makefiles" # Use Unix Makefiles for Ubuntu
         fi
+      shell: pwsh  # This ensures PowerShell is used on Windows.
 
     - name: Build
-      shell: bash
       run: |
         cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      shell: bash
 
     - name: Package Windows Build
       if: runner.os == 'Windows'
-      shell: bash
+      shell: pwsh  # PowerShell for Windows steps
       run: |
         mkdir -p ${{ steps.strings.outputs.build-output-dir }}/installer
         windeployqt ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.exe --dir ${{ steps.strings.outputs.build-output-dir }}/installer
@@ -74,5 +79,5 @@ jobs:
         title: "Dev build artifacts"
         files: |
           ${{ steps.strings.outputs.build-output-dir }}/*.deb
-          ${{ steps.strings.outputs.build-output-dir }}/my_app_windows.zip
+          ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
       if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')

@@ -126,6 +126,10 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        echo "🚀 Configuring Git user for pushing tags"
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+
         echo "🚀 Generating changelog..."
         echo "### Latest Changes" > changelog.txt
 

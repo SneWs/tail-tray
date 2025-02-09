@@ -66,12 +66,45 @@ jobs:
 
     - name: Package Windows Build
       if: runner.os == 'Windows' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
-      shell: pwsh  # Ensure PowerShell is used here on Windows.
+      shell: pwsh
       run: |
-        mkdir -p ${{ steps.strings.outputs.build-output-dir }}/installer
-        
-        windeployqt --release --dir ${{ steps.strings.outputs.build-output-dir }}/installer ${{ steps.strings.outputs.build-output-dir }}/${{matrix.build_type}}/tail-tray.exe
-        Compress-Archive -Path ${{ steps.strings.outputs.build-output-dir }}/installer/* -DestinationPath ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
+        # Define paths
+        $BUILD_DIR = "${{ steps.strings.outputs.build-output-dir }}"
+        $INSTALLER_DIR = "$BUILD_DIR/installer"
+        $EXECUTABLE_PATH = "$BUILD_DIR/${{matrix.build_type}}/tail-tray.exe"
+
+        # Create installer directory if it doesn't exist
+        mkdir -p $INSTALLER_DIR
+
+        # Copy the executable to the installer directory
+        if (Test-Path $EXECUTABLE_PATH) {
+            Copy-Item -Path $EXECUTABLE_PATH -Destination $INSTALLER_DIR
+        } else {
+            Write-Host "ERROR: tail-tray.exe not found in $EXECUTABLE_PATH!"
+            exit 1
+        }
+
+        # Run windeployqt to copy necessary Qt DLLs
+        windeployqt --release --dir $INSTALLER_DIR $INSTALLER_DIR/tail-tray.exe
+
+        # Verify that tail-tray.exe exists in the installer folder
+        if (!(Test-Path "$INSTALLER_DIR/tail-tray.exe")) {
+            Write-Host "ERROR: tail-tray.exe is missing from the installer folder!"
+            exit 1
+        }
+
+        # Install 7-Zip (needed for proper packaging)
+        choco install -y 7zip
+
+        # Use 7z to create a proper ZIP file including all subdirectories
+        7z a -r "$BUILD_DIR/Tail-Tray.zip" "$INSTALLER_DIR/*"
+
+        # Verify that the zip file was created
+        if (!(Test-Path "$BUILD_DIR/Tail-Tray.zip")) {
+            Write-Host "ERROR: Tail-Tray.zip was not created!"
+            exit 1
+        }
+
 
     - name: Package DEB file
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')

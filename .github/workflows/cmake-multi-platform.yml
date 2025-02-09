@@ -90,15 +90,6 @@ jobs:
         title: "Dev build artifacts"
         files: |
           ${{ steps.strings.outputs.build-output-dir }}/*.deb
-      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+          ${{ steps.strings.outputs.build-output-dir }}/*.zip
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod'
     
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
-        prerelease: true
-        title: "Dev build artifacts"
-        files: |
-          ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
-      if: runner.os == 'Windows' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
-  

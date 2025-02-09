@@ -122,13 +122,14 @@ jobs:
         gh release upload latest "$BUILD_DIR/Tail-Tray-Windows.zip" --clobber
 
     - name: Get Latest Commit Messages
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         echo "🚀 Generating changelog..."
         echo "### Latest Changes" > changelog.txt
         git fetch --tags  # Ensure tags are updated
-        git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"- %s" >> changelog.txt
+        git log HEAD^1..HEAD --pretty=format:"* %h - %s" >> changelog.txt
         echo "" >> changelog.txt
         echo "✅ Changelog generated:"
         cat changelog.txt

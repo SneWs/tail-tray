@@ -70,10 +70,8 @@ jobs:
       run: |
         mkdir -p ${{ steps.strings.outputs.build-output-dir }}/installer
         
-        ### TODO: We need to copy over QT DLL files to the installer dir and add to archive for it to be runnable on Windows.
-
-        windeployqt ${{ steps.strings.outputs.build-output-dir }}/${{matrix.build_type}}/tail-tray.exe --dir ${{ steps.strings.outputs.build-output-dir }}/installer
-        Compress-Archive -Path ${{ steps.strings.outputs.build-output-dir }}/installer -DestinationPath ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
+        windeployqt --release --dir ${{ steps.strings.outputs.build-output-dir }}/installer ${{ steps.strings.outputs.build-output-dir }}/${{matrix.build_type}}/tail-tray.exe
+        Compress-Archive -Path ${{ steps.strings.outputs.build-output-dir }}/installer/* -DestinationPath ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
 
     - name: Package DEB file
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
@@ -90,6 +88,6 @@ jobs:
         title: "Dev build artifacts"
         files: |
           ${{ steps.strings.outputs.build-output-dir }}/*.deb
-          ${{ steps.strings.outputs.build-output-dir }}/*.zip
+          ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
       if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod'
     

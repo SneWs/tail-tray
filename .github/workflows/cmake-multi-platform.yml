@@ -105,6 +105,10 @@ jobs:
             exit 1
         }
 
+    - name: Debug Installer Directory
+      if: runner.os == 'Windows' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      shell: pwsh
+      run: Get-ChildItem -Recurse ${{ steps.strings.outputs.build-output-dir }}/installer
 
     - name: Package DEB file
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')

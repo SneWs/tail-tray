@@ -113,7 +113,7 @@ jobs:
         7z a -r "$BUILD_DIR/Tail-Tray-Windows.zip" "$INSTALLER_DIR/*"
 
         # Verify that the zip file was created
-        if (!(Test-Path "$BUILD_DIR/Tail-Tray.zip")) {
+        if (!(Test-Path "$BUILD_DIR/Tail-Tray-Windows.zip")) {
             Write-Host "ERROR: Tail-Tray-Windows.zip was not created!"
             exit 1
         }

@@ -110,16 +110,16 @@ jobs:
         # Use 7z to create a proper ZIP file including all subdirectories
         choco install -y 7zip
 
-        7z a -r "$BUILD_DIR/Tail-Tray.zip" "$INSTALLER_DIR/*"
+        7z a -r "$BUILD_DIR/Tail-Tray-Windows.zip" "$INSTALLER_DIR/*"
 
         # Verify that the zip file was created
         if (!(Test-Path "$BUILD_DIR/Tail-Tray.zip")) {
-            Write-Host "ERROR: Tail-Tray.zip was not created!"
+            Write-Host "ERROR: Tail-Tray-Windows.zip was not created!"
             exit 1
         }
         
         # And attach the file
-        gh release upload latest "$BUILD_DIR/Tail-Tray.zip" --clobber
+        gh release upload latest "$BUILD_DIR/Tail-Tray-Windows.zip" --clobber
 
     - name: Get Latest Commit Messages
       env:
@@ -142,7 +142,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Tail-Tray-Windows
-        path: ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
+        path: "${{ steps.strings.outputs.build-output-dir }}/installer"
 
     - name: Upload Linux Build Artifact
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')

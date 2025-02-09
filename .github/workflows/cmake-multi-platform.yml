@@ -131,11 +131,11 @@ jobs:
 
         git fetch --tags --force
 
-        # Get the last tag before updating `latest`
-        PREV_TAG=$(git describe --tags --abbrev=0)
+        # Get the last tag safely (fallback if no tags exist)
+        PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")
 
-        # Move `latest` to the new commit
-        git tag -f latest
+        # Force-update `latest` as an annotated tag
+        git tag -fa latest -m "Latest build"
         git push origin latest --force
 
         # Generate the changelog from the previous tag to HEAD
@@ -144,7 +144,7 @@ jobs:
         echo "✅ Changelog generated:"
         cat changelog.txt
 
-        # And update release
+        # Update the GitHub release
         echo "Updating latest release"
         gh release edit latest --notes-file changelog.txt --repo ${{ github.repository }}
 

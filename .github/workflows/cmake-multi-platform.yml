@@ -111,22 +111,16 @@ jobs:
             exit 1
         }
 
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
-        prerelease: true
-        title: "Dev build artifacts"
-        files: |
-          ${{ steps.strings.outputs.build-output-dir }}/*.deb
-      
-    - uses: "marvinpinto/action-automatic-releases@latest"
+    - name: Upload Windows Build Artifact
       if: runner.os == 'Windows' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      uses: actions/upload-artifact@v4
       with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
-        prerelease: true
-        title: "Dev build artifacts"
-        files: |
-          ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
+        name: Tail-Tray-Windows
+        path: ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
+
+    - name: Upload Linux Build Artifact
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      uses: actions/upload-artifact@v4
+      with:
+        name: Tail-Tray-Linux
+        path: ${{ steps.strings.outputs.build-output-dir }}/*.deb

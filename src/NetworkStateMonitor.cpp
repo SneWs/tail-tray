@@ -82,8 +82,8 @@ NetworkStateMonitor::NetworkStateMonitor(QObject* parent)
 void NetworkStateMonitor::onTimerElapsed() {
     startProcess();
 
-    // Start a new 5min interval before next check
-    pTimer->setInterval((1000 * 60) * 5);
+    // Start a new 2min interval before next check
+    pTimer->setInterval((1000 * 60) * 2);
     pTimer->start();
 }
 

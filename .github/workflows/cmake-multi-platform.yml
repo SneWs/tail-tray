@@ -128,8 +128,11 @@ jobs:
       run: |
         echo "🚀 Generating changelog..."
         echo "### Latest Changes" > changelog.txt
-        git fetch --tags  # Ensure tags are updated
-        git log HEAD^1..HEAD --pretty=format:"* %h - %s" >> changelog.txt
+        git fetch --tags --force
+        git tag -f latest
+        git push origin latest --force
+        
+        git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"* %h - %s" >> changelog.txt
         echo "" >> changelog.txt
         echo "✅ Changelog generated:"
         cat changelog.txt

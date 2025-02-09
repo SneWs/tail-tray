@@ -57,6 +57,13 @@ jobs:
         cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
       shell: bash
 
+    - name: Package DEB file
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      shell: bash
+      run: |
+         chmod +x ./build-deb.sh
+         ./build-deb.sh ${{ steps.strings.outputs.build-output-dir }}
+
     - name: Build on Windows
       if: runner.os == 'Windows'
       run: |
@@ -93,10 +100,9 @@ jobs:
             exit 1
         }
 
-        # Install 7-Zip (needed for proper packaging)
+        # Use 7z to create a proper ZIP file including all subdirectories
         choco install -y 7zip
 
-        # Use 7z to create a proper ZIP file including all subdirectories
         7z a -r "$BUILD_DIR/Tail-Tray.zip" "$INSTALLER_DIR/*"
 
         # Verify that the zip file was created
@@ -105,19 +111,8 @@ jobs:
             exit 1
         }
 
-    - name: Debug Build Directory Windows
-      if: runner.os == 'Windows' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
-      shell: pwsh
-      run: Get-ChildItem -Recurse ${{ steps.strings.outputs.build-output-dir }}
-
-    - name: Package DEB file
-      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
-      shell: bash
-      run: |
-         chmod +x ./build-deb.sh
-         ./build-deb.sh ${{ steps.strings.outputs.build-output-dir }}
-
     - uses: "marvinpinto/action-automatic-releases@latest"
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
@@ -125,6 +120,13 @@ jobs:
         title: "Dev build artifacts"
         files: |
           ${{ steps.strings.outputs.build-output-dir }}/*.deb
+      
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      if: runner.os == 'Windows' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Dev build artifacts"
+        files: |
           ${{ steps.strings.outputs.build-output-dir }}/Tail-Tray.zip
-      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod'
-    

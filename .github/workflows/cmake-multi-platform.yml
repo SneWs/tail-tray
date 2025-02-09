@@ -133,10 +133,10 @@ jobs:
         echo "🚀 Generating changelog..."
         echo "### Latest Changes" > changelog.txt
 
-        git fetch --tags --force
-
         # Get the last tag safely (fallback if no tags exist)
         PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")
+
+        git fetch --tags --force
 
         # Force-update `latest` as an annotated tag
         git tag -fa latest -m "Latest build"

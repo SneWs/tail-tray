@@ -119,7 +119,7 @@ jobs:
         }
         
         # And attach the file
-        gh release upload latest "$BUILD_DIR/Tail-Tray.zip"
+        gh release upload latest "$BUILD_DIR/Tail-Tray.zip" --clobber
 
     #- name: Upload Windows Build Artifact
     #  if: runner.os == 'Windows' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')

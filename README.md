@@ -83,6 +83,12 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
 8. You can now hopefully run it from that folder by launching the exe file `tail-tray.exe` 
 9. This is still in an unsupported state but usually works, feel free to contribute to the windows builds if you have the know how. 
 
+### Windows Binaries
+There are Windows binaries (Experimental) available to download from https://github.com/SneWs/tail-tray/releases/tag/latest 
+The Tail-Tray-Windows.zip should just be to extract and run tail-tray.exe
+
+__NOTE:__ This is still _experimental_ and Windows builds aren't tested as frequent as the Linux builds. And the binaries here are built on each push to master. This means, no stability guarantees. But at least you don't have to build it yourself to give it a spin! :) 
+
 ### Participating & Filing bugs
 * If you would like to participate in the development of this project, feel free to fork the repo and submit a pull request.
 * Bugs, we all get them... Please file an issue in the issues tab and we'll sort it out together.

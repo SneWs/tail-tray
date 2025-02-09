@@ -63,8 +63,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
+        mkdir -p ${{ steps.strings.outputs.build-output-dir }}/artifacts 2>/dev/null
          chmod +x ./build-deb.sh
          ./build-deb.sh ${{ steps.strings.outputs.build-output-dir }}
+
+         cp ${{ steps.strings.outputs.build-output-dir }}/*.deb ${{ steps.strings.outputs.build-output-dir }}/artifacts
+
          # Create release if it doesn't exist
          gh release create latest artifacts/* --title "Dev build artifacts" --prerelease --repo ${{ github.repository }} --notes "Automated Dev Release"
         

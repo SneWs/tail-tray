@@ -13,6 +13,7 @@
 
 enum class Command {
     SetOperator,
+    SetExitNode,
     ListAccounts,
     SwitchAccount,
     Login,
@@ -72,6 +73,7 @@ public:
     virtual ~TailRunner();
 
     void setOperator();
+    void setExitNode(const QString& exitNode = "");
     void checkStatus();
     void getAccounts();
     void switchAccount(const QString& accountId);

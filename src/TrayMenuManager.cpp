@@ -284,18 +284,16 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             action->setEnabled(dev->online);
 
             connect(action, &QAction::triggered, this, [this, action](bool) {
+                auto devName = QString{};
+
                 if (action->isChecked()) {
-                    auto devName = action->data().toString();
-                    settings.exitNodeInUse(devName);
-                }
-                else {
-                    settings.exitNodeInUse("");
+                    devName = action->data().toString();
                 }
 
-                pExitNodeNone->setChecked(settings.exitNodeInUse().isEmpty());
+                pExitNodeNone->setChecked(devName.isEmpty());
 
                 settings.save();
-                pTailRunner->start();
+                pTailRunner->setExitNode(devName);
             });
         }
     }

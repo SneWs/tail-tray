@@ -52,6 +52,12 @@ void TailRunner::setOperator() {
     runCommand(Command::SetOperator, "set", args, false, true);
 }
 
+void TailRunner::setExitNode(const QString& exitNode) {
+    QStringList args;
+    args << "--exit-node=" + (exitNode.isEmpty() ? "" : exitNode);
+    runCommand(Command::SetExitNode, "set", args, false, false);
+}
+
 void TailRunner::checkStatus() {
     runCommand(Command::Status, "status", QStringList(), true);
 }
@@ -107,23 +113,12 @@ void TailRunner::start(const bool usePkExec) {
 
     if (settings.advertiseAsExitNode()) {
         args << "--advertise-exit-node";
-    }
-    else {
+
         // Check if we have a exit node that we should use
-        const auto exitNode = settings.exitNodeInUse();
-        if (!exitNode.isEmpty()) {
-            qDebug() << "Will use exit node" << exitNode;
-            args << "--exit-node" << exitNode;
-
-            if (settings.exitNodeAllowLanAccess())
-                args << "--exit-node-allow-lan-access";
-            else
-                args << "--exit-node-allow-lan-access=false";
-        }
-        else {
-
-            args << "--exit-node=";
-        }
+        if (settings.exitNodeAllowLanAccess())
+            args << "--exit-node-allow-lan-access";
+        else
+            args << "--exit-node-allow-lan-access=false";
     }
 
     runCommand(Command::Connect, "up", args, false, usePkExec);
@@ -369,9 +364,7 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
 #endif
             )
         {
-            QTimer::singleShot(1000, this, [this]() {
-                checkStatus();
-            });
+            checkStatus();
         }
     }
 }

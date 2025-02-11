@@ -14,6 +14,7 @@
 enum class Command {
     SetOperator,
     SetExitNode,
+    SetSettings,
     ListAccounts,
     SwitchAccount,
     Login,
@@ -74,6 +75,7 @@ public:
 
     void setOperator();
     void setExitNode(const QString& exitNode = "");
+    void applySettings(const TailSettings& s);
     void checkStatus();
     void getAccounts();
     void switchAccount(const QString& accountId);

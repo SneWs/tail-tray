@@ -164,6 +164,21 @@ void MainWindow::settingsReadyToRead() {
     qDebug() << "Run SSH: " << settings->runSSH;
     qDebug() << "No SNAT: " << settings->noSNAT;
     qDebug() << "Allow Exit node LAN Access: " << settings->exitNodeAllowLANAccess;
+
+    auto isUserOperator = settings->operatorUser == qEnvironmentVariable("USER");
+    if (!isUserOperator) {
+        const auto response = QMessageBox::warning(nullptr,
+           "Failed to run command",
+           "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
+           QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+
+        if (response == QMessageBox::Ok) {
+            pCurrentExecution->setOperator();
+        }
+    }
+    else {
+        pCurrentExecution->getAccounts();
+    }
 }
 
 void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {

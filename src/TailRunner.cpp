@@ -374,18 +374,6 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
                 }
 
                 qDebug() << "Failed to execute. Is current user operator? " << (isUserOperator ? "Yes" : "No");
-
-                if (!isUserOperator) {
-                    const auto response = QMessageBox::warning(nullptr,
-                       "Failed to run command",
-                       "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
-                       QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
-
-                    if (response == QMessageBox::Ok) {
-                        process->process()->close();
-                        start(true);
-                    }
-                }
             }
         }
         else if (commandInfo == Command::SendFile) {
@@ -398,7 +386,6 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
         }
         else if (commandInfo == Command::GetSettings) {
             emit settingsRead();
-            getAccounts();
         }
         else if (commandInfo == Command::ListAccounts) {
             checkStatus();

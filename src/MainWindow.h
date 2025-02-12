@@ -51,6 +51,7 @@ private:
     QMap<QString, QDateTime> seenWarnings;
 
 private slots:
+    void settingsReadyToRead();
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();

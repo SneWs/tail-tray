@@ -80,6 +80,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnSelectTailFileDefaultSaveLocation, &QPushButton::clicked,
         this, &MainWindow::onShowTailFileSaveLocationPicker);
 
+    connect(pCurrentExecution.get(), &TailRunner::settingsRead, this, &MainWindow::settingsReadyToRead);
     connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
     connect(pCurrentExecution.get(), &TailRunner::commandError, this, &MainWindow::onCommandError);
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
@@ -92,7 +93,13 @@ MainWindow::MainWindow(QWidget* parent)
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
 
     changeToState(TailState::NotLoggedIn);
-    pCurrentExecution->getAccounts();
+
+    // NOTE: The bootstrap to get this started is as follows:
+    // 1. Read settings from Tailscale daemon
+    // 2. Once that is successfully read, it will internally call getAccounts()
+    // 3. Once getAccounts() have returned it will once again internally call getStatus()
+    // 4. Once getStatus() returns we are in a running state, eg logged in and connected OR logged out OR logged in and disconnected etc...
+    pCurrentExecution->bootstrap();
 
     connect(ui->btnSettingsClose, &QPushButton::clicked, this, &MainWindow::settingsClosed);
 
@@ -131,6 +138,32 @@ void MainWindow::showAboutTab() {
 void MainWindow::showNetworkStatusTab() {
     ui->tabWidget->setCurrentIndex(2);
     show();
+}
+
+void MainWindow::settingsReadyToRead() {
+    const auto* settings = pCurrentExecution->currentSettings();
+    qDebug() << "Settings recv from Tailscale:";
+    qDebug() << "Operator: " << settings->operatorUser;
+    qDebug() << "Hostname: " << settings->hostname;
+    qDebug() << "Logged out: " << settings->loggedOut;
+    qDebug() << "Net filer kind: " << settings->netfilterKind;
+    qDebug() << "Net filer mode: " << settings->netfilterMode;
+    qDebug() << "Posture checking: " << settings->postureChecking;
+    qDebug() << "Route all: " << settings->routeAll;
+    qDebug() << "Shields up: " << settings->shieldsUp;
+    qDebug() << "Want running: " << settings->wantRunning;
+    qDebug() << "Allow single hosts: " << settings->allowSingleHosts;
+    qDebug() << "Exit node Id: " << settings->exitNodeId;
+    qDebug() << "Exit node Ip: " << settings->exitNodeIp;
+    qDebug() << "No stateful filtering: " << settings->noStatefulFiltering;
+    qDebug() << "Run web client: " << settings->runWebClient;
+    qDebug() << "Control panel URL: " << settings->controlURL;
+    qDebug() << "Corporate DNS: " << settings->corpDNS;
+    qDebug() << "Internal exit node prior: " << settings->internalExitNodePrior;
+    qDebug() << "Notepad URLs: " << settings->notepadURLs;
+    qDebug() << "Run SSH: " << settings->runSSH;
+    qDebug() << "No SNAT: " << settings->noSNAT;
+    qDebug() << "Allow Exit node LAN Access: " << settings->exitNodeAllowLANAccess;
 }
 
 void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {

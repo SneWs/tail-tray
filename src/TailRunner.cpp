@@ -193,7 +193,7 @@ void TailRunner::sendFile(const QString& targetDevice, const QString& localFileP
 }
 
 void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QStringList& args, const bool jsonResult, const bool usePkExec, void* userData) {
-    auto wrapper = new BufferedProcessWrapper(cmdType, this);
+    auto wrapper = new BufferedProcessWrapper(cmdType, cmdType == Command::Login, this);
     processes.emplace_back(wrapper);
 
     connect(wrapper, &BufferedProcessWrapper::processFinished,
@@ -450,8 +450,9 @@ void TailRunner::runCompletedCleanup() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // ProcessWrapper impl
 
-BufferedProcessWrapper::BufferedProcessWrapper(const Command cmd, QObject* parent)
+BufferedProcessWrapper::BufferedProcessWrapper(const Command cmd, bool emitOnActualSignals, QObject* parent)
     : QObject(parent)
+    , bEmitOnActualSignals(emitOnActualSignals)
     , proc(std::make_unique<QProcess>(this))
     , pUserData(nullptr)
     , eCommand(cmd)
@@ -495,10 +496,14 @@ void BufferedProcessWrapper::start(const QString& cmd, QStringList args, const b
 
 void BufferedProcessWrapper::onProcessCanReadStdOut() {
     didReceiveStdOut = true;
+    if (bEmitOnActualSignals)
+        emit processCanReadStdOut(this);
 }
 
 void BufferedProcessWrapper::onProcessCanReadStandardError() {
     didReceiveStdErr = true;
+    if (bEmitOnActualSignals)
+        emit processCanReadStandardError(this);
 }
 
 void BufferedProcessWrapper::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {

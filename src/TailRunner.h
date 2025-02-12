@@ -38,7 +38,7 @@ class BufferedProcessWrapper : public QObject
 {
     Q_OBJECT
 public:
-    explicit BufferedProcessWrapper(Command cmd, QObject* parent = nullptr);
+    explicit BufferedProcessWrapper(Command cmd, bool emitOnActualSignals = false, QObject* parent = nullptr);
 
     /// Start the process with the given command and arguments
     void start(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec, void* userData);
@@ -59,6 +59,7 @@ private slots:
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
+    bool bEmitOnActualSignals;
     std::unique_ptr<QProcess> proc;
     void* pUserData;
     Command eCommand;

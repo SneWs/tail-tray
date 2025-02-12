@@ -192,7 +192,7 @@ void MainWindow::settingsReadyToRead() {
 
     // Make sure current user is operator
     auto isUserOperator = tailscalePrefs->operatorUser == qEnvironmentVariable("USER");
-    if (!isUserOperator) {
+    if (!isUserOperator && !tailscalePrefs->loggedOut) {
         const auto response = QMessageBox::warning(nullptr,
            "Failed to run command",
            "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
@@ -220,6 +220,11 @@ void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
 void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
     if (isSudoRequired)
     {
+        const auto* prefs = pCurrentExecution->currentSettings();
+        if (prefs != nullptr && prefs->loggedOut) {
+            return;
+        }
+
         const auto response = QMessageBox::warning(this, tr("Sudo required"),
             error + tr("\n\nTo use Tail Tray you need to be set as operator. Do you want to set yourself as operator now?"),
             QMessageBox::Ok | QMessageBox::Cancel);
@@ -578,10 +583,13 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
         drives = pTailStatus->drives;
     }
     pTailStatus.reset(pNewStatus);
-    pTailStatus->drives = QList(drives);
 
-    if (pTailStatus->user->id > 0)
-    {
+    // And copy over to new status
+    pTailStatus->drives = drives;
+
+    const auto* tailscalePrefs = pCurrentExecution->currentSettings();
+
+    if (pTailStatus->user->id > 0) {
         if (pTailStatus->self->online)
             changeToState(TailState::Connected);
         else
@@ -623,7 +631,14 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
         ui->lblVersionNumber->setText(tr("Version ") + formattedVersion);
     }
     else {
-        changeToState(TailState::NotLoggedIn);
+        if (tailscalePrefs != nullptr) {
+            if (tailscalePrefs->loggedOut)
+                changeToState(TailState::NotLoggedIn);
+        }
+        else {
+            // Assume (fairly safely) that we are not logged in
+            changeToState(TailState::NotLoggedIn);
+        }
     }
 
     accountsTabUi->onTailStatusChanged(pTailStatus.get());

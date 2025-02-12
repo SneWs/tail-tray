@@ -103,8 +103,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->btnSettingsClose, &QPushButton::clicked, this, &MainWindow::settingsClosed);
 
-    syncSettingsToUi();
-
     // Make sure the settings tab is selected by default
     ui->tabWidget->setCurrentIndex(1);
 
@@ -153,8 +151,6 @@ void MainWindow::settingsReadyToRead() {
     qDebug() << "Shields up: " << tailscalePrefs->shieldsUp;
     qDebug() << "Want running: " << tailscalePrefs->wantRunning;
     qDebug() << "Allow single hosts: " << tailscalePrefs->allowSingleHosts;
-    qDebug() << "Exit node Id: " << tailscalePrefs->exitNodeId;
-    qDebug() << "Exit node Ip: " << tailscalePrefs->exitNodeIp;
     qDebug() << "No stateful filtering: " << tailscalePrefs->noStatefulFiltering;
     qDebug() << "Run web client: " << tailscalePrefs->runWebClient;
     qDebug() << "Control panel URL: " << tailscalePrefs->controlURL;
@@ -163,11 +159,24 @@ void MainWindow::settingsReadyToRead() {
     qDebug() << "Run SSH: " << tailscalePrefs->runSSH;
     qDebug() << "No SNAT: " << tailscalePrefs->noSNAT;
     qDebug() << "Allow Exit node LAN Access: " << tailscalePrefs->exitNodeAllowLANAccess;
-    if (tailscalePrefs->isExitNode()) {
+    auto isExitNode = tailscalePrefs->isExitNode();
+    if (isExitNode) {
         qDebug() << "Advertise routes (We are exit node and advertising)";
         for (const auto& r : tailscalePrefs->advertiseRoutes)
             qDebug() << "\tRoute " << r;
     }
+
+    qDebug() << "Exit node Id: " << tailscalePrefs->exitNodeId;
+    if (!tailscalePrefs->exitNodeId.isEmpty()) {
+        if (pTailStatus != nullptr && pTailStatus->peers.count() > 0) {
+            for (const auto& p : pTailStatus->peers) {
+                if (p->id == tailscalePrefs->exitNodeId) {
+                    qDebug() << "\tExit node by name: " << p->getShortDnsName();
+                }
+            }
+        }
+    }
+    qDebug() << "Exit node Ip: " << tailscalePrefs->exitNodeIp;
 
 #if defined(WINDOWS_BUILD)
     qDebug() << "Notepad URLs: " << tailscalePrefs->notepadURLs;
@@ -177,6 +186,7 @@ void MainWindow::settingsReadyToRead() {
     settings.allowIncomingConnections(!tailscalePrefs->shieldsUp);
     settings.useTailscaleDns(tailscalePrefs->corpDNS);
     settings.exitNodeAllowLanAccess(tailscalePrefs->exitNodeAllowLANAccess);
+    settings.advertiseAsExitNode(isExitNode);
 
     syncSettingsToUi();
 
@@ -225,6 +235,8 @@ void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
 
 void MainWindow::settingsClosed() {
     syncSettingsFromUi();
+    pCurrentExecution->applySettings(settings);
+
     if (eCurrentState == TailState::Connected)
         pCurrentExecution->start();
     hide();
@@ -515,6 +527,9 @@ void MainWindow::tailDrivesToUi() const {
 void MainWindow::showEvent(QShowEvent *event) {
     QMainWindow::showEvent(event);
 
+    // Read settings, and it will be synced to UI once read
+    pCurrentExecution->readSettings();
+
     // Getting accounts will also trigger a fetch of status
     pCurrentExecution->getAccounts();
 }
@@ -650,10 +665,8 @@ void MainWindow::syncSettingsToUi() const {
     ui->chkUseTailscaleDns->setChecked(settings.useTailscaleDns());
     ui->chkUseTailscaleSubnets->setChecked(settings.useSubnets());
     ui->chkRunAsExitNode->setChecked(settings.advertiseAsExitNode());
-    ui->chkExitNodeAllowNetworkAccess->setEnabled(settings.advertiseAsExitNode());
     ui->chkExitNodeAllowNetworkAccess->setChecked(settings.exitNodeAllowLanAccess());
     ui->chkStartOnLogin->setChecked(settings.startOnLogin());
-    ui->chkStartOnLogin->setChecked(false);
     ui->chkUseTailDrive->setChecked(settings.tailDriveEnabled());
     ui->txtTailDriveDefaultMountPath->setText(settings.tailDriveMountPath());
     ui->txtTailFilesDefaultSavePath->setText(settings.tailFilesDefaultSavePath());

@@ -95,11 +95,15 @@ void TailRunner::applySettings(const TailSettings& s) {
     if (settings.advertiseAsExitNode()) {
         args << "--advertise-exit-node";
 
-        // Check if we have a exit node that we should use
+        // Check if we have an exit node that we should use
         if (settings.exitNodeAllowLanAccess())
             args << "--exit-node-allow-lan-access";
         else
             args << "--exit-node-allow-lan-access=false";
+    }
+    else {
+        args << "--advertise-exit-node=false";
+        args << "--exit-node-allow-lan-access=false";
     }
 
     qDebug() << "TailRunner::applySettings: " << args;
@@ -386,6 +390,10 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
         }
         else if (commandInfo == Command::GetSettings) {
             emit settingsRead();
+        }
+        else if (commandInfo == Command::SetExitNode) {
+            readSettings();
+            checkStatus();
         }
         else if (commandInfo == Command::ListAccounts) {
             checkStatus();

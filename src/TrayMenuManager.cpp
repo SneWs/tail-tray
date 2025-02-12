@@ -281,7 +281,9 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             action->setCheckable(true);
             action->setChecked(dev->exitNode);
             action->setData(name);
-            action->setEnabled(dev->online);
+
+            // You can't use a exit node if you are advertising as exit node
+            action->setEnabled(dev->online && !settings.advertiseAsExitNode());
 
             connect(action, &QAction::triggered, this, [this, action](bool) {
                 auto devName = QString{};

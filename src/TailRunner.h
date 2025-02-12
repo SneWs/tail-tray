@@ -14,6 +14,7 @@
 enum class Command {
     SetOperator,
     SetExitNode,
+    GetSettings,
     SetSettings,
     ListAccounts,
     SwitchAccount,
@@ -37,7 +38,7 @@ class BufferedProcessWrapper : public QObject
 {
     Q_OBJECT
 public:
-    explicit BufferedProcessWrapper(Command cmd, QObject* parent = nullptr);
+    explicit BufferedProcessWrapper(Command cmd, bool emitOnActualSignals = false, QObject* parent = nullptr);
 
     /// Start the process with the given command and arguments
     void start(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec, void* userData);
@@ -58,6 +59,7 @@ private slots:
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
+    bool bEmitOnActualSignals;
     std::unique_ptr<QProcess> proc;
     void* pUserData;
     Command eCommand;
@@ -73,6 +75,9 @@ public:
     explicit TailRunner(const TailSettings& s, QObject* parent = nullptr);
     virtual ~TailRunner();
 
+    void bootstrap();
+
+    void readSettings();
     void setOperator();
     void setExitNode(const QString& exitNode = "");
     void applySettings(const TailSettings& s);
@@ -95,11 +100,15 @@ public:
 
     void sendFile(const QString& targetDevice, const QString& localFilePath, void* userData = nullptr);
 
+    [[nodiscard]] const CurrentTailPrefs* currentSettings() const { return currentPrefs.get(); }
+
 private:
     const TailSettings& settings;
+    std::unique_ptr<CurrentTailPrefs> currentPrefs;
     std::vector<BufferedProcessWrapper*> processes;
 
 signals:
+    void settingsRead();
     void accountsListed(const QList<TailAccountInfo>& accounts);
     void statusUpdated(TailStatus* newStatus);
     void loginFlowCompleted();
@@ -111,6 +120,7 @@ signals:
 private:
     void runCommand(Command cmdType, const QString& cmd, const QStringList& args, bool jsonResult = false, bool usePkExec = false, void* userData = nullptr);
     void parseStatusResponse(const QJsonObject& obj);
+    void parseSettingsResponse(const QJsonObject& obj);
 
     [[nodiscard]] bool hasPendingCommandOfType(Command cmdType) const;
     void runCompletedCleanup();

@@ -80,6 +80,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnSelectTailFileDefaultSaveLocation, &QPushButton::clicked,
         this, &MainWindow::onShowTailFileSaveLocationPicker);
 
+    connect(pCurrentExecution.get(), &TailRunner::settingsRead, this, &MainWindow::settingsReadyToRead);
     connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
     connect(pCurrentExecution.get(), &TailRunner::commandError, this, &MainWindow::onCommandError);
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
@@ -92,11 +93,15 @@ MainWindow::MainWindow(QWidget* parent)
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
 
     changeToState(TailState::NotLoggedIn);
-    pCurrentExecution->getAccounts();
+
+    // NOTE: The bootstrap to get this started is as follows:
+    // 1. Read settings from Tailscale daemon
+    // 2. Once that is successfully read, it will internally call getAccounts()
+    // 3. Once getAccounts() have returned it will once again internally call getStatus()
+    // 4. Once getStatus() returns we are in a running state, eg logged in and connected OR logged out OR logged in and disconnected etc...
+    pCurrentExecution->bootstrap();
 
     connect(ui->btnSettingsClose, &QPushButton::clicked, this, &MainWindow::settingsClosed);
-
-    syncSettingsToUi();
 
     // Make sure the settings tab is selected by default
     ui->tabWidget->setCurrentIndex(1);
@@ -133,6 +138,76 @@ void MainWindow::showNetworkStatusTab() {
     show();
 }
 
+void MainWindow::settingsReadyToRead() {
+    const auto* tailscalePrefs = pCurrentExecution->currentSettings();
+    qDebug() << "Settings recv from Tailscale:";
+    qDebug() << "Operator: " << tailscalePrefs->operatorUser;
+    qDebug() << "Hostname: " << tailscalePrefs->hostname;
+    qDebug() << "Logged out: " << tailscalePrefs->loggedOut;
+    qDebug() << "Net filer kind: " << tailscalePrefs->netfilterKind;
+    qDebug() << "Net filer mode: " << tailscalePrefs->netfilterMode;
+    qDebug() << "Posture checking: " << tailscalePrefs->postureChecking;
+    qDebug() << "Route all: " << tailscalePrefs->routeAll;
+    qDebug() << "Shields up: " << tailscalePrefs->shieldsUp;
+    qDebug() << "Want running: " << tailscalePrefs->wantRunning;
+    qDebug() << "Allow single hosts: " << tailscalePrefs->allowSingleHosts;
+    qDebug() << "No stateful filtering: " << tailscalePrefs->noStatefulFiltering;
+    qDebug() << "Run web client: " << tailscalePrefs->runWebClient;
+    qDebug() << "Control panel URL: " << tailscalePrefs->controlURL;
+    qDebug() << "Corporate DNS: " << tailscalePrefs->corpDNS;
+    qDebug() << "Internal exit node prior: " << tailscalePrefs->internalExitNodePrior;
+    qDebug() << "Run SSH: " << tailscalePrefs->runSSH;
+    qDebug() << "No SNAT: " << tailscalePrefs->noSNAT;
+    qDebug() << "Allow Exit node LAN Access: " << tailscalePrefs->exitNodeAllowLANAccess;
+    auto isExitNode = tailscalePrefs->isExitNode();
+    if (isExitNode) {
+        qDebug() << "Advertise routes (We are exit node and advertising)";
+        for (const auto& r : tailscalePrefs->advertiseRoutes)
+            qDebug() << "\tRoute " << r;
+    }
+
+    qDebug() << "Exit node Id: " << tailscalePrefs->exitNodeId;
+    if (!tailscalePrefs->exitNodeId.isEmpty()) {
+        if (pTailStatus != nullptr && pTailStatus->peers.count() > 0) {
+            for (const auto& p : pTailStatus->peers) {
+                if (p->id == tailscalePrefs->exitNodeId) {
+                    qDebug() << "\tExit node by name: " << p->getShortDnsName();
+                }
+            }
+        }
+    }
+    qDebug() << "Exit node Ip: " << tailscalePrefs->exitNodeIp;
+
+#if defined(WINDOWS_BUILD)
+    qDebug() << "Notepad URLs: " << tailscalePrefs->notepadURLs;
+#endif
+
+    // Sync settings with local settings
+    settings.allowIncomingConnections(!tailscalePrefs->shieldsUp);
+    settings.useTailscaleDns(tailscalePrefs->corpDNS);
+    settings.exitNodeAllowLanAccess(tailscalePrefs->exitNodeAllowLANAccess);
+    settings.advertiseAsExitNode(isExitNode);
+
+    syncSettingsToUi();
+
+    // Make sure current user is operator
+    auto isUserOperator = tailscalePrefs->operatorUser == qEnvironmentVariable("USER");
+    if (!isUserOperator && !tailscalePrefs->loggedOut) {
+        const auto response = QMessageBox::warning(nullptr,
+           "Failed to run command",
+           "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
+           QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+
+        if (response == QMessageBox::Ok) {
+            pCurrentExecution->setOperator();
+        }
+    }
+    else {
+        // Operator confirmed, lets continue the flow
+        pCurrentExecution->getAccounts();
+    }
+}
+
 void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
     accounts = foundAccounts;
     pTrayManager->onAccountsListed(foundAccounts);
@@ -145,6 +220,11 @@ void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
 void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
     if (isSudoRequired)
     {
+        const auto* prefs = pCurrentExecution->currentSettings();
+        if (prefs != nullptr && prefs->loggedOut) {
+            return;
+        }
+
         const auto response = QMessageBox::warning(this, tr("Sudo required"),
             error + tr("\n\nTo use Tail Tray you need to be set as operator. Do you want to set yourself as operator now?"),
             QMessageBox::Ok | QMessageBox::Cancel);
@@ -160,6 +240,8 @@ void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
 
 void MainWindow::settingsClosed() {
     syncSettingsFromUi();
+    pCurrentExecution->applySettings(settings);
+
     if (eCurrentState == TailState::Connected)
         pCurrentExecution->start();
     hide();
@@ -450,6 +532,9 @@ void MainWindow::tailDrivesToUi() const {
 void MainWindow::showEvent(QShowEvent *event) {
     QMainWindow::showEvent(event);
 
+    // Read settings, and it will be synced to UI once read
+    pCurrentExecution->readSettings();
+
     // Getting accounts will also trigger a fetch of status
     pCurrentExecution->getAccounts();
 }
@@ -498,10 +583,13 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
         drives = pTailStatus->drives;
     }
     pTailStatus.reset(pNewStatus);
-    pTailStatus->drives = QList(drives);
 
-    if (pTailStatus->user->id > 0)
-    {
+    // And copy over to new status
+    pTailStatus->drives = drives;
+
+    const auto* tailscalePrefs = pCurrentExecution->currentSettings();
+
+    if (pTailStatus->user->id > 0) {
         if (pTailStatus->self->online)
             changeToState(TailState::Connected);
         else
@@ -543,7 +631,14 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
         ui->lblVersionNumber->setText(tr("Version ") + formattedVersion);
     }
     else {
-        changeToState(TailState::NotLoggedIn);
+        if (tailscalePrefs != nullptr) {
+            if (tailscalePrefs->loggedOut)
+                changeToState(TailState::NotLoggedIn);
+        }
+        else {
+            // Assume (fairly safely) that we are not logged in
+            changeToState(TailState::NotLoggedIn);
+        }
     }
 
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
@@ -585,10 +680,8 @@ void MainWindow::syncSettingsToUi() const {
     ui->chkUseTailscaleDns->setChecked(settings.useTailscaleDns());
     ui->chkUseTailscaleSubnets->setChecked(settings.useSubnets());
     ui->chkRunAsExitNode->setChecked(settings.advertiseAsExitNode());
-    ui->chkExitNodeAllowNetworkAccess->setEnabled(settings.advertiseAsExitNode());
     ui->chkExitNodeAllowNetworkAccess->setChecked(settings.exitNodeAllowLanAccess());
     ui->chkStartOnLogin->setChecked(settings.startOnLogin());
-    ui->chkStartOnLogin->setChecked(false);
     ui->chkUseTailDrive->setChecked(settings.tailDriveEnabled());
     ui->txtTailDriveDefaultMountPath->setText(settings.tailDriveMountPath());
     ui->txtTailFilesDefaultSavePath->setText(settings.tailFilesDefaultSavePath());
@@ -616,6 +709,8 @@ void MainWindow::syncSettingsFromUi() {
     settings.startOnLogin(ui->chkStartOnLogin->isChecked());
     settings.tailDriveEnabled(ui->chkUseTailDrive->isChecked());
     settings.tailDriveMountPath(ui->txtTailDriveDefaultMountPath->text().trimmed());
+
+    pCurrentExecution->applySettings(settings);
 
     const QDir dir(ui->txtTailFilesDefaultSavePath->text().trimmed());
     if (dir.exists()) {

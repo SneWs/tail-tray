@@ -38,12 +38,29 @@ namespace
 TailRunner::TailRunner(const TailSettings& s, QObject* parent)
     : QObject(parent)
     , settings(s)
-    , processes()
-{ }
+    , processes() {
+}
 
 TailRunner::~TailRunner()
 {
     runCompletedCleanup();
+}
+
+void TailRunner::bootstrap() {
+    // NOTE: The bootstrap to get this started is as follows:
+    // 1. Read settings from Tailscale daemon
+    // 2. Once that is successfully read, it will internally call getAccounts()
+    // 3. Once getAccounts() have returned it will once again internally call getStatus()
+    // 4. Once getStatus() returns we are in a running state, eg logged in and connected OR logged out OR logged in and disconnected etc...
+
+    readSettings();
+}
+
+void TailRunner::readSettings() {
+    QStringList args;
+    args << "prefs";
+
+    runCommand(Command::GetSettings, "debug", args, false, false);
 }
 
 void TailRunner::setOperator() {
@@ -78,11 +95,15 @@ void TailRunner::applySettings(const TailSettings& s) {
     if (settings.advertiseAsExitNode()) {
         args << "--advertise-exit-node";
 
-        // Check if we have a exit node that we should use
+        // Check if we have an exit node that we should use
         if (settings.exitNodeAllowLanAccess())
             args << "--exit-node-allow-lan-access";
         else
             args << "--exit-node-allow-lan-access=false";
+    }
+    else {
+        args << "--advertise-exit-node=false";
+        args << "--exit-node-allow-lan-access=false";
     }
 
     qDebug() << "TailRunner::applySettings: " << args;
@@ -172,7 +193,7 @@ void TailRunner::sendFile(const QString& targetDevice, const QString& localFileP
 }
 
 void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QStringList& args, const bool jsonResult, const bool usePkExec, void* userData) {
-    auto wrapper = new BufferedProcessWrapper(cmdType, this);
+    auto wrapper = new BufferedProcessWrapper(cmdType, cmdType == Command::Login, this);
     processes.emplace_back(wrapper);
 
     connect(wrapper, &BufferedProcessWrapper::processFinished,
@@ -210,6 +231,20 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
 
             const QJsonObject obj = doc.object();
             parseStatusResponse(obj);
+            break;
+        }
+        case Command::GetSettings: {
+            QJsonParseError parseError;
+            const QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+
+            if (parseError.error != QJsonParseError::NoError)
+            {
+                qDebug() << parseError.errorString();
+                return;
+            }
+
+            const QJsonObject obj = doc.object();
+            parseSettingsResponse(obj);
             break;
         }
         case Command::ListAccounts: {
@@ -322,13 +357,9 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
             // and change the operator to current user since we won't be able to control it otherwise
             // as a regular user
 
-            const auto response = QMessageBox::warning(nullptr,
-               "Failed to run command",
-               "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
-               QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
-
             const QString info(process->process()->readAllStandardOutput());
             if (info.contains("https://login.tailscale.com")) {
+                qDebug() << "Login required!";
                 static QRegularExpression regex(R"(https:\/\/login\.tailscale\.com\/a\/[a-zA-Z0-9]+)");
                 const QRegularExpressionMatch match = regex.match(info);
                 if (match.hasMatch()) {
@@ -340,10 +371,13 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
                         QDesktopServices::openUrl(QUrl(url));
                 }
             }
+            else {
+                bool isUserOperator = false;
+                if (currentPrefs != nullptr) {
+                    isUserOperator = currentPrefs->operatorUser == qEnvironmentVariable("USER");
+                }
 
-            if (response == QMessageBox::Ok) {
-                process->process()->close();
-                start(true);
+                qDebug() << "Failed to execute. Is current user operator? " << (isUserOperator ? "Yes" : "No");
             }
         }
         else if (commandInfo == Command::SendFile) {
@@ -353,6 +387,13 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
     else {
         if (commandInfo == Command::SwitchAccount || commandInfo == Command::Login) {
             getAccounts();
+        }
+        else if (commandInfo == Command::GetSettings) {
+            emit settingsRead();
+        }
+        else if (commandInfo == Command::SetExitNode) {
+            readSettings();
+            checkStatus();
         }
         else if (commandInfo == Command::ListAccounts) {
             checkStatus();
@@ -375,6 +416,10 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
 
 void TailRunner::parseStatusResponse(const QJsonObject& obj) {
     emit statusUpdated(TailStatus::parse(obj));
+}
+
+void TailRunner::parseSettingsResponse(const QJsonObject& obj) {
+    currentPrefs = std::move(CurrentTailPrefs::parse(obj));
 }
 
 bool TailRunner::hasPendingCommandOfType(const Command cmdType) const {
@@ -405,8 +450,9 @@ void TailRunner::runCompletedCleanup() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // ProcessWrapper impl
 
-BufferedProcessWrapper::BufferedProcessWrapper(const Command cmd, QObject* parent)
+BufferedProcessWrapper::BufferedProcessWrapper(const Command cmd, bool emitOnActualSignals, QObject* parent)
     : QObject(parent)
+    , bEmitOnActualSignals(emitOnActualSignals)
     , proc(std::make_unique<QProcess>(this))
     , pUserData(nullptr)
     , eCommand(cmd)
@@ -450,10 +496,14 @@ void BufferedProcessWrapper::start(const QString& cmd, QStringList args, const b
 
 void BufferedProcessWrapper::onProcessCanReadStdOut() {
     didReceiveStdOut = true;
+    if (bEmitOnActualSignals)
+        emit processCanReadStdOut(this);
 }
 
 void BufferedProcessWrapper::onProcessCanReadStandardError() {
     didReceiveStdErr = true;
+    if (bEmitOnActualSignals)
+        emit processCanReadStandardError(this);
 }
 
 void BufferedProcessWrapper::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {

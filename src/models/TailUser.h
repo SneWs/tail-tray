@@ -22,18 +22,20 @@ public:
     QList<QString> roles;
 
     static std::unique_ptr<TailUser> parse(const QJsonObject& obj, long long userId) {
-        auto user = std::make_unique<TailUser>();
-
         auto idKey = QString::number(userId);
         if (!obj.contains(idKey) || obj[idKey].isNull()) {
-            return user;
+            return std::make_unique<TailUser>();
         }
 
         // Get the user object based on the user id (user id comes from the self part in the same doc)
         auto thisUser = obj[idKey].toObject();
+        return parse(thisUser);
+    }
 
-        user->id = userId;
+    static std::unique_ptr<TailUser> parse(const QJsonObject& thisUser) {
+        auto user = std::make_unique<TailUser>();
 
+        user->id = safeReadLong(thisUser, "ID");
         user->loginName = safeReadStr(thisUser, "LoginName");
         user->displayName = safeReadStr(thisUser, "DisplayName");
         user->profilePicUrl = safeReadStr(thisUser, "ProfilePicUrl");

@@ -391,7 +391,8 @@ void TrayMenuManager::setupWellKnownActions() const {
                 if (wnd->isVisible())
                     wnd->hide();
                 else {
-                    wnd->syncSettingsToUi();
+                    // NOTE: When settings are read, they will call settings to UI so will be in sync on show
+                    pTailRunner->readSettings();
                     wnd->showSettingsTab();
                 }
             }

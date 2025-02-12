@@ -141,31 +141,47 @@ void MainWindow::showNetworkStatusTab() {
 }
 
 void MainWindow::settingsReadyToRead() {
-    const auto* settings = pCurrentExecution->currentSettings();
+    const auto* tailscalePrefs = pCurrentExecution->currentSettings();
     qDebug() << "Settings recv from Tailscale:";
-    qDebug() << "Operator: " << settings->operatorUser;
-    qDebug() << "Hostname: " << settings->hostname;
-    qDebug() << "Logged out: " << settings->loggedOut;
-    qDebug() << "Net filer kind: " << settings->netfilterKind;
-    qDebug() << "Net filer mode: " << settings->netfilterMode;
-    qDebug() << "Posture checking: " << settings->postureChecking;
-    qDebug() << "Route all: " << settings->routeAll;
-    qDebug() << "Shields up: " << settings->shieldsUp;
-    qDebug() << "Want running: " << settings->wantRunning;
-    qDebug() << "Allow single hosts: " << settings->allowSingleHosts;
-    qDebug() << "Exit node Id: " << settings->exitNodeId;
-    qDebug() << "Exit node Ip: " << settings->exitNodeIp;
-    qDebug() << "No stateful filtering: " << settings->noStatefulFiltering;
-    qDebug() << "Run web client: " << settings->runWebClient;
-    qDebug() << "Control panel URL: " << settings->controlURL;
-    qDebug() << "Corporate DNS: " << settings->corpDNS;
-    qDebug() << "Internal exit node prior: " << settings->internalExitNodePrior;
-    qDebug() << "Notepad URLs: " << settings->notepadURLs;
-    qDebug() << "Run SSH: " << settings->runSSH;
-    qDebug() << "No SNAT: " << settings->noSNAT;
-    qDebug() << "Allow Exit node LAN Access: " << settings->exitNodeAllowLANAccess;
+    qDebug() << "Operator: " << tailscalePrefs->operatorUser;
+    qDebug() << "Hostname: " << tailscalePrefs->hostname;
+    qDebug() << "Logged out: " << tailscalePrefs->loggedOut;
+    qDebug() << "Net filer kind: " << tailscalePrefs->netfilterKind;
+    qDebug() << "Net filer mode: " << tailscalePrefs->netfilterMode;
+    qDebug() << "Posture checking: " << tailscalePrefs->postureChecking;
+    qDebug() << "Route all: " << tailscalePrefs->routeAll;
+    qDebug() << "Shields up: " << tailscalePrefs->shieldsUp;
+    qDebug() << "Want running: " << tailscalePrefs->wantRunning;
+    qDebug() << "Allow single hosts: " << tailscalePrefs->allowSingleHosts;
+    qDebug() << "Exit node Id: " << tailscalePrefs->exitNodeId;
+    qDebug() << "Exit node Ip: " << tailscalePrefs->exitNodeIp;
+    qDebug() << "No stateful filtering: " << tailscalePrefs->noStatefulFiltering;
+    qDebug() << "Run web client: " << tailscalePrefs->runWebClient;
+    qDebug() << "Control panel URL: " << tailscalePrefs->controlURL;
+    qDebug() << "Corporate DNS: " << tailscalePrefs->corpDNS;
+    qDebug() << "Internal exit node prior: " << tailscalePrefs->internalExitNodePrior;
+    qDebug() << "Run SSH: " << tailscalePrefs->runSSH;
+    qDebug() << "No SNAT: " << tailscalePrefs->noSNAT;
+    qDebug() << "Allow Exit node LAN Access: " << tailscalePrefs->exitNodeAllowLANAccess;
+    if (tailscalePrefs->isExitNode()) {
+        qDebug() << "Advertise routes (We are exit node and advertising)";
+        for (const auto& r : tailscalePrefs->advertiseRoutes)
+            qDebug() << "\tRoute " << r;
+    }
 
-    auto isUserOperator = settings->operatorUser == qEnvironmentVariable("USER");
+#if defined(WINDOWS_BUILD)
+    qDebug() << "Notepad URLs: " << tailscalePrefs->notepadURLs;
+#endif
+
+    // Sync settings with local settings
+    settings.allowIncomingConnections(!tailscalePrefs->shieldsUp);
+    settings.useTailscaleDns(tailscalePrefs->corpDNS);
+    settings.exitNodeAllowLanAccess(tailscalePrefs->exitNodeAllowLANAccess);
+
+    syncSettingsToUi();
+
+    // Make sure current user is operator
+    auto isUserOperator = tailscalePrefs->operatorUser == qEnvironmentVariable("USER");
     if (!isUserOperator) {
         const auto response = QMessageBox::warning(nullptr,
            "Failed to run command",
@@ -177,6 +193,7 @@ void MainWindow::settingsReadyToRead() {
         }
     }
     else {
+        // Operator confirmed, lets continue the flow
         pCurrentExecution->getAccounts();
     }
 }
@@ -664,6 +681,8 @@ void MainWindow::syncSettingsFromUi() {
     settings.startOnLogin(ui->chkStartOnLogin->isChecked());
     settings.tailDriveEnabled(ui->chkUseTailDrive->isChecked());
     settings.tailDriveMountPath(ui->txtTailDriveDefaultMountPath->text().trimmed());
+
+    pCurrentExecution->applySettings(settings);
 
     const QDir dir(ui->txtTailFilesDefaultSavePath->text().trimmed());
     if (dir.exists()) {

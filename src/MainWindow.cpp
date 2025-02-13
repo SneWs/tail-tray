@@ -255,8 +255,10 @@ void MainWindow::onNetworkReachabilityChanged(QNetworkInformation::Reachability 
     qDebug() << "onNetworkReachabilityChanged -> " << newReachability;
 
     if (newReachability == QNetworkInformation::Reachability::Online) {
-        // Bootstrap so we re-read all settings, accounts and status just as on startup
-        pCurrentExecution->bootstrap();
+        QTimer::singleShot(3000, this, [this]() {
+            // Bootstrap so we re-read all settings, accounts and status just as on startup
+            pCurrentExecution->bootstrap();
+        });
         return;
     }
 

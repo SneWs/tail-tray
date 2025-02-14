@@ -550,6 +550,11 @@ TailState MainWindow::changeToState(TailState newState)
         pTailStatus->user = std::make_unique<TailUser>();
     }
 
+    if (newState == TailState::Connected)
+        setWindowIcon(QIcon(":/icons/tray-on.png"));
+    else
+        setWindowIcon(QIcon(":/icons/tray-off.png"));
+
     pTrayManager->stateChangedTo(newState, pTailStatus.get());
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
 

@@ -1,5 +1,5 @@
 Package: tail-tray
-Version: 0.2.11
+Version: 0.2.12
 Maintainer: Marcus Grenängen (marcus@grenangen.se)
 Description: Tailscale Tray application
 Architecture: amd64

@@ -89,12 +89,14 @@ if (APPLE)
             MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
             MACOSX_BUNDLE TRUE)
 elseif (WIN32)
+    set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/tail-tray-windows.rc")
     set(WIN_ICON "${CMAKE_CURRENT_SOURCE_DIR}/icons/tailscale-windows.ico")
 
     qt_add_executable(tail-tray
             WIN32
             MANUAL_FINALIZATION
             ${PROJECT_SOURCES}
+            ${app_icon_resource_windows}
     )
 else ()
     qt_add_executable(tail-tray

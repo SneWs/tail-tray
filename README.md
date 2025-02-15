@@ -72,22 +72,21 @@ I'm working on fixing this. And if you know how to package for Debian and Ubuntu
 9. Run `sudo make install`
 10. It will now be installed to `/usr/local/bin/tail-tray` and can be started by running `tail-tray` in a terminal or by clicking the Tail Tray icon in the launcher.
 
-### Building on Windows (Experimental)
+### Building on Windows
+0. Install QT 6
 1. Clone the repo
 2. cd  into the repo `cd tail-tray`
 3. Make a build directory `mkdir build`
-4. cd into the build directory `cd build`
-5. Run `cmake -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_PREFIX_PATH:PATH=C:/Qt/6.8.0/msvc2022_64 ../`
-6. Make sure to replace the QT install path and version for what you have installed and intend to build with from above command
-7. Run `msbuild tail-tray.sln` make sure that you have msbuild etc in your path or it will not work
-8. You can now hopefully run it from that folder by launching the exe file `tail-tray.exe` 
-9. This is still in an unsupported state but usually works, feel free to contribute to the windows builds if you have the know how. 
+4. Run `cmake -B "./build" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_PREFIX_PATH:PATH=C:/Qt/6.8.2/msvc2022_64 -G "Visual Studio 17 2022"`
+   1. NOTE: Make sure to replace the DCMAKE_PREFIX_PATH with the path to your QT install dir
+5. Run `cmake --build "./build" --config Release`
+6. You should be able to start it by typing `.\build\Release\tail-tray.exe` 
 
 ### Windows Binaries
 There are Windows binaries (Experimental) available to download from https://github.com/SneWs/tail-tray/releases/tag/latest 
 The Tail-Tray-Windows.zip should just be to extract and run tail-tray.exe
 
-__NOTE:__ This is still _experimental_ and Windows builds aren't tested as frequent as the Linux builds. And the binaries here are built on each push to master. This means, no stability guarantees. But at least you don't have to build it yourself to give it a spin! :) 
+__NOTE:__ This is still _experimental_ and Windows builds aren't tested as frequent as the Linux builds. And the binaries here are built on each push to master. This means, no stability guarantees. But at least you don't have to build it yourself to give it a spin!
 
 ### Participating & Filing bugs
 * If you would like to participate in the development of this project, feel free to fork the repo and submit a pull request.

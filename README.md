@@ -58,15 +58,14 @@ To do that, please see the Getting started section below.
       * On Windows (Unsupported but currently working)
         Make sure to download and install QT binaries
       * If you are running Gnome and not using Ubuntu, make sure to install AppIndicator so you can see your tray icons. See https://extensions.gnome.org/extension/615/appindicator-support/
-3. Clone the repo
-4. cd into the repo `cd tail-tray`
-5. Make a build directory `mkdir build`
-6. cd into the build directory `cd build`
-7. Run `cmake ../`
-    * If you want to disable DAVFS: `cmake -DDAVFS_ENABLED=OFF ../`
-8. Run `make`
-9. Run `sudo make install`
-10. It will now be installed to `/usr/local/bin/tail-tray` and can be started by running `tail-tray` in a terminal or by clicking the Tail Tray icon in the launcher.
+2. Clone the repo
+3. cd into the repo `cd tail-tray`
+4. Run `cmake -B "./build" -DCMAKE_BUILD_TYPE="Release"`
+   * If you want to disable DAVFS: `cmake -B "./build" -DDAVFS_ENABLED=OFF -DCMAKE_BUILD_TYPE="Release"`
+5. Run `cmake --build "./build" --config Release`
+6. Run `cd build`
+7. Run `sudo make install`
+8. It will now be installed to `/usr/local/bin/tail-tray` and can be started by running `tail-tray` in a terminal or by clicking the Tail Tray icon in the launcher.
 
 ### Building on Windows
 0. Install QT 6

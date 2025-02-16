@@ -62,11 +62,31 @@ jobs:
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-    - name: Package DEB file
-      run: |
-         chmod +x ./build-deb.sh
-         ./build-deb.sh ${{ steps.strings.outputs.build-output-dir }}
-      shell: bash
+    - name: Package DEB file for Ubuntu
+      uses: jtdor/build-deb-action@v1
+      env:
+        DEB_BUILD_OPTIONS: noautodbgsym
+      with:
+        artifacts-dir: build
+        docker-image: ubuntu:24.04
+        extra-build-deps: devscripts git
+        before-build-hook: |
+          git checkout debian/changelog
+          debchange --controlmaint --local="ubuntu" "New upstream release"
+        buildpackage-opts: --build=binary --no-sign
+
+    - name: Package DEB file for Debian
+      uses: jtdor/build-deb-action@v1
+      env:
+        DEB_BUILD_OPTIONS: noautodbgsym
+      with:
+        artifacts-dir: build
+        docker-image: debian:trixie
+        extra-build-deps: devscripts git
+        before-build-hook: |
+          git checkout debian/changelog
+          debchange --controlmaint --local="debian" "New upstream release"
+        buildpackage-opts: --build=binary --no-sign
 
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:

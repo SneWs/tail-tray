@@ -1,0 +1,28 @@
+Source: tail-tray
+Section: net
+Priority: optional
+Maintainer: Marcus Grenängen <marcus@grenangen.se>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+ git,
+ qt6-tools-dev,
+ qt6-tools-dev-tools,
+ g++,
+ clang,
+ cmake,
+ davfs2
+Standards-Version: 4.6.2
+Homepage: https://github.com/SneWs/tail-tray
+Vcs-Browser: https://github.com/SneWs/tail-tray
+Vcs-Git: https://github.com/SneWs/tail-tray.git
+
+Package: tail-tray
+Architecture: amd64
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Suggests:
+ davfs2,
+Description: Tailscale tray application
+ Tailscale tray menu and UI for KDE Plasma Desktop

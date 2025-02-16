@@ -57,16 +57,34 @@ jobs:
         cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
       shell: bash
 
-    - name: Package DEB file
+    - name: Package DEB file for Ubuntu
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      uses: jtdor/build-deb-action@v1
+      env:
+        DEB_BUILD_OPTIONS: noautodbgsym
+      with:
+        artifacts-dir: ${{ steps.strings.outputs.build-output-dir }}
+        docker-image: ubuntu:24.04
+        before-build-hook: debchange --controlmaint --local="ubuntu~git$(git rev-parse --short HEAD)" "CI build"
+        buildpackage-opts: --build=binary --no-sign
+
+    - name: Package DEB file for Debian
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      uses: jtdor/build-deb-action@v1
+      env:
+        DEB_BUILD_OPTIONS: noautodbgsym
+      with:
+        artifacts-dir: ${{ steps.strings.outputs.build-output-dir }}
+        docker-image: debian:trixie
+        before-build-hook: debchange --controlmaint --local="debian~git$(git rev-parse --short HEAD)" "CI build"
+        buildpackage-opts: --build=binary --no-sign
+
+    - name: Upload DEB files
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
-         chmod +x ./build-deb.sh
-         ./build-deb.sh ${{ steps.strings.outputs.build-output-dir }}
-        
-         # And attach the file
          gh release upload latest ${{ steps.strings.outputs.build-output-dir }}/*.deb --clobber
 
     - name: Build on Windows

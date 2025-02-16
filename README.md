@@ -23,10 +23,6 @@ GNU General Public License v3.0 - see [LICENSE](LICENSE) for more details
 For now the easiest and most reliable way to install this is to build it from source.
 To do that, please see the Getting started section below.
 
-If you're feeling adventurous, you can download the latest deb release and give that a try, but there are known issues with it.
-**_NOTE:_** The deb package that is made as part of the release _might not_ working as intended. 
-I'm working on fixing this. And if you know how to package for Debian and Ubuntu, feel free to help out. See https://github.com/SneWs/tail-tray/issues/12 for details
-
 ### Prerequisites
 * Tailscale installed and running - https://tailscale.com 
 * davfs2 installed and configured (If you plan on using Tail drives or accessing Tail drives. Tail Tray also helps you to automatically configure this) - https://wiki.archlinux.org/title/Davfs2

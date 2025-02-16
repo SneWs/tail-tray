@@ -2,6 +2,7 @@
 #include <QFile>
 
 #include "MainWindow.h"
+#include "Paths.h"
 
 #include <QList>
 #include <QFileDialog>
@@ -726,7 +727,8 @@ void MainWindow::syncSettingsFromUi() {
     if (settings.startOnLogin()) {
         if (!QFile::exists(targetFile)) {
             (void)homeDir.mkpath(".config/autostart");
-            QFile::copy("/usr/local/share/applications/tail-tray.desktop", targetFile);
+            QFile::copy(QString(DATAROOTDIR)
+                + QString("/applications/tail-tray.desktop"), targetFile);
         }
     }
     else {

@@ -57,17 +57,43 @@ jobs:
         cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
       shell: bash
 
-    - name: Package DEB file
+    - name: Package DEB file for Ubuntu
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      uses: jtdor/build-deb-action@v1
+      env:
+        DEB_BUILD_OPTIONS: noautodbgsym
+      with:
+        artifacts-dir: build
+        docker-image: ubuntu:24.04
+        extra-build-deps: devscripts git
+        before-build-hook: |
+          git checkout debian/changelog
+          debchange --controlmaint --local="ubuntu~git$(git rev-parse --short HEAD)" "CI build"
+        buildpackage-opts: --build=binary --no-sign
+
+    - name: Package DEB file for Debian
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
+      uses: jtdor/build-deb-action@v1
+      env:
+        DEB_BUILD_OPTIONS: noautodbgsym
+      with:
+        artifacts-dir: build
+        docker-image: debian:trixie
+        extra-build-deps: devscripts git
+        before-build-hook: |
+          git checkout debian/changelog
+          debchange --controlmaint --local="debian~git$(git rev-parse --short HEAD)" "CI build"
+        buildpackage-opts: --build=binary --no-sign
+
+    - name: Upload DEB files
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
-         chmod +x ./build-deb.sh
-         ./build-deb.sh ${{ steps.strings.outputs.build-output-dir }}
-        
-         # And attach the file
-         gh release upload latest ${{ steps.strings.outputs.build-output-dir }}/*.deb --clobber
+        mv ${{ steps.strings.outputs.build-output-dir }}/*ubuntu*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-ubuntu.deb
+        mv ${{ steps.strings.outputs.build-output-dir }}/*debian*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-debian.deb
+        gh release upload latest ${{ steps.strings.outputs.build-output-dir }}/*.deb --clobber
 
     - name: Build on Windows
       if: runner.os == 'Windows'
@@ -161,4 +187,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Tail-Tray-Linux
-        path: ${{ steps.strings.outputs.build-output-dir }}/tail-tray.deb
+        path: ${{ steps.strings.outputs.build-output-dir }}/*.deb

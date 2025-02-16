@@ -17,3 +17,6 @@ cmake-build-release/
 
 packaging/
 .flatpak-builder/
+
+tail-tray.desktop
+src/Paths.h

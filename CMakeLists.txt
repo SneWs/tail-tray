@@ -116,6 +116,8 @@ qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
 target_link_libraries(tail-tray PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
 
+configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
+
 if (UNIX AND NOT APPLE)
     include(GNUInstallDirs)
 endif ()
@@ -127,6 +129,11 @@ install(TARGETS tail-tray
 )
 
 if (UNIX AND NOT APPLE)
+    configure_file(tail-tray.desktop.in
+        ${CMAKE_SOURCE_DIR}/tail-tray.desktop
+        @ONLY
+    )
+
     install(FILES tail-tray.desktop
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
     )

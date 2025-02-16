@@ -22,6 +22,9 @@ namespace
             case Command::SettingsChange: return "SettingsChange";
             case Command::Status: return "Status";
             case Command::SendFile: return "SendFile";
+            case Command::SetExitNode: return "SetExitNode";
+            case Command::GetSettings: return "GetSettings";
+            case Command::SetSettings: return "SetSettings";
 #if defined(DAVFS_ENABLED)
             case Command::Drive: return "Drive";
             case Command::DriveAdd: return "DriveAdd";

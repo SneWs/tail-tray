@@ -10,6 +10,7 @@
 
 #include "ManageDriveWindow.h"
 #include "KnownValues.h"
+#include "AdvertiseRoutesDlg.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -90,6 +91,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(pNetworkStateMonitor.get(), &NetworkStateMonitor::netCheckCompleted, this, &MainWindow::netCheckCompleted);
 
+    connect(ui->btnAdvertiseRoutes, &QPushButton::clicked, this, &MainWindow::showAdvertiseRoutesDialog);
+
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
 
@@ -140,7 +143,8 @@ void MainWindow::showNetworkStatusTab() {
 }
 
 void MainWindow::settingsReadyToRead() {
-    const auto* tailscalePrefs = pCurrentExecution->currentSettings();
+    auto tailscalePrefs = pCurrentExecution->currentSettings();
+
     qDebug() << "Settings recv from Tailscale:";
     qDebug() << "Operator: " << tailscalePrefs->operatorUser;
     qDebug() << "Hostname: " << tailscalePrefs->hostname;
@@ -482,6 +486,18 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
     }
 }
 
+void MainWindow::showAdvertiseRoutesDialog() const {
+    auto knownRoutes = pCurrentExecution->currentSettings()->getFilteredAdvertiseRoutes();
+    
+    AdvertiseRoutesDlg dlg(knownRoutes);
+    auto result = dlg.exec();
+    if (result != QDialog::Accepted)
+        return;
+    
+    const auto& routes = dlg.getDefinedRoutes();
+    pCurrentExecution->advertiseRoutes(routes);
+}
+
 bool MainWindow::isTailDriveFileAlreadySetup() {
     auto homeDavFsSecret = KnownValues::getTailDriveFilePath();
 
@@ -689,6 +705,16 @@ void MainWindow::syncSettingsToUi() const {
     ui->chkUseTailDrive->setChecked(settings.tailDriveEnabled());
     ui->txtTailDriveDefaultMountPath->setText(settings.tailDriveMountPath());
     ui->txtTailFilesDefaultSavePath->setText(settings.tailFilesDefaultSavePath());
+
+    auto advertisedRoutes = pCurrentExecution->currentSettings()->getFilteredAdvertiseRoutes();
+    if (advertisedRoutes.count() > 0) {
+        ui->lblAdvertisingNumRoutes->setText(tr("Advertising %1 routes")
+            .arg(advertisedRoutes.count())
+        );
+    }
+    else {
+        ui->lblAdvertisingNumRoutes->setText(tr("No routes advertised"));
+    }
 
     // Do we have a startup entry?
     auto configDir = QDir::home();

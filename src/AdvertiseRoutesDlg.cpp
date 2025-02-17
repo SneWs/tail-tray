@@ -59,6 +59,8 @@ AdvertiseRoutesDlg::AdvertiseRoutesDlg(const QList<QString>& routes, QWidget* pa
     for (const QString& route : routes) {
         ui->lstRoutes->addItem(route);
     }
+
+    ui->txtRoute->setText("0.0.0.0/0");
 }
 
 AdvertiseRoutesDlg::~AdvertiseRoutesDlg()
@@ -96,7 +98,7 @@ void AdvertiseRoutesDlg::validateAndAddRoute() {
     }
 
     ui->lstRoutes->addItem(route);    
-    ui->txtRoute->clear();
+    ui->txtRoute->setText("0.0.0.0/0");
 }
 
 void AdvertiseRoutesDlg::removeSelectedRoutes() {

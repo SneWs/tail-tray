@@ -314,6 +314,17 @@ public:
 
     [[nodiscard]] bool isExitNode() const { return advertiseRoutes.count() > 0; }
 
+    QList<QString> getFilteredAdvertiseRoutes() const {
+        QList<QString> filteredRoutes;
+        for (const auto& route : advertiseRoutes) {
+            // Filter out default routes
+            if (route.contains("::/0") || route.contains("0.0.0.0/0"))
+                continue;
+            filteredRoutes.emplace_back(route);
+        }
+        return filteredRoutes;
+    }
+
     static std::unique_ptr<CurrentTailPrefs> parse(const QJsonObject& obj) {
         auto prefs = std::make_unique<CurrentTailPrefs>();
 

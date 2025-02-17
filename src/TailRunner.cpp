@@ -82,7 +82,13 @@ void TailRunner::setExitNode(const QString& exitNode) {
 void TailRunner::advertiseRoutes(const QList<QString>& definedRoutes) {
     QStringList args;
     args << "--advertise-routes";
-    args << definedRoutes.join(",");
+    if (definedRoutes.count() > 0) {
+        args << definedRoutes.join(",");
+    }
+    else {
+        // Empty resets the routes
+        args << "";
+    }
 
     runCommand(Command::AdvertiseRoutes, "set", args, false, false);
 }
@@ -406,6 +412,10 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
         else if (commandInfo == Command::SetExitNode) {
             readSettings();
             checkStatus();
+        }
+        else if (commandInfo == Command::AdvertiseRoutes ||
+                 commandInfo == Command::SetSettings) {
+            readSettings();
         }
         else if (commandInfo == Command::ListAccounts) {
             checkStatus();

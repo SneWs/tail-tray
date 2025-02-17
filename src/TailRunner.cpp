@@ -25,6 +25,7 @@ namespace
             case Command::SetExitNode: return "SetExitNode";
             case Command::GetSettings: return "GetSettings";
             case Command::SetSettings: return "SetSettings";
+            case Command::AdvertiseRoutes: return "AdvertiseRoutes";
 #if defined(DAVFS_ENABLED)
             case Command::Drive: return "Drive";
             case Command::DriveAdd: return "DriveAdd";
@@ -76,6 +77,14 @@ void TailRunner::setExitNode(const QString& exitNode) {
     QStringList args;
     args << "--exit-node=" + (exitNode.isEmpty() ? "" : exitNode);
     runCommand(Command::SetExitNode, "set", args, false, false);
+}
+
+void TailRunner::advertiseRoutes(const QList<QString>& definedRoutes) {
+    QStringList args;
+    args << "--advertise-routes";
+    args << definedRoutes.join(",");
+
+    runCommand(Command::AdvertiseRoutes, "set", args, false, false);
 }
 
 void TailRunner::applySettings(const TailSettings& s) {

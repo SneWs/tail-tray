@@ -8,39 +8,52 @@
 #include <QDebug>
 
 namespace {
-    bool isValidIPv4WithSubnet(const QString& input) {
-        // Regular expression for matching "xxx.xxx.xxx.xxx/yy"
-        static QRegularExpression regex(R"(^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})$)");
-        QRegularExpressionMatch match = regex.match(input);
+    bool isValidIPWithSubnet(const QString& input) {
+        // Regular expression for IPv4 with subnet (xxx.xxx.xxx.xxx/yy)
+        static QRegularExpression ipv4Regex(R"(^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/(\d{1,2})$)");
+        QRegularExpressionMatch ipv4Match = ipv4Regex.match(input);
     
-        if (!match.hasMatch()) {
-            return false; // Format is incorrect
-        }
+        if (ipv4Match.hasMatch()) {
+            // Extract IP parts
+            QStringList ipParts = input.split('/').first().split('.');
+            int subnet = input.split('/').last().toInt();
     
-        // Extract IP parts
-        QStringList ipParts = input.split('/').first().split('.');
-        int subnet = input.split('/').last().toInt();
+            // Validate each octet (0-255)
+            for (const QString &part : ipParts) {
+                int value = part.toInt();
+                if (value < 0 || value > 255) {
+                    return false;
+                }
+            }
     
-        // Validate each octet (0-255)
-        for (const QString &part : ipParts) {
-            int value = part.toInt();
-            if (value < 0 || value > 255) {
+            // Validate subnet mask (0-32)
+            if (subnet < 0 || subnet > 32) {
                 return false;
             }
+    
+            // Validate the IP address using QHostAddress
+            QHostAddress ipAddress(input.split('/').first());
+            return ipAddress.protocol() == QAbstractSocket::IPv4Protocol;
         }
     
-        // Validate subnet mask (0-32)
-        if (subnet < 0 || subnet > 32) {
-            return false;
+        // Regular expression for IPv6 with subnet
+        static QRegularExpression ipv6Regex(R"(^([0-9a-fA-F:]+)/(\d{1,3})$)");
+        QRegularExpressionMatch ipv6Match = ipv6Regex.match(input);
+    
+        if (ipv6Match.hasMatch()) {
+            int subnet = ipv6Match.captured(2).toInt();
+    
+            // Validate subnet mask (0-128)
+            if (subnet < 0 || subnet > 128) {
+                return false;
+            }
+    
+            // Validate the IP address using QHostAddress
+            QHostAddress ipAddress(ipv6Match.captured(1));
+            return ipAddress.protocol() == QAbstractSocket::IPv6Protocol;
         }
     
-        // Validate the IP address using QHostAddress
-        QHostAddress ipAddress(input.split('/').first());
-        if (ipAddress.protocol() != QAbstractSocket::IPv4Protocol) {
-            return false;
-        }
-    
-        return true;
+        return false; // Neither valid IPv4 nor IPv6 format
     }
 }
 
@@ -60,7 +73,7 @@ AdvertiseRoutesDlg::AdvertiseRoutesDlg(const QList<QString>& routes, QWidget* pa
         ui->lstRoutes->addItem(route);
     }
 
-    ui->txtRoute->setText("0.0.0.0/0");
+    ui->txtRoute->setText("");
 }
 
 AdvertiseRoutesDlg::~AdvertiseRoutesDlg()
@@ -87,8 +100,8 @@ void AdvertiseRoutesDlg::validateAndAddRoute() {
         errors = "Route cannot be empty";
     }
 
-    if (!isValidIPv4WithSubnet(route)) {
-        errors = "Invalid route format. Expected: xxx.xxx.xxx.xxx/yy";
+    if (!isValidIPWithSubnet(route)) {
+        errors = "Invalid route format. Expected IPv4/IPv6 with subnet (xxx.xxx.xxx.xxx/yy or [xxxx:xxxx:xxxx::xxxx]/yy)";
     }
 
     if (!errors.isEmpty()) {
@@ -98,7 +111,7 @@ void AdvertiseRoutesDlg::validateAndAddRoute() {
     }
 
     ui->lstRoutes->addItem(route);    
-    ui->txtRoute->setText("0.0.0.0/0");
+    ui->txtRoute->setText("");
 }
 
 void AdvertiseRoutesDlg::removeSelectedRoutes() {

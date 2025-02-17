@@ -25,6 +25,7 @@ enum class Command {
     SettingsChange,
     Status,
     SendFile,
+    AdvertiseRoutes,
 #if defined(DAVFS_ENABLED)
     Drive,
     DriveAdd,
@@ -80,6 +81,7 @@ public:
     void readSettings();
     void setOperator();
     void setExitNode(const QString& exitNode = "");
+    void advertiseRoutes(const QList<QString>& definedRoutes);
     void applySettings(const TailSettings& s);
     void checkStatus();
     void getAccounts();

@@ -16,6 +16,7 @@
 #include "TailFileReceiver.h"
 #include "./ui_MainWindow.h"
 #include "NetworkStateMonitor.h"
+#include "models/TailStatus.h"
 
 class AccountsTabUiManager;
 
@@ -76,6 +77,9 @@ private slots:
 
     // Network reports
     void netCheckCompleted(bool success, const QMap<QString, QString>& results, QList<QPair<QString, float>>& latencies) const;
+
+    // Advertise routes and other network settings
+    void showAdvertiseRoutesDialog() const;
 
 private:
     // Switch to the new state and return the prev (old) state back to caller

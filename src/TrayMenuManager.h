@@ -57,6 +57,4 @@ private:
     void setupWellKnownActions() const;
 };
 
-
-
 #endif //TRAYMENUMANAGER_H

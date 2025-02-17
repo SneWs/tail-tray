@@ -67,6 +67,9 @@ set(PROJECT_SOURCES
         src/ManageDriveWindow.ui
         src/NetworkStateMonitor.cpp
         src/NetworkStateMonitor.h
+        src/AdvertiseRoutesDlg.h
+        src/AdvertiseRoutesDlg.cpp
+        src/AdvertiseRoutesDlg.ui
 )
 
 if (APPLE)

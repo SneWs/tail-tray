@@ -11,6 +11,7 @@
 #include "ManageDriveWindow.h"
 #include "KnownValues.h"
 #include "AdvertiseRoutesDlg.h"
+#include "DnsSettingsDlg.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -83,6 +84,7 @@ MainWindow::MainWindow(QWidget* parent)
         this, &MainWindow::onShowTailFileSaveLocationPicker);
 
     connect(pCurrentExecution.get(), &TailRunner::settingsRead, this, &MainWindow::settingsReadyToRead);
+    connect(pCurrentExecution.get(), &TailRunner::dnsStatusRead, this, &MainWindow::dnsStatusUpdated);
     connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
     connect(pCurrentExecution.get(), &TailRunner::commandError, this, &MainWindow::onCommandError);
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
@@ -92,6 +94,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(pNetworkStateMonitor.get(), &NetworkStateMonitor::netCheckCompleted, this, &MainWindow::netCheckCompleted);
 
     connect(ui->btnAdvertiseRoutes, &QPushButton::clicked, this, &MainWindow::showAdvertiseRoutesDialog);
+    connect(ui->btnTailscaleDnsSettings, &QPushButton::clicked, this, &MainWindow::showDnsSettingsDialog);
 
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
@@ -211,6 +214,20 @@ void MainWindow::settingsReadyToRead() {
         // Operator confirmed, lets continue the flow
         pCurrentExecution->getAccounts();
     }
+}
+
+void MainWindow::dnsStatusUpdated(TailDnsStatus* dnsStatus) {
+    pDnsStatus.reset(dnsStatus);
+
+    qDebug() << "DNS Status recv from Tailscale:";
+    
+    qDebug() << "Split DNS routes:";
+    for (const auto& r : dnsStatus->splitDnsRoutes)
+        qDebug() << "\t" << r.first << ": " << r.second;
+    
+    qDebug() << "Search Domains";
+    for (const auto& d : dnsStatus->searchDomains)
+        qDebug() << "\t" << d;
 }
 
 void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
@@ -490,12 +507,21 @@ void MainWindow::showAdvertiseRoutesDialog() const {
     auto knownRoutes = pCurrentExecution->currentSettings()->getFilteredAdvertiseRoutes();
     
     AdvertiseRoutesDlg dlg(knownRoutes);
+    dlg.setWindowIcon(windowIcon());
     auto result = dlg.exec();
     if (result != QDialog::Accepted)
         return;
     
     const auto& routes = dlg.getDefinedRoutes();
     pCurrentExecution->advertiseRoutes(routes);
+}
+
+void MainWindow::showDnsSettingsDialog() const {    
+    DnsSettingsDlg dlg(pDnsStatus.get(), ui->chkUseTailscaleDns->isChecked());
+    dlg.setWindowIcon(windowIcon());
+    dlg.exec();
+
+    ui->chkUseTailscaleDns->setChecked(dlg.isTailscaleDnsEnabled());
 }
 
 bool MainWindow::isTailDriveFileAlreadySetup() {

@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.nginx": "NGINX",
+        "filesystem": "cpp",
+        "xstring": "cpp"
+    }
+}

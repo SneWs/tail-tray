@@ -47,6 +47,8 @@ set(PROJECT_SOURCES
         src/models/TailDriveInfo.h
         src/models/TailStatus.h
         src/models/TailState.h
+        src/models/TailDnsStatus.h
+        src/models/CurrentTailPrefs.h
         src/models/JsonHelpers.h
         src/models/Models.h
         src/TrayMenuManager.cpp
@@ -70,6 +72,9 @@ set(PROJECT_SOURCES
         src/AdvertiseRoutesDlg.h
         src/AdvertiseRoutesDlg.cpp
         src/AdvertiseRoutesDlg.ui
+        src/DnsSettingsDlg.h
+        src/DnsSettingsDlg.cpp
+        src/DnsSettingsDlg.ui
 )
 
 if (APPLE)

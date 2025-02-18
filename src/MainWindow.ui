@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>624</width>
+    <width>588</width>
     <height>600</height>
    </rect>
   </property>
@@ -556,54 +556,65 @@
            <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
           </property>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
+           <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
+            <property name="leftMargin">
+             <number>9</number>
+            </property>
+            <property name="topMargin">
+             <number>9</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <property name="bottomMargin">
+             <number>9</number>
+            </property>
             <item>
-             <widget class="QWidget" name="widget" native="true">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
               </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label">
               <property name="minimumSize">
                <size>
                 <width>120</width>
                 <height>0</height>
                </size>
               </property>
-              <property name="styleSheet">
-               <string notr="true"/>
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout">
-               <item>
-                <widget class="QLabel" name="label">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>120</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <bold>true</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>General:</string>
-                 </property>
-                 <property name="buddy">
-                  <cstring>chkAllowIncomingCnx</cstring>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <property name="text">
+               <string>General</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
              </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
@@ -615,12 +626,36 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>140</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>140</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true"/>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <property name="sizeConstraint">
               <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>9</number>
              </property>
              <item>
               <widget class="QCheckBox" name="chkAllowIncomingCnx">
@@ -645,9 +680,9 @@
                 </widget>
                </item>
                <item>
-                <spacer name="horizontalSpacer">
+                <spacer name="horizontalSpacer_5">
                  <property name="orientation">
-                  <enum>Qt::Orientation::Vertical</enum>
+                  <enum>Qt::Orientation::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -660,7 +695,7 @@
                <item>
                 <widget class="QPushButton" name="btnTailscaleDnsSettings">
                  <property name="enabled">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                  <property name="text">
                   <string>Manage...</string>
@@ -732,6 +767,12 @@
             <layout class="QVBoxLayout" name="verticalLayout_5">
              <item>
               <widget class="QLabel" name="label_5">
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
                <property name="font">
                 <font>
                  <bold>true</bold>
@@ -807,6 +848,12 @@
             <layout class="QVBoxLayout" name="verticalLayout_6">
              <item>
               <widget class="QLabel" name="label_3">
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
                <property name="font">
                 <font>
                  <bold>true</bold>
@@ -825,6 +872,9 @@
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_9">
+            <property name="bottomMargin">
+             <number>9</number>
+            </property>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_8">
               <item>
@@ -896,6 +946,12 @@
             <layout class="QVBoxLayout" name="verticalLayout_10">
              <item>
               <widget class="QLabel" name="label_8">
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
                <property name="font">
                 <font>
                  <bold>true</bold>
@@ -913,6 +969,9 @@
            <layout class="QVBoxLayout" name="verticalLayout_12">
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <property name="bottomMargin">
+               <number>9</number>
+              </property>
               <item>
                <widget class="QLabel" name="label_9">
                 <property name="font">
@@ -976,6 +1035,12 @@
             <layout class="QVBoxLayout" name="verticalLayout_13">
              <item>
               <widget class="QLabel" name="lblTailDrive">
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
                <property name="font">
                 <font>
                  <bold>true</bold>
@@ -994,6 +1059,9 @@
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_21">
+            <property name="bottomMargin">
+             <number>9</number>
+            </property>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_22">
               <item>
@@ -1084,8 +1152,8 @@
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>200</width>
-            <height>20</height>
+            <width>20</width>
+            <height>400</height>
            </size>
           </property>
          </spacer>
@@ -1376,24 +1444,8 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_20">
         <property name="spacing">
-         <number>18</number>
+         <number>6</number>
         </property>
-        <item>
-         <spacer name="verticalSpacer_15">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Policy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>12</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_20">
           <item>
@@ -1672,6 +1724,9 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_24">
+          <property name="topMargin">
+           <number>20</number>
+          </property>
           <item>
            <spacer name="horizontalSpacer_19">
             <property name="orientation">

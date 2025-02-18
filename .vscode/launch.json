@@ -6,12 +6,11 @@
     "configurations": [
         {
             "name": "(Windows) Launch",
-            "type": "cppvsdbg",
+            "type": "cppdbg",
             "request": "launch",
             "args": [],
             "stopAtEntry": false,
             "environment": [],
-            "console": "internalConsole",
             "linux": {
                 "cwd": "${workspaceRoot}/build",
                 "program": "${workspaceRoot}/build/tail-tray"

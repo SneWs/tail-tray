@@ -17,10 +17,19 @@ jobs:
         build_type: [Release]
 
     steps:
-    - name: Install Qt
+    - name: Install Qt - Linux
+      if: runner.os == 'Linux'
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.4.2'
+        version: '6.7.3'
+        target: 'desktop'
+        set-env: 'true'
+
+    - name: Install Qt - Windows
+      if: runner.os == 'Windows'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.2'
         target: 'desktop'
         set-env: 'true'
 

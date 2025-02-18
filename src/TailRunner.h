@@ -15,6 +15,7 @@ enum class Command {
     SetOperator,
     SetExitNode,
     GetSettings,
+    GetDnsStatus,
     SetSettings,
     ListAccounts,
     SwitchAccount,
@@ -79,6 +80,7 @@ public:
     void bootstrap();
 
     void readSettings();
+    void readDnsStatus();
     void setOperator();
     void setExitNode(const QString& exitNode = "");
     void advertiseRoutes(const QList<QString>& definedRoutes);
@@ -111,6 +113,7 @@ private:
 
 signals:
     void settingsRead();
+    void dnsStatusRead(TailDnsStatus* dnsStatus);
     void accountsListed(const QList<TailAccountInfo>& accounts);
     void statusUpdated(TailStatus* newStatus);
     void loginFlowCompleted();

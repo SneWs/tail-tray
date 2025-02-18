@@ -24,6 +24,7 @@ namespace
             case Command::SendFile: return "SendFile";
             case Command::SetExitNode: return "SetExitNode";
             case Command::GetSettings: return "GetSettings";
+            case Command::GetDnsStatus: return "GetDnsStatus";
             case Command::SetSettings: return "SetSettings";
             case Command::AdvertiseRoutes: return "AdvertiseRoutes";
 #if defined(DAVFS_ENABLED)
@@ -65,6 +66,13 @@ void TailRunner::readSettings() {
     args << "prefs";
 
     runCommand(Command::GetSettings, "debug", args, false, false);
+}
+
+void TailRunner::readDnsStatus() {
+    QStringList args;
+    args << "status";
+
+    runCommand(Command::GetDnsStatus, "dns", args, false, false);
 }
 
 void TailRunner::setOperator() {
@@ -265,6 +273,25 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
             parseSettingsResponse(obj);
             break;
         }
+        case Command::GetDnsStatus: {
+            QString raw(data);
+            if (raw.isEmpty()) {
+                qDebug() << "No DNS status found on stdout or stderr";
+                emit commandError("No DNS status found", false);
+
+            }
+            else {
+                auto dnsStatus = TailDnsStatus::parse(raw);
+                if (dnsStatus == nullptr || dnsStatus->searchDomains.isEmpty()) {
+                    qDebug() << "Failed to parse DNS status";
+                    emit commandError("Failed to parse DNS status", false);
+                }
+                else {
+                    emit dnsStatusRead(dnsStatus);
+                }
+            }
+            break;
+        }
         case Command::ListAccounts: {
             const QString raw(data);
             const QList<TailAccountInfo> accounts = TailAccountInfo::parseAllFound(raw);
@@ -409,6 +436,9 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
         else if (commandInfo == Command::GetSettings) {
             emit settingsRead();
         }
+        else if (commandInfo == Command::Status) {
+            readDnsStatus();
+        }
         else if (commandInfo == Command::SetExitNode) {
             readSettings();
             checkStatus();
@@ -423,7 +453,8 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
         else if (commandInfo == Command::SendFile) {
             emit fileSent(true, QString{}, process->userData());
         }
-        else if (commandInfo != Command::Status && commandInfo != Command::Logout
+        else if (commandInfo != Command::Status && commandInfo != Command::Logout &&
+                 commandInfo != Command::GetDnsStatus
 #if defined(DAVFS_ENABLED)
                  && commandInfo != Command::Drive
 #endif

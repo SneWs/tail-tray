@@ -8,5 +8,7 @@
 #include "TailNetInfo.h"
 #include "TailDriveInfo.h"
 #include "TailStatus.h"
+#include "CurrentTailPrefs.h"
+#include "TailDnsStatus.h"
 
 #endif //MODELS_H

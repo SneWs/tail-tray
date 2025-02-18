@@ -42,6 +42,7 @@ private:
     std::unique_ptr<TrayMenuManager> pTrayManager;
     std::unique_ptr<TailRunner> pCurrentExecution;
     std::unique_ptr<TailStatus> pTailStatus;
+    std::unique_ptr<TailDnsStatus> pDnsStatus;
     std::unique_ptr<TailFileReceiver> pFileReceiver;
     std::unique_ptr<NetworkStateMonitor> pNetworkStateMonitor;
 
@@ -53,6 +54,7 @@ private:
 
 private slots:
     void settingsReadyToRead();
+    void dnsStatusUpdated(TailDnsStatus* dnsStatus);
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();
@@ -80,6 +82,7 @@ private slots:
 
     // Advertise routes and other network settings
     void showAdvertiseRoutesDialog() const;
+    void showDnsSettingsDialog() const;
 
 private:
     // Switch to the new state and return the prev (old) state back to caller

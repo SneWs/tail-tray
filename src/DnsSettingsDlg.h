@@ -24,7 +24,7 @@ signals:
     void dnsEnabledChanged(bool enabled);
 
 private slots:
-    void dnsCheckStateChanged(Qt::CheckState state);
+    void dnsCheckStateChanged(bool checked);
 
 private:
     Ui::DnsSettingsDlg* ui;

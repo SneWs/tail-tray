@@ -9,7 +9,7 @@ DnsSettingsDlg::DnsSettingsDlg(TailDnsStatus const* pDnsStatus, bool dnsEnabled,
     ui->setupUi(this);
 
     connect(ui->btnClose, &QPushButton::clicked, this, &DnsSettingsDlg::close);
-    connect(ui->chkUseTailscaleDns, &QCheckBox::checkStateChanged, this, &DnsSettingsDlg::dnsCheckStateChanged);
+    connect(ui->chkUseTailscaleDns, &QCheckBox::toggled, this, &DnsSettingsDlg::dnsCheckStateChanged);
 
     // Sync the search domains and routes with the UI
     for (const auto& domain : dnsStatus->searchDomains)
@@ -36,10 +36,9 @@ bool DnsSettingsDlg::isTailscaleDnsEnabled() const {
     return ui->chkUseTailscaleDns->isChecked();
 }
 
-void DnsSettingsDlg::dnsCheckStateChanged(Qt::CheckState state) {
-    bool enabled = state == Qt::Checked;
-    emit dnsEnabledChanged(enabled);
+void DnsSettingsDlg::dnsCheckStateChanged(bool checked) {
+    emit dnsEnabledChanged(checked);
 
-    ui->grpSearchDomains->setVisible(enabled);
-    ui->grpRoutes->setVisible(enabled);
+    ui->grpSearchDomains->setVisible(checked);
+    ui->grpRoutes->setVisible(checked);
 }

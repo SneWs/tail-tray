@@ -282,19 +282,25 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
             action->setChecked(dev->exitNode);
             action->setData(name);
 
+            if (dev->exitNode) {
+                pExitNodeNone->setChecked(false);
+                pExitNodeNone->setEnabled(true);
+            }
+
             // You can't use a exit node if you are advertising as exit node
             action->setEnabled(dev->online && !settings.advertiseAsExitNode());
 
             connect(action, &QAction::triggered, this, [this, action](bool) {
                 auto devName = QString{};
 
-                if (action->isChecked()) {
+                bool isChecked = action->isChecked();
+                pExitNodeNone->setChecked(!isChecked);
+
+                if (isChecked) {
                     devName = action->data().toString();
                 }
 
                 pExitNodeNone->setChecked(devName.isEmpty());
-
-                settings.save();
                 pTailRunner->setExitNode(devName);
             });
         }
@@ -382,6 +388,11 @@ void TrayMenuManager::setupWellKnownActions() const {
     connect(pThisDevice.get(), &QAction::triggered, this, [this](bool) {
         auto* wnd = dynamic_cast<MainWindow*>(this->parent());
         wnd->showAccountsTab();
+    });
+
+    connect(pExitNodeNone.get(), &QAction::triggered, this, [this](bool) {
+        pExitNodeNone->setEnabled(false);
+        pTailRunner->setExitNode("");
     });
 
     connect(pQuitAction.get(), &QAction::triggered, qApp, &QApplication::quit);

@@ -15,6 +15,7 @@ This is a personal project and is not endorsed by Tailscale Inc. in any shape or
 - [X] Tail drive support - Working with davfs2 support + additional help setting up davfs2 and mounting etc
 - [X] Send files to any device on your Tailnet directly from the tray menu
 - [X] Get notified and receive files from any device on your Tailnet to a pre-defined location on disk
+- [X] Nix Derivation 
 
 ### License
 GNU General Public License v3.0 - see [LICENSE](LICENSE) for more details
@@ -34,6 +35,37 @@ To do that, please see the Getting started section below.
 * Any other architecture that QT 6 supports and where you can compile this project and where Tailscale runs
 
 ### Getting started
+#### Install with nix
+You can install tail-tray with the Nix-Package Manager or on NixOS via the configuration.nix.
+
+> **IMPORTANT:** tail-tray is currently only available on the nix **unstable** channel! The Pull Request for the stable channel is already open: [NixOS/nixpkgs#383072](https://github.com/NixOS/nixpkgs/pull/383072)
+##### Nix-Package Manager
+```bash
+# persistant on NixOS
+nix-env -iA nixos.tail-tray nixos.tailscale
+
+# persistant on non NixOS
+nix-env -iA nixpkgs.tail-tray nixpkgs.tailscale
+
+# non persistant
+nix-shell -p tail-tray tailscale
+```
+
+##### NixOS
+configuration.nix:
+```nix
+{pkgs, ...}:
+
+{
+...
+    environment.systemPackages = with pkgs; [
+        tailscale
+        tail-tray
+    ];
+...
+}
+```
+#### Install from source
 1. Install the following dependencies
    * Git, QT 6, cmake and a c++ compiler, for example:
       * On Ubuntu and Ubuntu based distros

@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget* parent)
     , pFileReceiver(nullptr)
     , eCurrentState(TailState::NoAccount)
     , pNetworkStateMonitor(std::make_unique<NetworkStateMonitor>(this))
+    , pDnsStatus(std::make_unique<TailDnsStatus>())
 {
     ui->setupUi(this);
 
@@ -217,6 +218,9 @@ void MainWindow::settingsReadyToRead() {
 }
 
 void MainWindow::dnsStatusUpdated(TailDnsStatus* dnsStatus) {
+    if (dnsStatus == nullptr)
+        return;
+    
     pDnsStatus.reset(dnsStatus);
 
     qDebug() << "DNS Status recv from Tailscale:";

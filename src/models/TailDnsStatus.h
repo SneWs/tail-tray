@@ -13,8 +13,8 @@ class TailDnsStatus final : public QObject
 {
     Q_OBJECT
 public:
-    QList<QPair<QString, QString>> splitDnsRoutes;
-    QList<QString> searchDomains;
+    QList<QPair<QString, QString>> splitDnsRoutes{};
+    QList<QString> searchDomains{};
 
     static TailDnsStatus* parse(const QString rawOutput) {
         auto* newStatus = new TailDnsStatus{};

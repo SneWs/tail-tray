@@ -282,7 +282,7 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
             }
             else {
                 auto dnsStatus = TailDnsStatus::parse(raw);
-                if (dnsStatus == nullptr || dnsStatus->searchDomains.isEmpty()) {
+                if (dnsStatus == nullptr) {
                     qDebug() << "Failed to parse DNS status";
                     emit commandError("Failed to parse DNS status", false);
                 }

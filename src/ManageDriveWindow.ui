@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>445</width>
-    <height>242</height>
+    <height>169</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Tail Drive</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset resource="../resources.qrc">
     <normaloff>:/icons/tray-on.png</normaloff>:/icons/tray-on.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -69,12 +69,12 @@
    <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Orientation::Vertical</enum>
+      <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>34</height>
+       <width>34</width>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -84,7 +84,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
+        <enum>Qt::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -113,7 +113,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

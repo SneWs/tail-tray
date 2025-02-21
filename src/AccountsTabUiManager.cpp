@@ -56,7 +56,6 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
         }
         else {
             // Secondary account not currently active...
-            ui->accountDetailsContainer->setVisible(true);
             ui->lblUsername->setText(account.account);
             ui->lblTailnetName->setText(account.tailnet);
             ui->lblEmail->setText(account.account);
@@ -84,14 +83,10 @@ void AccountsTabUiManager::onTailStatusChanged(TailStatus* status) {
     pTailStatus = status;
     if (pTailStatus == nullptr || pTailStatus->user == nullptr || pTailStatus->user->id <= 0) {
         // Not logged in
-
-        // Hide account details view, nothing to show
-        ui->accountDetailsContainer->setVisible(false);
         return;
     }
 
     // Show account details view
-    ui->accountDetailsContainer->setVisible(true);
     ui->lblUsername->setText(pTailStatus->user->displayName);
     ui->lblTailnetName->setText(pTailStatus->user->loginName);
     ui->lblEmail->setText(pTailStatus->user->loginName);

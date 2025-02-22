@@ -70,10 +70,19 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     ui->lstAccounts->clear();
     for (const auto& account : foundAccounts) {
         auto loginName = account.account;
-        if (loginName.endsWith('*'))
+        bool isActiveAccount = false;
+        if (loginName.endsWith('*')) {
+            isActiveAccount = true;
             loginName = loginName.chopped(1);
+        }
+
         auto* pCurrent = new QListWidgetItem(account.tailnet + "\n" + loginName);
         pCurrent->setData(Qt::UserRole, account.id);
+        if (isActiveAccount && foundAccounts.count() > 1) {
+            QFont font = pCurrent->font();
+            font.setBold(true);
+            pCurrent->setFont(font);
+        }
         ui->lstAccounts->addItem(pCurrent);
         pCurrent->setTextAlignment(Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
     }

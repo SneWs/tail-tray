@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget* parent)
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
 
-    changeToState(TailState::NotLoggedIn);
+    changeToState(TailState::NotConnected);
 
     // NOTE: The bootstrap to get this started is as follows:
     // 1. Read settings from Tailscale daemon
@@ -692,6 +692,34 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
     }
 
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
+
+    if (pTailStatus->backendState == "NoState") {
+        // We are not running
+        changeToState(TailState::NotConnected);
+        bool showMessage = true;
+        if (seenWarnings.contains("NoState")) {
+            auto lastSeen = seenWarnings["NoState"];
+            auto daysSinceLastSeen = lastSeen.secsTo(QDateTime::currentDateTime());
+            if (daysSinceLastSeen < (60 * 60) * 1) // 1 hours before showing the same health info again
+            {
+                return; // No point in showing
+            }
+
+            showMessage = true;
+            // Update to now
+            seenWarnings["NoState"] = QDateTime::currentDateTime();
+        }
+        else {
+            showMessage = true;
+            seenWarnings.insert("NoState", QDateTime::currentDateTime());
+        }
+
+        if (showMessage) {
+            QMessageBox::information(this, tr("Tailscale not running"),
+                tr("Unexpected state, tailscale backend is not running. Please check your internet connection and try again."),
+                QMessageBox::Ok);
+        }
+    }
 
 #if defined(DAVFS_ENABLED)
     tailDrivesToUi();

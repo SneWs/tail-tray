@@ -344,8 +344,10 @@ void TrayMenuManager::buildAccountsMenu() const {
     for (const auto& acc : accounts) {
         const bool isActive = acc.account.endsWith('*');
         auto accountName = acc.account;
-        if (isActive)
+        if (isActive) {
             accountName = accountName.chopped(1);
+            pThisDevice->setText(accountName);
+        }
 
         auto accountAction = new QAction(acc.tailnet + " (" + accountName + ")");
         accountAction->setCheckable(true);

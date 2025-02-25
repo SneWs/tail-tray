@@ -90,6 +90,8 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
 
 void AccountsTabUiManager::onTailStatusChanged(TailStatus* status) {
     pTailStatus = status;
+    showAccountDetails(false);
+
     if (pTailStatus == nullptr || pTailStatus->user == nullptr || pTailStatus->user->id <= 0) {
         // Not logged in
         return;
@@ -117,7 +119,28 @@ void AccountsTabUiManager::onTailStatusChanged(TailStatus* status) {
         }
     }
 
+    showAccountDetails(true);
+
     if (!pTailStatus->user->profilePicUrl.isEmpty()) {
         // ui->lblUsername->setPixmap(QPixmap(pTailStatus->user->profilePicUrl));
     }
+}
+
+void AccountsTabUiManager::showAccountDetails(bool show) {
+    if (!show)
+        ui->lblUsername->setText(tr("Select an account in the list to view details"));
+    ui->lblUsername->setVisible(true);
+    
+    ui->lblTailnetName->setVisible(show);
+    ui->lblTailnetNameTitle->setVisible(show);
+    ui->lblEmail->setVisible(show);
+    ui->lblEmailTitle->setVisible(show);
+    ui->lblStatus->setVisible(show);
+    ui->lblStatusTitle->setVisible(show);
+    ui->lblKeyExpiry->setVisible(show);
+    ui->lblKeyExpiryTitle->setVisible(show);
+    ui->lblUserImage->setVisible(show);
+    ui->btnLogout->setVisible(show);
+    ui->btnAdminConsole->setVisible(show);
+    ui->btnReAuthenticate->setVisible(show);
 }

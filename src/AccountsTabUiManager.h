@@ -27,6 +27,9 @@ public:
     void onTailStatusChanged(TailStatus* status);
 
 private:
+    void showAccountDetails(bool show = true);
+
+private:
     Ui::MainWindow* ui;
     TailRunner* pTailRunner;
     TailStatus* pTailStatus;

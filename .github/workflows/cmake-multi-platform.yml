@@ -66,7 +66,7 @@ jobs:
         cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
       shell: bash
 
-    - name: Package DEB file for Ubuntu
+    - name: Package DEB file for Ubuntu 24.04
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
       uses: jtdor/build-deb-action@v1
       env:
@@ -77,7 +77,21 @@ jobs:
         extra-build-deps: devscripts git
         before-build-hook: |
           git checkout debian/changelog
-          debchange --controlmaint --local="ubuntu~git$(git rev-parse --short HEAD)" "CI build"
+          debchange --controlmaint --local="ubuntu-24.04-noble~git$(git rev-parse --short HEAD)" "CI build"
+        buildpackage-opts: --build=binary --no-sign
+
+    - name: Package DEB file for Ubuntu 24.10
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
+      uses: jtdor/build-deb-action@v1
+      env:
+        DEB_BUILD_OPTIONS: noautodbgsym
+      with:
+        artifacts-dir: build
+        docker-image: ubuntu:24.10
+        extra-build-deps: devscripts git
+        before-build-hook: |
+          git checkout debian/changelog
+          debchange --controlmaint --local="ubuntu-24.10-oracular~git$(git rev-parse --short HEAD)" "CI build"
         buildpackage-opts: --build=binary --no-sign
 
     - name: Package DEB file for Debian
@@ -91,7 +105,7 @@ jobs:
         extra-build-deps: devscripts git
         before-build-hook: |
           git checkout debian/changelog
-          debchange --controlmaint --local="debian~git$(git rev-parse --short HEAD)" "CI build"
+          debchange --controlmaint --local="debian-trixie~git$(git rev-parse --short HEAD)" "CI build"
         buildpackage-opts: --build=binary --no-sign
 
     - name: Upload DEB files
@@ -100,8 +114,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
-        mv ${{ steps.strings.outputs.build-output-dir }}/*ubuntu*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-ubuntu.deb
-        mv ${{ steps.strings.outputs.build-output-dir }}/*debian*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-debian.deb
+        mv ${{ steps.strings.outputs.build-output-dir }}/*ubuntu-24.04*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-ubuntu-24.04.deb
+        mv ${{ steps.strings.outputs.build-output-dir }}/*ubuntu-24.10*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-ubuntu-24.10.deb
+        mv ${{ steps.strings.outputs.build-output-dir }}/*debian*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-debian-trixie.deb
         gh release upload latest ${{ steps.strings.outputs.build-output-dir }}/*.deb --clobber
 
     - name: Build on Windows
@@ -192,9 +207,9 @@ jobs:
         name: Tail-Tray-Windows
         path: "${{ steps.strings.outputs.build-output-dir }}/installer"
 
-    - name: Upload Linux Build Artifact
-      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
-      uses: actions/upload-artifact@v4
-      with:
-        name: Tail-Tray-Linux
-        path: ${{ steps.strings.outputs.build-output-dir }}/*.deb
+    #- name: Upload Linux Build Artifact
+    #  if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
+    #  uses: actions/upload-artifact@v4
+    #  with:
+    #    name: Tail-Tray-Linux
+    #    path: ${{ steps.strings.outputs.build-output-dir }}/*.deb

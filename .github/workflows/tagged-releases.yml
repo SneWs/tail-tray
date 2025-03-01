@@ -72,7 +72,7 @@ jobs:
         extra-build-deps: devscripts git
         before-build-hook: |
           git checkout debian/changelog
-          debchange --controlmaint --local="ubuntu" "New upstream release"
+          debchange --controlmaint --local="ubuntu-24.04-noble" "New upstream release"
         buildpackage-opts: --build=binary --no-sign
 
     - name: Package DEB file for Debian
@@ -85,7 +85,7 @@ jobs:
         extra-build-deps: devscripts git
         before-build-hook: |
           git checkout debian/changelog
-          debchange --controlmaint --local="debian" "New upstream release"
+          debchange --controlmaint --local="debian-trixie" "New upstream release"
         buildpackage-opts: --build=binary --no-sign
 
     - uses: "marvinpinto/action-automatic-releases@latest"

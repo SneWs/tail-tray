@@ -77,6 +77,8 @@ public:
     explicit TailRunner(const TailSettings& s, QObject* parent = nullptr);
     virtual ~TailRunner();
 
+    void shutdown();
+
     void bootstrap();
 
     void readSettings();

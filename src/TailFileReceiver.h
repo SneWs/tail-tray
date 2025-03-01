@@ -13,6 +13,8 @@ public:
     TailFileReceiver(QString savePath, QObject* parent = nullptr);
     ~TailFileReceiver();
 
+    void shutdown();
+
 signals:
     void fileReceived(QString filePath);
     void errorListening(const QString& error);

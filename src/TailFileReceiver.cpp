@@ -18,6 +18,12 @@ TailFileReceiver::~TailFileReceiver() {
     m_process->close();
 }
 
+void TailFileReceiver::shutdown() {
+    if (m_process != nullptr) {
+        m_process->close();
+    }
+}
+
 void TailFileReceiver::startListening() {
     qDebug() << "Starting to listening for files";
 

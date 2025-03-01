@@ -51,6 +51,21 @@ TailRunner::~TailRunner()
     runCompletedCleanup();
 }
 
+void TailRunner::shutdown() {
+    // Kill off any pending process calls, this is needed in cases such as:
+    // - When the user is in a pending login state, then the process is waiting for user to complete web auth flows
+    
+    for (const auto& proc : processes) {
+        if (proc->process()->state() == QProcess::Running) {
+            proc->process()->kill();
+            proc->process()->waitForFinished();
+            proc->process()->close();
+        }
+    }
+
+    runCompletedCleanup();
+}
+
 void TailRunner::bootstrap() {
     // NOTE: The bootstrap to get this started is as follows:
     // 1. Read settings from Tailscale daemon

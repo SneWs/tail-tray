@@ -14,6 +14,8 @@ public:
     explicit NetworkStateMonitor(QObject* parent = nullptr);
     ~NetworkStateMonitor() override = default;
 
+    void shutdown();
+
 signals:
     void netCheckCompleted(bool success, const QMap<QString, QString>& information, QList<QPair<QString, float>>& latencies);
 

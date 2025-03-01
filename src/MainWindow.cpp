@@ -127,6 +127,12 @@ MainWindow::MainWindow(QWidget* parent)
 #endif
 }
 
+void MainWindow::shutdown() {
+    pNetworkStateMonitor->shutdown();
+    pFileReceiver->shutdown();
+    pCurrentExecution->shutdown();
+}
+
 void MainWindow::showSettingsTab() {
     ui->tabWidget->setCurrentIndex(1);
     show();

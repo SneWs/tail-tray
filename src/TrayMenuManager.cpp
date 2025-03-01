@@ -397,7 +397,11 @@ void TrayMenuManager::setupWellKnownActions() const {
         pTailRunner->setExitNode("");
     });
 
-    connect(pQuitAction.get(), &QAction::triggered, qApp, &QApplication::quit);
+    connect(pQuitAction.get(), &QAction::triggered, qApp, [this](bool) {
+        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+        wnd->shutdown();
+        qApp->quit();
+    });
 
     connect(pSysTray.get(), &QSystemTrayIcon::activated,
         this, [this](QSystemTrayIcon::ActivationReason reason) {

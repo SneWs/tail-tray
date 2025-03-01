@@ -79,6 +79,16 @@ NetworkStateMonitor::NetworkStateMonitor(QObject* parent)
     QTimer::singleShot(1000, this, &NetworkStateMonitor::onTimerElapsed);
 }
 
+void NetworkStateMonitor::shutdown() {
+    if (pTimer != nullptr) {
+        pTimer->stop();
+    }
+
+    if (pProcess != nullptr) {
+        pProcess->close();
+    }
+}
+
 void NetworkStateMonitor::onTimerElapsed() {
     startProcess();
 

@@ -116,6 +116,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     setupNetworkCallbacks();
 
+    // Disable Tailnet lock UI for now
+    ui->lblTailnetLockStatus->setEnabled(false);
+    ui->lblTailnetLockTitle->setEnabled(false);
+    ui->btnManageTailnetLocks->setEnabled(false);
+
 #if defined(WINDOWS_BUILD)
     // On windows this looks like crap, so don't use it
     ui->twNetworkStatus->setAlternatingRowColors(false);

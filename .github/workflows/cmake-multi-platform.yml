@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "master" ]
   pull_request:
-    branches: [ "*" ]
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -67,7 +67,7 @@ jobs:
       shell: bash
 
     - name: Package DEB file for Ubuntu 24.04
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
       uses: jtdor/build-deb-action@v1
       env:
         DEB_BUILD_OPTIONS: noautodbgsym
@@ -81,7 +81,7 @@ jobs:
         buildpackage-opts: --build=binary --no-sign
 
     - name: Package DEB file for Debian
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
       uses: jtdor/build-deb-action@v1
       env:
         DEB_BUILD_OPTIONS: noautodbgsym
@@ -192,9 +192,9 @@ jobs:
         name: Tail-Tray-Windows
         path: "${{ steps.strings.outputs.build-output-dir }}/installer"
 
-    - name: Upload Linux Build Artifact
-      if: runner.os == 'Linux'
-      uses: actions/upload-artifact@v4
-      with:
-        name: Tail-Tray-Linux
-        path: ${{ steps.strings.outputs.build-output-dir }}/*.deb
+    #- name: Upload Linux Build Artifact
+    #  if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
+    #  uses: actions/upload-artifact@v4
+    #  with:
+    #    name: Tail-Tray-Linux
+    #    path: ${{ steps.strings.outputs.build-output-dir }}/*.deb

@@ -261,7 +261,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                 driveMenu->addSeparator();
                 auto* openAction = driveMenu->addAction(tr("Open in file manager"));
                 connect(openAction, &QAction::triggered, this, [this, drive](bool) {
-                    QDesktopServices::openUrl(QUrl(drive.path));
+                    QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::toNativeSeparators(drive.path)));
                 });
             }
 #endif

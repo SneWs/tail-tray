@@ -35,10 +35,10 @@ public:
     static std::unique_ptr<TailUser> parse(const QJsonObject& thisUser) {
         auto user = std::make_unique<TailUser>();
 
-        user->id = safeReadLong(thisUser, "ID");
-        user->loginName = safeReadStr(thisUser, "LoginName");
-        user->displayName = safeReadStr(thisUser, "DisplayName");
-        user->profilePicUrl = safeReadStr(thisUser, "ProfilePicUrl");
+        user->id = jsonReadLong(thisUser, "ID");
+        user->loginName = jsonReadString(thisUser, "LoginName");
+        user->displayName = jsonReadString(thisUser, "DisplayName");
+        user->profilePicUrl = jsonReadString(thisUser, "ProfilePicUrl");
 
         if (thisUser.contains("roles"))
         {

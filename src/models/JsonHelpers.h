@@ -5,7 +5,7 @@
 #include <QJsonObject>
 
 namespace JsonHelpers {
-    static QString safeReadStr(const QJsonObject& obj, const QString& key) {
+    static QString jsonReadString(const QJsonObject& obj, const QString& key) {
         if (!obj.contains(key))
             return QString{};
 
@@ -15,7 +15,7 @@ namespace JsonHelpers {
         return obj[key].toString("");
     }
 
-    static int safeReadInt(const QJsonObject& obj, const QString& key) {
+    static int jsonReadInt(const QJsonObject& obj, const QString& key) {
         if (!obj.contains(key))
             return 0;
 
@@ -25,7 +25,7 @@ namespace JsonHelpers {
         return obj[key].toInt();
     }
 
-    static long long safeReadLong(const QJsonObject& obj, const QString& key) {
+    static long long jsonReadLong(const QJsonObject& obj, const QString& key) {
         if (!obj.contains(key))
             return 0;
 
@@ -35,7 +35,7 @@ namespace JsonHelpers {
         return obj[key].toInteger();
     }
 
-    static bool safeReadBool(const QJsonObject& obj, const QString& key) {
+    static bool jsonReadBool(const QJsonObject& obj, const QString& key) {
         if (!obj.contains(key))
             return false;
 

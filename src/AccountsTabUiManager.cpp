@@ -5,7 +5,6 @@
 #include "AccountsTabUiManager.h"
 
 #include <QDesktopServices>
-#include <QPushButton>
 #include <QUrl>
 
 #include "./ui_MainWindow.h"

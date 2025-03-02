@@ -36,9 +36,9 @@ public:
     static TailNetInfo parse(const QJsonObject& obj) {
         TailNetInfo retVal;
 
-        retVal.name = safeReadStr(obj, "Name");
-        retVal.magicDnsSuffix = safeReadStr(obj, "MagicDnsSuffix");
-        retVal.magicDnsEnabled = safeReadBool(obj, "MagicDnsEnabled");
+        retVal.name = jsonReadString(obj, "Name");
+        retVal.magicDnsSuffix = jsonReadString(obj, "MagicDnsSuffix");
+        retVal.magicDnsEnabled = jsonReadBool(obj, "MagicDnsEnabled");
 
         return retVal;
     }

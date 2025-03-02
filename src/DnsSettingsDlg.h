@@ -2,7 +2,6 @@
 #define DNSSETTINGSDLG_H
 
 #include <QDialog>
-#include <QList>
 
 #include "models/Models.h"
 
@@ -15,10 +14,10 @@ class DnsSettingsDlg : public QDialog
     Q_OBJECT
 public:
     explicit DnsSettingsDlg(TailDnsStatus const* pDnsStatus, bool dnsEnabled, QWidget* parent = nullptr);
-    ~DnsSettingsDlg();
+    ~DnsSettingsDlg() override;
 
     void setTailscaleDnsEnabled(bool enabled);
-    bool isTailscaleDnsEnabled() const;
+    [[nodiscard]] bool isTailscaleDnsEnabled() const;
 
 signals:
     void dnsEnabledChanged(bool enabled);

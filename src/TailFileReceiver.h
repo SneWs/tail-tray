@@ -1,8 +1,6 @@
 #ifndef TAILFILERECEIVER_H_
 #define TAILFILERECEIVER_H_
 
-#include <QObject>
-#include <QString>
 #include <QProcess>
 
 #include <memory>
@@ -10,8 +8,8 @@
 class TailFileReceiver : public QObject {
     Q_OBJECT
 public:
-    TailFileReceiver(QString savePath, QObject* parent = nullptr);
-    ~TailFileReceiver();
+    explicit TailFileReceiver(QString savePath, QObject* parent = nullptr);
+    ~TailFileReceiver() override;
 
     void shutdown();
 

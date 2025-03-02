@@ -217,18 +217,18 @@ public:
     static std::unique_ptr<CurrentTailPrefs> parse(const QJsonObject& obj) {
         auto prefs = std::make_unique<CurrentTailPrefs>();
 
-        prefs->controlURL = safeReadStr(obj, "ControlURL");
-        prefs->routeAll = safeReadBool(obj, "RouteAll");
-        prefs->exitNodeId = safeReadStr(obj, "ExitNodeID");
-        prefs->exitNodeIp = safeReadStr(obj, "ExitNodeIP");
-        prefs->internalExitNodePrior = safeReadStr(obj, "InternalExitNodePrior");
-        prefs->exitNodeAllowLANAccess = safeReadBool(obj, "ExitNodeAllowLANAccess");
-        prefs->corpDNS = safeReadBool(obj, "CorpDNS");
-        prefs->runSSH = safeReadBool(obj, "RunSSH");
-        prefs->runWebClient = safeReadBool(obj, "RunWebClient");
-        prefs->wantRunning = safeReadBool(obj, "WantRunning");
-        prefs->loggedOut = safeReadBool(obj, "LoggedOut");
-        prefs->shieldsUp = safeReadBool(obj, "ShieldsUp");
+        prefs->controlURL = jsonReadString(obj, "ControlURL");
+        prefs->routeAll = jsonReadBool(obj, "RouteAll");
+        prefs->exitNodeId = jsonReadString(obj, "ExitNodeID");
+        prefs->exitNodeIp = jsonReadString(obj, "ExitNodeIP");
+        prefs->internalExitNodePrior = jsonReadString(obj, "InternalExitNodePrior");
+        prefs->exitNodeAllowLANAccess = jsonReadBool(obj, "ExitNodeAllowLANAccess");
+        prefs->corpDNS = jsonReadBool(obj, "CorpDNS");
+        prefs->runSSH = jsonReadBool(obj, "RunSSH");
+        prefs->runWebClient = jsonReadBool(obj, "RunWebClient");
+        prefs->wantRunning = jsonReadBool(obj, "WantRunning");
+        prefs->loggedOut = jsonReadBool(obj, "LoggedOut");
+        prefs->shieldsUp = jsonReadBool(obj, "ShieldsUp");
 
         // AdvertiseTags
         if (obj.contains("AdvertiseTags") && !obj["AdvertiseTags"].isNull()) {
@@ -237,8 +237,8 @@ public:
             }
         }
 
-        prefs->hostname = safeReadStr(obj, "Hostname");
-        prefs->notepadURLs = safeReadBool(obj, "NotepadURLs");
+        prefs->hostname = jsonReadString(obj, "Hostname");
+        prefs->notepadURLs = jsonReadBool(obj, "NotepadURLs");
 
         // AdvertiseRoutes
         if (obj.contains("AdvertiseRoutes") && !obj["AdvertiseRoutes"].isNull()) {
@@ -254,10 +254,10 @@ public:
             }
         }
 
-        prefs->noSNAT = safeReadBool(obj, "NoSNAT");
-        prefs->noStatefulFiltering = safeReadBool(obj, "NoStatefulFiltering");
-        prefs->netfilterMode = safeReadInt(obj, "NetfilterMode");
-        prefs->operatorUser = safeReadStr(obj, "OperatorUser");
+        prefs->noSNAT = jsonReadBool(obj, "NoSNAT");
+        prefs->noStatefulFiltering = jsonReadBool(obj, "NoStatefulFiltering");
+        prefs->netfilterMode = jsonReadInt(obj, "NetfilterMode");
+        prefs->operatorUser = jsonReadString(obj, "OperatorUser");
 
         // AutoUpdate
         // TBD
@@ -265,9 +265,9 @@ public:
         // AppConnector
         // TBD
 
-        prefs->postureChecking = safeReadBool(obj, "PostureChecking");
-        prefs->netfilterKind = safeReadStr(obj, "NetfilterKind");
-        prefs->allowSingleHosts = safeReadBool(obj, "AllowSingleHosts");
+        prefs->postureChecking = jsonReadBool(obj, "PostureChecking");
+        prefs->netfilterKind = jsonReadString(obj, "NetfilterKind");
+        prefs->allowSingleHosts = jsonReadBool(obj, "AllowSingleHosts");
 
         // DriveShares
         if (obj.contains("DriveShares") && !obj["DriveShares"].isNull()) {

@@ -257,6 +257,12 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                 connect(removeAction, &QAction::triggered, this, [this, drive](bool) {
                     pTailRunner->removeDrive(drive);
                 });
+
+                driveMenu->addSeparator();
+                auto* openAction = driveMenu->addAction(tr("Open in file manager"));
+                connect(openAction, &QAction::triggered, this, [this, drive](bool) {
+                    QDesktopServices::openUrl(QUrl(drive.path));
+                });
             }
 #endif
         }

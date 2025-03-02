@@ -37,8 +37,8 @@ public:
     }
 
     static QList<TailDriveInfo> parse(const QString& rawString) {
-        QList<TailDriveInfo> parsedList;
-        static QRegularExpression re(R"((\w+)\s+([\w\/]+)\s+(\w+))");
+        QList<TailDriveInfo> parsedList{};
+        static QRegularExpression re(R"(^(\S+)\s+([\S\\/:\.]+)\s*(\S*)\s*$)");
 
         QStringList lines = rawString.split('\n');
         if (lines.count() < 3) {

@@ -24,6 +24,10 @@ MainWindow::MainWindow(QWidget* parent)
     , eCurrentState(TailState::NoAccount)
     , pNetworkStateMonitor(std::make_unique<NetworkStateMonitor>(this))
     , pDnsStatus(std::make_unique<TailDnsStatus>())
+#if defined(DAVFS_ENABLED)
+    , pTailDriveUiManager()
+#endif
+    , settings(this)
 {
     ui->setupUi(this);
 
@@ -34,42 +38,11 @@ MainWindow::MainWindow(QWidget* parent)
 
 // Davfs or not
 #if defined(DAVFS_ENABLED)
+    pTailDriveUiManager = std::make_unique<TailDriveUiManager>(ui.get(), pCurrentExecution.get(), this);
+    
     // Make sure to adjust tail drive based on the check state
     if (settings.tailDriveEnabled()) {
         ui->tabWidget->insertTab(3, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
-    }
-
-    connect(ui->btnAddTailDrive, &QPushButton::clicked,
-            this, &MainWindow::addTailDriveButtonClicked);
-
-    connect(ui->btnRemoveSelectedTailDrive, &QPushButton::clicked,
-            this, &MainWindow::removeTailDriveButtonClicked);
-
-    connect(ui->chkUseTailDrive, &QCheckBox::clicked,
-            this, [this]() {
-                auto checked = ui->chkUseTailDrive->isChecked();
-                settings.tailDriveEnabled(checked);
-
-                if (checked) {
-                    ui->tabWidget->insertTab(3, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
-                }
-                else {
-                    ui->tabWidget->removeTab(3);
-                }
-            });
-
-    connect(ui->btnSelectTailDriveMountPath, &QPushButton::clicked,
-            this, &MainWindow::selectTailDriveMountPath);
-
-    if (!isTailDriveFileAlreadySetup()) {
-        ui->btnTailDriveFixDavFsMountSetup->setEnabled(true);
-        ui->btnTailDriveFixDavFsMountSetup->setText(tr("Fix it for me"));
-        connect(ui->btnTailDriveFixDavFsMountSetup, &QPushButton::clicked,
-                this, &MainWindow::fixTailDriveDavFsSetup);
-    }
-    else {
-        ui->btnTailDriveFixDavFsMountSetup->setEnabled(false);
-        ui->btnTailDriveFixDavFsMountSetup->setText(tr("Configured and ready"));
     }
 
     connect(pCurrentExecution.get(), &TailRunner::driveListed, this, &MainWindow::drivesListed);
@@ -308,7 +281,7 @@ void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, co
     if (error) {
         pTailStatus->drivesConfigured = false;
         qDebug() << errorMsg;
-        qDebug() << "To read more about configuring taill drives, see https://tailscale.com/kb/1369/taildrive";
+        qDebug() << "To read more about configuring tail drives, see https://tailscale.com/kb/1369/taildrive";
 
         QMessageBox::information(nullptr,
             tr("Tail Drive - Error"),
@@ -326,87 +299,8 @@ void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, co
     // Refresh the tray icon menus
     pTrayManager->stateChangedTo(eCurrentState, pTailStatus.get());
 
-    tailDrivesToUi();
-}
-
-void MainWindow::addTailDriveButtonClicked() const {
-    ManageDriveWindow dlg(TailDriveInfo{}, nullptr);
-    auto result = dlg.exec();
-    if (result == QDialog::Accepted) {
-        auto newDrive = dlg.driveInfo();
-        pCurrentExecution->addDrive(newDrive);
-
-        pTailStatus->drives.emplace_back(newDrive);
-        tailDrivesToUi();
-    }
-}
-
-void MainWindow::removeTailDriveButtonClicked() const {
-    auto selectedItems = ui->twSharedDrives->selectedItems();
-    if (selectedItems.count() < 1) {
-        return;
-    }
-
-    auto row = ui->twSharedDrives->row(selectedItems.first());
-    const auto& drive = pTailStatus->drives[row];
-
-    auto answer = QMessageBox::question(nullptr,
-        tr("Are you sure?"),
-        tr("Do you really want to remove the share ") + drive.path + "?",
-        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-
-    if (answer != QMessageBox::Yes) {
-        return;
-    }
-
-    pCurrentExecution->removeDrive(drive);
-
-    pTailStatus->drives.removeAt(row);
-    ui->twSharedDrives->removeRow(row);
-    if (row > 0)
-        ui->twSharedDrives->selectRow(row - 1);
-
-    tailDrivesToUi();
-}
-
-void MainWindow::selectTailDriveMountPath() const {
-    QFileDialog dlg(nullptr, tr("Select mount path"), ui->txtTailDriveDefaultMountPath->text());
-    dlg.setOption(QFileDialog::Option::ShowDirsOnly, true);
-    dlg.setFileMode(QFileDialog::FileMode::Directory);
-
-    auto result = dlg.exec();
-    if (result == QDialog::Accepted) {
-        auto files = dlg.selectedFiles();
-        if (files.count() > 0) {
-            ui->txtTailDriveDefaultMountPath->setText(files.first());
-        }
-    }
-}
-
-void MainWindow::fixTailDriveDavFsSetup() const {
-    auto homeDir = KnownValues::getHomeDir();
-    auto homeDavFsSecret = KnownValues::getTailDriveFilePath();
-
-    if (isTailDriveFileAlreadySetup())
-        return;
-
-    // Create the .davfs2 folder if it doesn't exist
-    auto davDir = QDir(homeDir);
-    (void)davDir.mkpath(".davfs2"); // Don't care for return val
-
-    QFile davFsSecret(homeDavFsSecret);
-    davFsSecret.open(QIODevice::ReadWrite);
-
-    // We need to add our config lines
-    davFsSecret.seek(davFsSecret.size());
-    davFsSecret.write(QString("\n# Tailscale davfs server config\n").toUtf8());
-    davFsSecret.write(QString(KnownValues::tailDavFsUrl + "\tGuest\tGuest\n").toUtf8());
-
-    davFsSecret.close();
-
-    QMessageBox::information(nullptr, "Tail Tray", tr("davfs2 config has been written"));
-
-    ui->btnTailDriveFixDavFsMountSetup->setEnabled(isTailDriveFileAlreadySetup());
+    // And the UI for it
+    pTailDriveUiManager->stateChangedTo(eCurrentState, pTailStatus.get());
 }
 #endif
 
@@ -562,29 +456,6 @@ bool MainWindow::isTailDriveFileAlreadySetup() {
     return false;
 }
 
-#if defined(DAVFS_ENABLED)
-void MainWindow::tailDrivesToUi() const {
-    if (pTailStatus == nullptr) {
-        return;
-    }
-
-    const auto& drives = pTailStatus->drives;
-
-    ui->twSharedDrives->clearContents();
-    ui->twSharedDrives->setColumnCount(2);
-    ui->twSharedDrives->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Path"));
-    ui->twSharedDrives->setRowCount(static_cast<int>(drives.count()));
-
-    for (int i = 0; i < drives.count(); i++) {
-        const auto& drive = drives[i];
-        qDebug() << "Drive: " << drive.name << " (" << drive.path << ")";
-
-        ui->twSharedDrives->setItem(i, 0, new QTableWidgetItem(drive.name));
-        ui->twSharedDrives->setItem(i, 1, new QTableWidgetItem(drive.path));
-    }
-}
-#endif
-
 void MainWindow::showEvent(QShowEvent *event) {
     QMainWindow::showEvent(event);
 
@@ -623,9 +494,10 @@ TailState MainWindow::changeToState(TailState newState)
         startListeningForIncomingFiles();
 
 #if defined(DAVFS_ENABLED)
-        if (settings.tailDriveEnabled()) {
-            pCurrentExecution->listDrives();
-        }
+    pTailDriveUiManager->stateChangedTo(newState, pTailStatus.get());
+    if (settings.tailDriveEnabled()) {
+        pCurrentExecution->listDrives();
+    }
 #endif
     }
 
@@ -729,9 +601,7 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
         }
     }
 
-#if defined(DAVFS_ENABLED)
-    tailDrivesToUi();
-#endif
+    pTailDriveUiManager->stateChangedTo(eCurrentState, pTailStatus.get());
 }
 
 bool MainWindow::shallowCheckForNetworkAvailable() {

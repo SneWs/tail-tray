@@ -590,9 +590,6 @@ void MainWindow::showEvent(QShowEvent *event) {
 
     // Read settings, and it will be synced to UI once read
     pCurrentExecution->readSettings();
-
-    // Getting accounts will also trigger a fetch of status
-    pCurrentExecution->getAccounts();
 }
 
 TailState MainWindow::changeToState(TailState newState)

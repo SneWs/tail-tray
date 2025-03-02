@@ -2,6 +2,7 @@
     "files.associations": {
         "*.nginx": "NGINX",
         "filesystem": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "qjsonobject": "cpp"
     }
 }

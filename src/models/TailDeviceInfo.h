@@ -56,16 +56,16 @@ public:
     {
         auto self = std::make_unique<TailDeviceInfo>();
 
-        self->id = safeReadStr(obj, "ID");
-        self->publicKey = safeReadStr(obj, "PublicKey");
-        self->hostName = safeReadStr(obj, "HostName");
-        self->dnsName = safeReadStr(obj, "DNSName");
-        self->os = safeReadStr(obj, "OS");
-        self->userId = safeReadLong(obj, "UserID");
-        self->exitNode = safeReadBool(obj, "ExitNode");
-        self->exitNodeOption = safeReadBool(obj, "ExitNodeOption");
-        self->online = safeReadBool(obj, "Online");
-        self->active = safeReadBool(obj, "Active");
+        self->id = jsonReadString(obj, "ID");
+        self->publicKey = jsonReadString(obj, "PublicKey");
+        self->hostName = jsonReadString(obj, "HostName");
+        self->dnsName = jsonReadString(obj, "DNSName");
+        self->os = jsonReadString(obj, "OS");
+        self->userId = jsonReadLong(obj, "UserID");
+        self->exitNode = jsonReadBool(obj, "ExitNode");
+        self->exitNodeOption = jsonReadBool(obj, "ExitNodeOption");
+        self->online = jsonReadBool(obj, "Online");
+        self->active = jsonReadBool(obj, "Active");
 
         if (obj.contains("KeyExpiry") && !obj["KeyExpiry"].isNull()) {
             self->keyExpiry = QDateTime::fromString(obj["KeyExpiry"].toString(), Qt::DateFormat::ISODate);

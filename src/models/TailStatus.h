@@ -43,11 +43,11 @@ public:
 
     static TailStatus* parse(const QJsonObject& obj) {
         auto* newStatus = new TailStatus{};
-        newStatus->version = safeReadStr(obj, "Version");
-        newStatus->tun = safeReadBool(obj, "TUN");
-        newStatus->backendState = safeReadStr(obj, "BackendState");
-        newStatus->haveNodeKey = safeReadBool(obj, "HaveNodeKey");
-        newStatus->authUrl = safeReadStr(obj, "AuthURL");
+        newStatus->version = jsonReadString(obj, "Version");
+        newStatus->tun = jsonReadBool(obj, "TUN");
+        newStatus->backendState = jsonReadString(obj, "BackendState");
+        newStatus->haveNodeKey = jsonReadBool(obj, "HaveNodeKey");
+        newStatus->authUrl = jsonReadString(obj, "AuthURL");
 
         // Will be null when not logged in for example
         if (!obj["TailscaleIPs"].isNull()) {
@@ -67,8 +67,8 @@ public:
             }
         }
 
-        newStatus->magicDnsSuffix = safeReadStr(obj, "MagicDNSSuffix");
-        newStatus->clientVersion = safeReadStr(obj, "ClientVersion");
+        newStatus->magicDnsSuffix = jsonReadString(obj, "MagicDNSSuffix");
+        newStatus->clientVersion = jsonReadString(obj, "ClientVersion");
 
         if (obj.contains("CurrentTailnet") && !obj["CurrentTailnet"].isNull()) {
             newStatus->currentTailNet = TailNetInfo::parse(obj["CurrentTailnet"].toObject());
@@ -115,10 +115,10 @@ public:
 
     static std::unique_ptr<TailPrefsConfig> parse(const QJsonObject& obj) {
         auto config = std::make_unique<TailPrefsConfig>();
-        config->privateNodeKey = safeReadStr(obj, "PrivateNodeKey");
-        config->oldPrivateNodeKey = safeReadStr(obj, "OldPrivateNodeKey");
-        config->networkLockKey = safeReadStr(obj, "NetworkLockKey");
-        config->nodeID = safeReadStr(obj, "NodeID");
+        config->privateNodeKey = jsonReadString(obj, "PrivateNodeKey");
+        config->oldPrivateNodeKey = jsonReadString(obj, "OldPrivateNodeKey");
+        config->networkLockKey = jsonReadString(obj, "NetworkLockKey");
+        config->nodeID = jsonReadString(obj, "NodeID");
         config->user = TailUser::parse(obj["UserProfile"].toObject());
         return config;
     }

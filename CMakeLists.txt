@@ -64,6 +64,8 @@ set(PROJECT_SOURCES
         src/TailFileReceiver.h
         src/TailRunner.h
         src/TailRunner.cpp
+        src/TailDriveUiManager.h
+        src/TailDriveUiManager.cpp
         src/ManageDriveWindow.h
         src/ManageDriveWindow.cpp
         src/ManageDriveWindow.ui

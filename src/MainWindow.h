@@ -16,6 +16,10 @@
 #include "NetworkStateMonitor.h"
 #include "models/TailStatus.h"
 
+#if defined(DAVFS_ENABLED)
+#include "TailDriveUiManager.h"
+#endif
+
 class AccountsTabUiManager;
 
 class MainWindow : public QMainWindow
@@ -45,6 +49,9 @@ private:
     std::unique_ptr<TailDnsStatus> pDnsStatus;
     std::unique_ptr<TailFileReceiver> pFileReceiver;
     std::unique_ptr<NetworkStateMonitor> pNetworkStateMonitor;
+#if defined(DAVFS_ENABLED)
+    std::unique_ptr<TailDriveUiManager> pTailDriveUiManager;
+#endif
 
     TailState eCurrentState;
     TailSettings settings;
@@ -63,12 +70,6 @@ private slots:
 
 #if defined(DAVFS_ENABLED)
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const;
-
-    // Tail drive
-    void addTailDriveButtonClicked() const;
-    void removeTailDriveButtonClicked() const;
-    void selectTailDriveMountPath() const;
-    void fixTailDriveDavFsSetup() const;
 #endif
 
     // Send file
@@ -93,10 +94,6 @@ private:
     void setupNetworkCallbacks() const;
 
     [[nodiscard]] static bool isTailDriveFileAlreadySetup();
-
-#if defined(DAVFS_ENABLED)
-    void tailDrivesToUi() const;
-#endif
 
 protected:
     void showEvent(QShowEvent *event) override;

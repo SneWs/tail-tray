@@ -3,9 +3,6 @@
 
 #include <memory>
 
-#include <QObject>
-#include <QString>
-#include <QList>
 #include <QProcess>
 
 #include "models/Models.h"
@@ -75,7 +72,7 @@ class TailRunner : public QObject
     Q_OBJECT
 public:
     explicit TailRunner(const TailSettings& s, QObject* parent = nullptr);
-    virtual ~TailRunner();
+    ~TailRunner() override;
 
     void shutdown();
 

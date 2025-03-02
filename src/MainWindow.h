@@ -3,18 +3,16 @@
 
 #include <memory>
 
-#include <QMainWindow>
-#include <QTimer>
 #include <QNetworkInformation>
 #include <QMap>
 #include <QDateTime>
 
+#include "./ui_MainWindow.h"
 #include "TailRunner.h"
 #include "TailSettings.h"
 #include "TrayMenuManager.h"
 #include "AccountsTabUiManager.h"
 #include "TailFileReceiver.h"
-#include "./ui_MainWindow.h"
 #include "NetworkStateMonitor.h"
 #include "models/TailStatus.h"
 

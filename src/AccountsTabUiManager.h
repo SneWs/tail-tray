@@ -5,8 +5,6 @@
 #ifndef ACCOUNTSTABUIMANAGER_H
 #define ACCOUNTSTABUIMANAGER_H
 
-#include <QObject>
-
 #include "TailRunner.h"
 
 QT_BEGIN_NAMESPACE

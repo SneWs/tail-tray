@@ -5,10 +5,7 @@
 
 #include <memory>
 
-#include <QDialog>
-#include <QAction>
 #include "ui_ManageDriveWindow.h"
-
 #include "models/Models.h"
 
 class ManageDriveWindow : public QDialog

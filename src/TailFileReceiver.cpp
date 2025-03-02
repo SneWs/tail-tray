@@ -15,12 +15,20 @@ TailFileReceiver::TailFileReceiver(QString savePath, QObject* parent)
 
 TailFileReceiver::~TailFileReceiver() {
     disconnect(m_processFinishedConnection);
-    m_process->close();
+    if (m_process != nullptr) {
+        if (m_process->state() == QProcess::Running) {
+            m_process->terminate();
+        }
+        m_process.reset();
+    }
 }
 
 void TailFileReceiver::shutdown() {
     if (m_process != nullptr) {
-        m_process->close();
+        if (m_process->state() == QProcess::Running) {
+            m_process->terminate();
+        }
+        m_process.reset();
     }
 }
 

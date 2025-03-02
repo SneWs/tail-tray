@@ -12,9 +12,9 @@ class AdvertiseRoutesDlg : public QDialog
     Q_OBJECT
 public:
     explicit AdvertiseRoutesDlg(const QList<QString>& routes, QWidget* parent = nullptr);
-    ~AdvertiseRoutesDlg();
+    ~AdvertiseRoutesDlg() override;
 
-    const QList<QString>& getDefinedRoutes() const { return definedRoutes; }
+    [[nodiscard]] const QList<QString>& getDefinedRoutes() const { return definedRoutes; }
 
 private slots:
     void validateAndClose();

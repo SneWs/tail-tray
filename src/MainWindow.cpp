@@ -70,6 +70,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnAdvertiseRoutes, &QPushButton::clicked, this, &MainWindow::showAdvertiseRoutesDialog);
     connect(ui->btnTailscaleDnsSettings, &QPushButton::clicked, this, &MainWindow::showDnsSettingsDialog);
 
+    // This is the insert
+
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
 

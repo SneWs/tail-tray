@@ -68,7 +68,8 @@
       </property>
       <widget class="QWidget" name="tabAccount">
        <attribute name="icon">
-        <iconset theme="user-offline"/>
+        <iconset theme="user-offline">
+         <normaloff>.</normaloff>.</iconset>
        </attribute>
        <attribute name="title">
         <string>Account</string>
@@ -523,25 +524,17 @@
       </widget>
       <widget class="QWidget" name="tabSettings">
        <attribute name="icon">
-        <iconset theme="preferences-system"/>
+        <iconset theme="preferences-system">
+         <normaloff>.</normaloff>.</iconset>
        </attribute>
        <attribute name="title">
         <string>Settings</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_18">
+       <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <property name="spacing">
-           <number>6</number>
-          </property>
-          <property name="sizeConstraint">
-           <enum>QLayout::SetDefaultConstraint</enum>
-          </property>
-          <property name="bottomMargin">
-           <number>8</number>
-          </property>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0">
+           <layout class="QVBoxLayout" name="verticalLayout_3">
             <property name="leftMargin">
              <number>9</number>
             </property>
@@ -581,129 +574,84 @@
            </layout>
           </item>
           <item>
-           <widget class="QWidget" name="widget_2" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>140</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>140</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_3">
-             <property name="sizeConstraint">
-              <enum>QLayout::SetDefaultConstraint</enum>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>9</number>
-             </property>
-             <item>
-              <widget class="QCheckBox" name="chkAllowIncomingCnx">
-               <property name="text">
-                <string>Allow incoming connections</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout">
-               <item>
-                <widget class="QCheckBox" name="chkUseTailscaleDns">
-                 <property name="text">
-                  <string>Use Tailscale DNS settings</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="horizontalSpacer_5">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnTailscaleDnsSettings">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="text">
-                  <string>Manage...</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QVBoxLayout" name="verticalLayout_2">
-               <property name="spacing">
-                <number>2</number>
-               </property>
-               <item>
-                <widget class="QCheckBox" name="chkUseTailscaleSubnets">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Route traffic according to your network's rules. Some networks requires this to access IP addresses that don't start with 100.x.y.z.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Use Tailscale subnets</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="chkStartOnLogin">
-               <property name="text">
-                <string>Start on Login</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QCheckBox" name="chkAllowIncomingCnx">
+              <property name="text">
+               <string>Allow incoming connections</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QCheckBox" name="chkUseTailscaleDns">
+                <property name="text">
+                 <string>Use Tailscale DNS settings</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnTailscaleDnsSettings">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Manage...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chkAcceptRoutes">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Route traffic according to your network's rules. Some networks requires this to access IP addresses that don't start with 100.x.y.z.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Accept routes advertised by other Tailscale nodes</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chkStartOnLogin">
+              <property name="text">
+               <string>Start on Login</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -880,6 +828,9 @@
                 </property>
                 <property name="text">
                  <string>Allow local network access</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1181,7 +1132,8 @@
         </sizepolicy>
        </property>
        <attribute name="icon">
-        <iconset theme="drive-removable-media"/>
+        <iconset theme="drive-removable-media">
+         <normaloff>.</normaloff>.</iconset>
        </attribute>
        <attribute name="title">
         <string>Tail Drive</string>
@@ -1409,7 +1361,8 @@
       </widget>
       <widget class="QWidget" name="tabNetworkStatus">
        <attribute name="icon">
-        <iconset theme="QIcon::ThemeIcon::NetworkWireless"/>
+        <iconset theme="QIcon::ThemeIcon::NetworkWireless">
+         <normaloff>.</normaloff>.</iconset>
        </attribute>
        <attribute name="title">
         <string>Network Status</string>
@@ -1453,7 +1406,8 @@
       </widget>
       <widget class="QWidget" name="tabAbout">
        <attribute name="icon">
-        <iconset theme="help-about"/>
+        <iconset theme="help-about">
+         <normaloff>.</normaloff>.</iconset>
        </attribute>
        <attribute name="title">
         <string>About</string>

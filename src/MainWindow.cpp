@@ -250,7 +250,6 @@ void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
 
 void MainWindow::settingsClosed() {
     syncSettingsFromUi();
-    pCurrentExecution->applySettings(settings);
 
     if (eCurrentState == TailState::Connected)
         pCurrentExecution->start();
@@ -634,8 +633,8 @@ void MainWindow::setupNetworkCallbacks() const {
 void MainWindow::syncSettingsToUi() const {
     ui->chkAllowIncomingCnx->setChecked(settings.allowIncomingConnections());
     ui->chkUseTailscaleDns->setChecked(settings.useTailscaleDns());
-    ui->chkUseTailscaleSubnets->setChecked(settings.useSubnets());
     ui->chkRunAsExitNode->setChecked(settings.advertiseAsExitNode());
+    ui->chkAcceptRoutes->setChecked(settings.acceptRoutes());
     ui->chkExitNodeAllowNetworkAccess->setChecked(settings.exitNodeAllowLanAccess());
     ui->chkStartOnLogin->setChecked(settings.startOnLogin());
     ui->chkUseTailDrive->setChecked(settings.tailDriveEnabled());
@@ -669,14 +668,12 @@ void MainWindow::syncSettingsToUi() const {
 void MainWindow::syncSettingsFromUi() {
     settings.allowIncomingConnections(ui->chkAllowIncomingCnx->isChecked());
     settings.useTailscaleDns(ui->chkUseTailscaleDns->isChecked());
-    settings.useSubnets(ui->chkUseTailscaleSubnets->isChecked());
     settings.advertiseAsExitNode(ui->chkRunAsExitNode->isChecked());
     settings.exitNodeAllowLanAccess(ui->chkExitNodeAllowNetworkAccess->isChecked());
     settings.startOnLogin(ui->chkStartOnLogin->isChecked());
     settings.tailDriveEnabled(ui->chkUseTailDrive->isChecked());
     settings.tailDriveMountPath(ui->txtTailDriveDefaultMountPath->text().trimmed());
-
-    pCurrentExecution->applySettings(settings);
+    settings.acceptRoutes(ui->chkAcceptRoutes->isChecked());
 
     const QDir dir(ui->txtTailFilesDefaultSavePath->text().trimmed());
     if (dir.exists()) {

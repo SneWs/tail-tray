@@ -51,14 +51,6 @@ void TailSettings::exitNodeAllowLanAccess(bool enabled) {
     settings.setValue("exitNodeAllowLanAccess", enabled);
 }
 
-bool TailSettings::useSubnets() const {
-    return settings.value("useSubnets", false).toBool();
-}
-
-void TailSettings::useSubnets(bool enabled) {
-    settings.setValue("useSubnets", enabled);
-}
-
 bool TailSettings::startOnLogin() const {
     return settings.value("startOnLogin", false).toBool();
 }

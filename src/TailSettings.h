@@ -30,9 +30,6 @@ public:
     [[nodiscard]] bool exitNodeAllowLanAccess() const;
     void exitNodeAllowLanAccess(bool enabled);
 
-    [[nodiscard]] bool useSubnets() const;
-    void useSubnets(bool enabled);
-
     [[nodiscard]] bool startOnLogin() const;
     void startOnLogin(bool enabled);
 

@@ -7,6 +7,8 @@
 #include <QList>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QGuiApplication>
+#include <QScreen>
 
 #include "ManageDriveWindow.h"
 #include "KnownValues.h"
@@ -339,7 +341,7 @@ void MainWindow::onTailnetFileReceived(QString filePath) const {
     const QString msg("File " + file.fileName() + " was received and saved in " + file.absolutePath());
 
     pTrayManager->trayIcon()->showMessage(tr("File received"), msg,
-        QSystemTrayIcon::MessageIcon::Information, 8000);
+        QSystemTrayIcon::MessageIcon::Information, 5000);
 }
 
 void MainWindow::onShowTailFileSaveLocationPicker() {
@@ -457,6 +459,40 @@ bool MainWindow::isTailDriveFileAlreadySetup() {
 
 void MainWindow::showEvent(QShowEvent *event) {
     QMainWindow::showEvent(event);
+
+    auto* screen = QGuiApplication::primaryScreen();
+    auto screenRc = screen->availableVirtualGeometry();
+    qDebug() << "Virtual Screen size: " << screenRc;
+    qDebug() << "Screen Size: " << screen->availableGeometry();
+
+    QFrame* notifier = new QFrame;
+    notifier->setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    notifier->setFocusPolicy(Qt::NoFocus);
+    notifier->setWindowTitle(tr("Tailscale"));
+    notifier->setGeometry(QRect(0, 0, 300, 100));
+
+    QRect geom = notifier ->geometry();
+    geom.moveBottomRight(screenRc.bottomRight());
+    notifier->setGeometry(geom);
+    notifier->show();
+    QTimer::singleShot(3000, this, [notifier](){
+        notifier->hide();
+        delete notifier;
+    });
+
+    /*
+    QPoint tray_center   = mTrayIcon->geometry().center();
+QRect  screen_rect   = qApp->screenAt(tray_center)->geometry();
+QPoint screen_center = screen_rect.center();
+
+Qt::Corner corner = Qt::TopLeftCorner;
+if (tray_center.x() > screen_center.x() && tray_center.y() <= screen_center.y())
+    corner = Qt::TopRightCorner;
+else if (tray_center.x() > screen_center.x() && tray_center.y() > screen_center.y())
+    corner = Qt::BottomRightCorner;
+else if (tray_center.x() <= screen_center.x() && tray_center.y() > screen_center.y())
+    corner = Qt::BottomLeftCorner;
+    */
 
     // Read settings, and it will be synced to UI once read
     pCurrentExecution->readSettings();

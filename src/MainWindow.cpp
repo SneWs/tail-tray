@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QWindow>
 
 #include "ManageDriveWindow.h"
 #include "KnownValues.h"
@@ -460,39 +461,36 @@ bool MainWindow::isTailDriveFileAlreadySetup() {
 void MainWindow::showEvent(QShowEvent *event) {
     QMainWindow::showEvent(event);
 
-    auto* screen = QGuiApplication::primaryScreen();
+    auto trayCenter = pTrayManager->trayIcon()->geometry().center();
+    auto* screen = qApp->screenAt(trayCenter);
     auto screenRc = screen->availableVirtualGeometry();
     qDebug() << "Virtual Screen size: " << screenRc;
     qDebug() << "Screen Size: " << screen->availableGeometry();
 
-    QFrame* notifier = new QFrame;
+    QRect requestedSize(0, 0, 420, 220);
+    requestedSize.moveBottomRight(screenRc.bottomRight());
+    
+    QFrame* notifier = new QFrame{};
     notifier->setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     notifier->setFocusPolicy(Qt::NoFocus);
-    notifier->setWindowTitle(tr("Tailscale"));
-    notifier->setGeometry(QRect(0, 0, 300, 100));
-
-    QRect geom = notifier ->geometry();
-    geom.moveBottomRight(screenRc.bottomRight());
-    notifier->setGeometry(geom);
+    notifier->setWindowTitle("Tailscale");
+    notifier->setGeometry(requestedSize);
+    notifier->setStyleSheet("background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 5px;");
     notifier->show();
-    QTimer::singleShot(3000, this, [notifier](){
+
+    QTimer::singleShot(10000, this, [notifier](){
         notifier->hide();
         delete notifier;
     });
 
-    /*
-    QPoint tray_center   = mTrayIcon->geometry().center();
-QRect  screen_rect   = qApp->screenAt(tray_center)->geometry();
-QPoint screen_center = screen_rect.center();
-
-Qt::Corner corner = Qt::TopLeftCorner;
-if (tray_center.x() > screen_center.x() && tray_center.y() <= screen_center.y())
-    corner = Qt::TopRightCorner;
-else if (tray_center.x() > screen_center.x() && tray_center.y() > screen_center.y())
-    corner = Qt::BottomRightCorner;
-else if (tray_center.x() <= screen_center.x() && tray_center.y() > screen_center.y())
-    corner = Qt::BottomLeftCorner;
-    */
+    // auto screenCenter = screenRc.center();
+    // Qt::Corner corner = Qt::TopLeftCorner;
+    // if (trayCenter.x() > screenCenter.x() && trayCenter.y() <= screenCenter.y())
+    //     corner = Qt::TopRightCorner;
+    // else if (trayCenter.x() > screenCenter.x() && trayCenter.y() > screenCenter.y())
+    //     corner = Qt::BottomRightCorner;
+    // else if (trayCenter.x() <= screenCenter.x() && trayCenter.y() > screenCenter.y())
+    //     corner = Qt::BottomLeftCorner;
 
     // Read settings, and it will be synced to UI once read
     pCurrentExecution->readSettings();

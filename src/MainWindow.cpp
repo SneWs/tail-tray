@@ -89,8 +89,6 @@ MainWindow::MainWindow(QWidget* parent)
     // Make sure the settings tab is selected by default
     ui->tabWidget->setCurrentIndex(1);
 
-    setupNetworkCallbacks();
-
     // Disable Tailnet lock UI for now
     ui->lblTailnetLockStatus->setEnabled(false);
     ui->lblTailnetLockTitle->setEnabled(false);
@@ -264,21 +262,6 @@ void MainWindow::settingsClosed() {
 
 void MainWindow::loginFlowCompleted() const {
     pCurrentExecution->start();
-}
-
-void MainWindow::onNetworkReachabilityChanged(QNetworkInformation::Reachability newReachability) {
-    qDebug() << "onNetworkReachabilityChanged -> " << newReachability;
-
-    // if (newReachability == QNetworkInformation::Reachability::Online) {
-    //     QTimer::singleShot(3000, this, [this]() {
-    //         // Bootstrap so we re-read all settings, accounts and status just as on startup
-    //         pCurrentExecution->bootstrap();
-    //     });
-    //     return;
-    // }
-    //
-    // if (eCurrentState != TailState::NotConnected)
-    //     changeToState(TailState::NotConnected);
 }
 
 void MainWindow::onIpnEvent() const {
@@ -620,25 +603,6 @@ bool MainWindow::shallowCheckForNetworkAvailable() {
         return true;
 
     return false;
-}
-
-void MainWindow::setupNetworkCallbacks() const {
-    auto* inst = QNetworkInformation::instance();
-    if (inst == nullptr) {
-        if (!QNetworkInformation::loadDefaultBackend()) {
-            qDebug() << "Unable to load Network information stack";
-            return;
-        }
-
-        inst = QNetworkInformation::instance();
-        if (inst == nullptr) {
-            qDebug() << "No network information stack available";
-            return;
-        }
-    }
-
-    connect(inst, &QNetworkInformation::reachabilityChanged,
-        this, &MainWindow::onNetworkReachabilityChanged);
 }
 
 void MainWindow::syncSettingsToUi() const {

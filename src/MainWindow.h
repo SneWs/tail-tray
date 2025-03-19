@@ -68,7 +68,6 @@ private slots:
     void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();
     void loginFlowCompleted() const;
-    void onNetworkReachabilityChanged(QNetworkInformation::Reachability newReachability);
     void onIpnEvent() const;
 
 #if defined(DAVFS_ENABLED)
@@ -94,7 +93,6 @@ private:
     void onTailStatusChanged(TailStatus* pNewStatus);
 
     static bool shallowCheckForNetworkAvailable();
-    void setupNetworkCallbacks() const;
 
     [[nodiscard]] static bool isTailDriveFileAlreadySetup();
 

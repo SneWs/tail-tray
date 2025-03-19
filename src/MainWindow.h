@@ -14,6 +14,7 @@
 #include "AccountsTabUiManager.h"
 #include "TailFileReceiver.h"
 #include "NetworkStateMonitor.h"
+#include "IpnWatcher.h"
 #include "models/TailStatus.h"
 
 #if defined(DAVFS_ENABLED)
@@ -49,6 +50,7 @@ private:
     std::unique_ptr<TailDnsStatus> pDnsStatus;
     std::unique_ptr<TailFileReceiver> pFileReceiver;
     std::unique_ptr<NetworkStateMonitor> pNetworkStateMonitor;
+    std::unique_ptr<IpnWatcher> pIpnWatcher;
 #if defined(DAVFS_ENABLED)
     std::unique_ptr<TailDriveUiManager> pTailDriveUiManager;
 #endif
@@ -66,7 +68,7 @@ private slots:
     void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();
     void loginFlowCompleted() const;
-    void onNetworkReachabilityChanged(QNetworkInformation::Reachability newReachability);
+    void onIpnEvent() const;
 
 #if defined(DAVFS_ENABLED)
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const;
@@ -91,7 +93,6 @@ private:
     void onTailStatusChanged(TailStatus* pNewStatus);
 
     static bool shallowCheckForNetworkAvailable();
-    void setupNetworkCallbacks() const;
 
     [[nodiscard]] static bool isTailDriveFileAlreadySetup();
 

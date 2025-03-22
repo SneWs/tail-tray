@@ -68,7 +68,7 @@ private slots:
     void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();
     void loginFlowCompleted() const;
-    void onIpnEvent() const;
+    void onIpnEvent(IpnEventData* eventData) const;
 
 #if defined(DAVFS_ENABLED)
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const;

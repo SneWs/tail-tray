@@ -264,9 +264,22 @@ void MainWindow::loginFlowCompleted() const {
     pCurrentExecution->start();
 }
 
-void MainWindow::onIpnEvent() const {
-    qDebug() << "IpnEvent received!";
+void MainWindow::onIpnEvent(IpnEventData* eventData) const {
     pCurrentExecution->bootstrap();
+    if (eventData->Health.Warnings.networkStatus.ImpactsConnectivity) {
+        if (eventData->Health.Warnings.networkStatus.Text.isEmpty())
+            return;
+
+        if (seenWarnings.contains(eventData->Health.Warnings.networkStatus.Text)) {
+            // We have seen this warning before, so don't show it again
+            return;
+        }
+
+        seenWarnings[eventData->Health.Warnings.networkStatus.Text] = QDateTime::currentDateTime();
+        pTrayManager->trayIcon()->showMessage(eventData->Health.Warnings.networkStatus.Title, 
+            eventData->Health.Warnings.networkStatus.Text, 
+            QSystemTrayIcon::MessageIcon::Warning, 5000);
+    }
 }
 
 #if defined(DAVFS_ENABLED)

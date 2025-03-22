@@ -1,4 +1,10 @@
 #include "IpnWatcher.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QDebug>
+
+#include "models/Models.h"
 
 IpnWatcher::IpnWatcher(QObject *parent)
     : QObject(parent)
@@ -44,15 +50,42 @@ void IpnWatcher::stop() {
 }
 
 void IpnWatcher::onProcessCanReadStdOut() {
-    emit eventReceived();
+    QByteArray data = m_process->readAllStandardOutput();
+    if (data.length() < 1) {
+        return;
+    }
+
+    QString json = QString::fromUtf8(data);
+    QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8());
+    if (doc.isNull()) {
+        return;
+    }
+
+    if (!doc.isObject()) {
+        return;
+    }
+
+    QJsonObject obj = doc.object();
+    qDebug() << "IPN Event received";
+
+    IpnEventData* eventData = IpnEventData::parse(obj);
+    
+    if (!eventData->Health.Warnings.networkStatus.Severity.isEmpty()) {
+        qDebug() << "Severity: " << eventData->Health.Warnings.networkStatus.Severity;
+        qDebug() << "Text: " << eventData->Health.Warnings.networkStatus.Text;
+        qDebug() << "Title: " << eventData->Health.Warnings.networkStatus.Title;
+    }
+
+    emit eventReceived(eventData);
+    eventData->deleteLater();
 }
 
 void IpnWatcher::onProcessCanReadStandardError() {
-    emit eventReceived();
+    //emit eventReceived();
 }
 
 void IpnWatcher::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
-    emit eventReceived();
+    //emit eventReceived();
 
     if (!m_isShuttingDown) {
         start();

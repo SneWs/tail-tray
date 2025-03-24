@@ -3,6 +3,8 @@
 
 #include <QProcess>
 
+#include "models/Models.h"
+
 class IpnWatcher : public QObject {
     Q_OBJECT
 public:
@@ -13,12 +15,9 @@ public:
     void stop();
 
 signals:
-    /// This will signal any time a new event comes in
-    /// TODO: We should scan for some specific well known event data types
-    /// so we can provide better feedback to listeners
-    /// but for now this will do just fine as the intended use case will be to re-read settings and check status
-    /// etc a-new every time this is emitted
-    void eventReceived();
+    /// This will signal any time a new event comes in from the IPN watcher.
+    /// The receiver needs to take ownership of the event data.
+    void eventReceived(IpnEventData* eventData);
 
 private slots:
     void onProcessCanReadStdOut();

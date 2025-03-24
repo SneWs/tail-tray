@@ -137,46 +137,46 @@ void MainWindow::showNetworkStatusTab() {
 void MainWindow::settingsReadyToRead() {
     auto tailscalePrefs = pCurrentExecution->currentSettings();
 
-    qDebug() << "Settings recv from Tailscale:";
-    qDebug() << "Operator: " << tailscalePrefs->operatorUser;
-    qDebug() << "Hostname: " << tailscalePrefs->hostname;
-    qDebug() << "Logged out: " << tailscalePrefs->loggedOut;
-    qDebug() << "Net filer kind: " << tailscalePrefs->netfilterKind;
-    qDebug() << "Net filer mode: " << tailscalePrefs->netfilterMode;
-    qDebug() << "Posture checking: " << tailscalePrefs->postureChecking;
-    qDebug() << "Route all: " << tailscalePrefs->routeAll;
-    qDebug() << "Shields up: " << tailscalePrefs->shieldsUp;
-    qDebug() << "Want running: " << tailscalePrefs->wantRunning;
-    qDebug() << "Allow single hosts: " << tailscalePrefs->allowSingleHosts;
-    qDebug() << "No stateful filtering: " << tailscalePrefs->noStatefulFiltering;
-    qDebug() << "Run web client: " << tailscalePrefs->runWebClient;
-    qDebug() << "Control panel URL: " << tailscalePrefs->controlURL;
-    qDebug() << "Corporate DNS: " << tailscalePrefs->corpDNS;
-    qDebug() << "Internal exit node prior: " << tailscalePrefs->internalExitNodePrior;
-    qDebug() << "Run SSH: " << tailscalePrefs->runSSH;
-    qDebug() << "No SNAT: " << tailscalePrefs->noSNAT;
-    qDebug() << "Allow Exit node LAN Access: " << tailscalePrefs->exitNodeAllowLANAccess;
+    // qDebug() << "Settings recv from Tailscale:";
+    // qDebug() << "Operator: " << tailscalePrefs->operatorUser;
+    // qDebug() << "Hostname: " << tailscalePrefs->hostname;
+    // qDebug() << "Logged out: " << tailscalePrefs->loggedOut;
+    // qDebug() << "Net filer kind: " << tailscalePrefs->netfilterKind;
+    // qDebug() << "Net filer mode: " << tailscalePrefs->netfilterMode;
+    // qDebug() << "Posture checking: " << tailscalePrefs->postureChecking;
+    // qDebug() << "Route all: " << tailscalePrefs->routeAll;
+    // qDebug() << "Shields up: " << tailscalePrefs->shieldsUp;
+    // qDebug() << "Want running: " << tailscalePrefs->wantRunning;
+    // qDebug() << "Allow single hosts: " << tailscalePrefs->allowSingleHosts;
+    // qDebug() << "No stateful filtering: " << tailscalePrefs->noStatefulFiltering;
+    // qDebug() << "Run web client: " << tailscalePrefs->runWebClient;
+    // qDebug() << "Control panel URL: " << tailscalePrefs->controlURL;
+    // qDebug() << "Corporate DNS: " << tailscalePrefs->corpDNS;
+    // qDebug() << "Internal exit node prior: " << tailscalePrefs->internalExitNodePrior;
+    // qDebug() << "Run SSH: " << tailscalePrefs->runSSH;
+    // qDebug() << "No SNAT: " << tailscalePrefs->noSNAT;
+    // qDebug() << "Allow Exit node LAN Access: " << tailscalePrefs->exitNodeAllowLANAccess;
     auto isExitNode = tailscalePrefs->isExitNode();
-    if (isExitNode) {
-        qDebug() << "Advertise routes (We are exit node and advertising)";
-        for (const auto& r : tailscalePrefs->advertiseRoutes)
-            qDebug() << "\tRoute " << r;
-    }
+    // if (isExitNode) {
+    //     qDebug() << "Advertise routes (We are exit node and advertising)";
+    //     for (const auto& r : tailscalePrefs->advertiseRoutes)
+    //         qDebug() << "\tRoute " << r;
+    // }
 
-    qDebug() << "Exit node Id: " << tailscalePrefs->exitNodeId;
-    if (!tailscalePrefs->exitNodeId.isEmpty()) {
-        if (pTailStatus != nullptr && pTailStatus->peers.count() > 0) {
-            for (const auto& p : pTailStatus->peers) {
-                if (p->id == tailscalePrefs->exitNodeId) {
-                    qDebug() << "\tExit node by name: " << p->getShortDnsName();
-                }
-            }
-        }
-    }
-    qDebug() << "Exit node Ip: " << tailscalePrefs->exitNodeIp;
+    //qDebug() << "Exit node Id: " << tailscalePrefs->exitNodeId;
+    // if (!tailscalePrefs->exitNodeId.isEmpty()) {
+    //     if (pTailStatus != nullptr && pTailStatus->peers.count() > 0) {
+    //         for (const auto& p : pTailStatus->peers) {
+    //             if (p->id == tailscalePrefs->exitNodeId) {
+    //                 qDebug() << "\tExit node by name: " << p->getShortDnsName();
+    //             }
+    //         }
+    //     }
+    // }
+    // qDebug() << "Exit node Ip: " << tailscalePrefs->exitNodeIp;
 
 #if defined(WINDOWS_BUILD)
-    qDebug() << "Notepad URLs: " << tailscalePrefs->notepadURLs;
+    //qDebug() << "Notepad URLs: " << tailscalePrefs->notepadURLs;
 #endif
 
     // Sync settings with local settings
@@ -211,15 +211,15 @@ void MainWindow::dnsStatusUpdated(TailDnsStatus* dnsStatus) {
     
     pDnsStatus.reset(dnsStatus);
 
-    qDebug() << "DNS Status recv from Tailscale:";
-    
-    qDebug() << "Split DNS routes:";
-    for (const auto& r : dnsStatus->splitDnsRoutes)
-        qDebug() << "\t" << r.first << ": " << r.second;
-    
-    qDebug() << "Search Domains";
-    for (const auto& d : dnsStatus->searchDomains)
-        qDebug() << "\t" << d;
+    // qDebug() << "DNS Status recv from Tailscale:";
+    //
+    // qDebug() << "Split DNS routes:";
+    // for (const auto& r : dnsStatus->splitDnsRoutes)
+    //     qDebug() << "\t" << r.first << ": " << r.second;
+    //
+    // qDebug() << "Search Domains";
+    // for (const auto& d : dnsStatus->searchDomains)
+    //     qDebug() << "\t" << d;
 }
 
 void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
@@ -264,22 +264,28 @@ void MainWindow::loginFlowCompleted() const {
     pCurrentExecution->start();
 }
 
-void MainWindow::onIpnEvent(IpnEventData* eventData) const {
-    pCurrentExecution->bootstrap();
+void MainWindow::onIpnEvent(IpnEventData* eventData) {
     if (eventData->Health.Warnings.networkStatus.ImpactsConnectivity) {
-        if (eventData->Health.Warnings.networkStatus.Text.isEmpty())
-            return;
-
-        if (seenWarnings.contains(eventData->Health.Warnings.networkStatus.Text)) {
-            // We have seen this warning before, so don't show it again
-            return;
+        if (eventData->Health.Warnings.networkStatus.WarnableCode == "network-status") {
+            if (eCurrentState != TailState::Connected) {
+                if (!eventData->Health.Warnings.networkStatus.Text.isEmpty()) {
+                    showWarningMessage(eventData->Health.Warnings.networkStatus.Title, eventData->Health.Warnings.networkStatus.Text);
+                }
+            }
         }
-
-        seenWarnings[eventData->Health.Warnings.networkStatus.Text] = QDateTime::currentDateTime();
-        pTrayManager->trayIcon()->showMessage(eventData->Health.Warnings.networkStatus.Title, 
-            eventData->Health.Warnings.networkStatus.Text, 
-            QSystemTrayIcon::MessageIcon::Warning, 5000);
     }
+    else {
+        if (eventData->Health.Warnings.networkStatus.Severity == "warning") {
+            if (!eventData->Health.Warnings.networkStatus.Text.isEmpty())
+                showWarningMessage(eventData->Health.Warnings.networkStatus.Title, eventData->Health.Warnings.networkStatus.Text);
+        }
+        else if (eventData->Health.Warnings.networkStatus.Severity == "error") {
+            if (!eventData->Health.Warnings.networkStatus.Text.isEmpty())
+                showErrorMessage(eventData->Health.Warnings.networkStatus.Title, eventData->Health.Warnings.networkStatus.Text);
+        }
+    }
+
+    pCurrentExecution->bootstrap();
 }
 
 #if defined(DAVFS_ENABLED)
@@ -439,6 +445,42 @@ void MainWindow::showDnsSettingsDialog() const {
     ui->chkUseTailscaleDns->setChecked(dlg.isTailscaleDnsEnabled());
 }
 
+void MainWindow::showWarningMessage(const QString& title, const QString& message, bool timeLimited) {
+    auto key = message.toLower().trimmed();
+    if (timeLimited) {
+        auto now = QDateTime::currentDateTime();
+        if (seenWarningsAndErrors.contains(key)) {
+            auto lastShown = seenWarningsAndErrors[message];
+            auto diff = lastShown.secsTo(now);
+            if (diff < 60 * 60) // 1 hour
+                return; // No point in showing the same message again
+        }
+        else {
+            seenWarningsAndErrors.insert(key, now);
+        }
+    }
+
+    pTrayManager->trayIcon()->showMessage(title, message, QSystemTrayIcon::MessageIcon::Warning, 5000);
+}
+
+void MainWindow::showErrorMessage(const QString& title, const QString& message, bool timeLimited) {
+    auto key = message.toLower().trimmed();
+    if (timeLimited) {
+        auto now = QDateTime::currentDateTime();
+        if (seenWarningsAndErrors.contains(key)) {
+            auto lastShown = seenWarningsAndErrors[message];
+            auto diff = lastShown.secsTo(now);
+            if (diff < 60 * 60) // 1 hour
+                return; // No point in showing the same message again
+        }
+        else {
+            seenWarningsAndErrors.insert(key, now);
+        }
+    }
+
+    pTrayManager->trayIcon()->showMessage(title, message, QSystemTrayIcon::MessageIcon::Critical, 5000);
+}
+
 bool MainWindow::isTailDriveFileAlreadySetup() {
     auto homeDavFsSecret = KnownValues::getTailDriveFilePath();
 
@@ -472,6 +514,7 @@ void MainWindow::showEvent(QShowEvent *event) {
 TailState MainWindow::changeToState(TailState newState)
 {
     auto retVal = eCurrentState;
+    auto didChangeState = eCurrentState != newState;
     eCurrentState = newState;
 
     if (eCurrentState == TailState::NotLoggedIn)
@@ -482,10 +525,15 @@ TailState MainWindow::changeToState(TailState newState)
         pTailStatus->user = std::make_unique<TailUser>();
     }
 
-    if (newState == TailState::Connected)
+    if (newState == TailState::Connected) {
         setWindowIcon(QIcon(":/icons/tray-on.png"));
-    else
+        if (didChangeState) {
+            seenWarningsAndErrors.clear();
+        }
+    }
+    else {
         setWindowIcon(QIcon(":/icons/tray-off.png"));
+    }
 
     pTrayManager->stateChangedTo(newState, pTailStatus.get());
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
@@ -533,34 +581,13 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 
         if (pTailStatus->health.count() > 0)
         {
-            QDateTime now = QDateTime::currentDateTime();
-            QString str;
+            auto now = QDateTime::currentDateTime();
+            QString str{};
             for (const auto& s : pTailStatus->health)
-            {
-                if (seenWarnings.contains(s))
-                {
-                    auto lastSeen = seenWarnings[s];
-                    auto daysSinceLastSeen = lastSeen.secsTo(now);
-                    if (daysSinceLastSeen < (60 * 60) * 6) // 6 hours before showing the same health info again
-                        continue; // No point in showing
-
-                    // Update to now
-                    seenWarnings[s] = now;
-                }
-                else
-                {
-                    seenWarnings.insert(s, now);
-                }
-
                 str += s + "\n";
-            }
 
             if (str.length() > 1)
-            {
-                pTrayManager->trayIcon()->showMessage(tr("Warning"),
-                  str,
-                  QSystemTrayIcon::Warning, 5000);
-            }
+                showWarningMessage(tr("Warning"), str);
         }
 
         auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));
@@ -578,35 +605,6 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
     }
 
     accountsTabUi->onTailStatusChanged(pTailStatus.get());
-
-    if (pTailStatus->backendState == "NoState") {
-        // We are not running
-        changeToState(TailState::NotConnected);
-        bool showMessage = true;
-        if (seenWarnings.contains("NoState")) {
-            auto lastSeen = seenWarnings["NoState"];
-            auto daysSinceLastSeen = lastSeen.secsTo(QDateTime::currentDateTime());
-            if (daysSinceLastSeen < (60 * 60) * 1) // 1 hours before showing the same health info again
-            {
-                return; // No point in showing
-            }
-
-            showMessage = true;
-            // Update to now
-            seenWarnings["NoState"] = QDateTime::currentDateTime();
-        }
-        else {
-            showMessage = true;
-            seenWarnings.insert("NoState", QDateTime::currentDateTime());
-        }
-
-        if (showMessage) {
-            QMessageBox::information(this, tr("Tailscale not running"),
-                tr("Unexpected state, tailscale backend is not running. Please check your internet connection and try again."),
-                QMessageBox::Ok);
-        }
-    }
-
     pTailDriveUiManager->stateChangedTo(eCurrentState, pTailStatus.get());
 }
 

@@ -71,6 +71,7 @@ void IpnWatcher::onProcessCanReadStdOut() {
     IpnEventData* eventData = IpnEventData::parse(obj);
     
     if (!eventData->Health.Warnings.networkStatus.Severity.isEmpty()) {
+        qDebug() << "Nw" << (eventData->Health.Warnings.networkStatus.ImpactsConnectivity ? "Connectivity Disruption" : "Connection OK");
         qDebug() << "Severity: " << eventData->Health.Warnings.networkStatus.Severity;
         qDebug() << "Text: " << eventData->Health.Warnings.networkStatus.Text;
         qDebug() << "Title: " << eventData->Health.Warnings.networkStatus.Title;

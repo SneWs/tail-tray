@@ -134,17 +134,17 @@ void NetworkStateMonitor::onProcessCanReadStdOut() {
 
     emit netCheckCompleted(true, information, latencies);
 
-    qDebug() << "Network check completed";
-    for (auto it = information.begin(); it != information.end(); ++it) {
-        const auto& key = it.key();
-        const auto& value = it.value();
-        qDebug() << key << ": " << value;
-    }
+    // qDebug() << "Network check completed";
+    // for (auto it = information.begin(); it != information.end(); ++it) {
+    //     const auto& key = it.key();
+    //     const auto& value = it.value();
+    //     qDebug() << key << ": " << value;
+    // }
 }
 
 void NetworkStateMonitor::onProcessCanReadStandardError() {
     const QString message(pProcess->readAllStandardError());
-    qDebug() << "NetworkStateMonitor::StdError - " << message;
+    // qDebug() << "NetworkStateMonitor::StdError - " << message;
 
     emit netCheckCompleted(false, information, latencies);
 }

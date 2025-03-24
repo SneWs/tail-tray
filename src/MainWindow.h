@@ -59,7 +59,7 @@ private:
     TailSettings settings;
     QList<TailAccountInfo> accounts;
 
-    QMap<QString, QDateTime> seenWarnings;
+    QMap<QString, QDateTime> seenWarningsAndErrors;
 
 private slots:
     void settingsReadyToRead();
@@ -68,7 +68,7 @@ private slots:
     void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();
     void loginFlowCompleted() const;
-    void onIpnEvent(IpnEventData* eventData) const;
+    void onIpnEvent(IpnEventData* eventData);
 
 #if defined(DAVFS_ENABLED)
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const;
@@ -86,6 +86,10 @@ private slots:
     // Advertise routes and other network settings
     void showAdvertiseRoutesDialog() const;
     void showDnsSettingsDialog() const;
+
+    // Warnings, Errors etc reporting (Toast messages)
+    void showWarningMessage(const QString& title, const QString& message, bool timeLimited = true);
+    void showErrorMessage(const QString& title, const QString& message, bool timeLimited = true);
 
 private:
     // Switch to the new state and return the prev (old) state back to caller

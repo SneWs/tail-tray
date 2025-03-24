@@ -147,7 +147,7 @@ void TailRunner::applySettings(const TailSettings& s) {
         args << "--exit-node-allow-lan-access=false";
     }
 
-    qDebug() << "TailRunner::applySettings: " << args;
+    //qDebug() << "TailRunner::applySettings: " << args;
 
     runCommand(Command::SetSettings, "set", args, false, false);
 }
@@ -339,7 +339,7 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
 #endif
         default:
             // Just echo out to console for now
-            qDebug() << QString(data);
+            //qDebug() << QString(data);
             break;
     }
 }
@@ -352,7 +352,7 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
     if (commandInfo == Command::Login) {
         const QString message(wrapper->process()->readAllStandardError());
         if (!message.isEmpty()) {
-            qDebug() << message;
+            //qDebug() << message;
             if (message.startsWith("Success", Qt::CaseSensitivity::CaseInsensitive)) {
                 // Login was successful
                 // Wait for a bit before triggering flow completed
@@ -404,7 +404,7 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
 }
 
 void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
-    qDebug() << "Process exit code " << exitCode << " - " << exitStatus;
+    //qDebug() << "Process exit code " << exitCode << " - " << exitStatus;
 
     // Cleanup processes that has completed, this will not include this current process that invoked the signal
     // as it's not flagged as completed until after we return from this call
@@ -503,7 +503,7 @@ void TailRunner::runCompletedCleanup() {
     for (auto it = processes.begin(); it != processes.end();) {
         if ((*it)->isCompleted()) {
             const auto cmd = commandToString((*it)->command());
-            qDebug() << "Cleaning up process " << cmd;
+            //qDebug() << "Cleaning up process " << cmd;
 
             (*it)->deleteLater();
             it = processes.erase(it);

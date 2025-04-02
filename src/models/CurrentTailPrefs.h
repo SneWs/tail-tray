@@ -230,6 +230,12 @@ public:
         prefs->loggedOut = jsonReadBool(obj, "LoggedOut");
         prefs->shieldsUp = jsonReadBool(obj, "ShieldsUp");
 
+        if (obj.contains("AutoUpdate") && !obj["AutoUpdate"].isNull()) {
+            const auto& autoUpdateObj = obj["AutoUpdate"].toObject();
+            prefs->autoUpdate_Check = jsonReadBool(autoUpdateObj, "Check");
+            prefs->autoUpdate_Apply = jsonReadBool(autoUpdateObj, "Apply");
+        }
+
         // AdvertiseTags
         if (obj.contains("AdvertiseTags") && !obj["AdvertiseTags"].isNull()) {
             for (const auto& tag : obj["AdvertiseTags"].toArray()) {

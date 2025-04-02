@@ -59,6 +59,13 @@ void TailSettings::startOnLogin(bool enabled) {
     settings.setValue("startOnLogin", enabled);
 }
 
+bool TailSettings::autoUpdateTailscale() const {
+    return settings.value("autoUpdateTailscale", true).toBool();
+}
+void TailSettings::autoUpdateTailscale(bool enabled) {
+    settings.setValue("autoUpdateTailscale", enabled);
+}
+
 QString TailSettings::tailDriveMountPath() const {
     auto homePath = qEnvironmentVariable("HOME");
     return settings.value("tailDriveMountPath", homePath.append("/Tailscale")).toString();

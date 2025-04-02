@@ -184,6 +184,7 @@ void MainWindow::settingsReadyToRead() {
     settings.useTailscaleDns(tailscalePrefs->corpDNS);
     settings.exitNodeAllowLanAccess(tailscalePrefs->exitNodeAllowLANAccess);
     settings.advertiseAsExitNode(isExitNode);
+    settings.autoUpdateTailscale(tailscalePrefs->autoUpdate_Apply);
 
     syncSettingsToUi();
 
@@ -627,6 +628,19 @@ void MainWindow::syncSettingsToUi() const {
     ui->txtTailDriveDefaultMountPath->setText(settings.tailDriveMountPath());
     ui->txtTailFilesDefaultSavePath->setText(settings.tailFilesDefaultSavePath());
 
+#if defined(WINDOWS_BUILD)
+    // Windows does support auto update
+    ui->chkAutoUpdateTailscale->setChecked(settings.autoUpdateTailscale());
+#else
+    // Auto update is only supported on select platforms, Linux is not one of them (in general)
+    // So we hide the option on Linux
+    ui->lblTailScaleAutoUpdate->setVisible(false);
+    ui->chkAutoUpdateTailscale->setVisible(false);
+    ui->lblTailScaleAutoUpdate->setEnabled(false);
+    ui->chkAutoUpdateTailscale->setEnabled(false);
+    ui->tabSettings->layout()->removeItem(ui->layoutAutoUpdate);
+#endif
+
     auto advertisedRoutes = pCurrentExecution->currentSettings()->getFilteredAdvertiseRoutes();
     if (advertisedRoutes.count() > 0) {
         ui->lblAdvertisingNumRoutes->setText(tr("Advertising %1 routes")
@@ -660,6 +674,10 @@ void MainWindow::syncSettingsFromUi() {
     settings.tailDriveEnabled(ui->chkUseTailDrive->isChecked());
     settings.tailDriveMountPath(ui->txtTailDriveDefaultMountPath->text().trimmed());
     settings.acceptRoutes(ui->chkAcceptRoutes->isChecked());
+
+#if defined(WINDOWS_BUILD)
+    settings.autoUpdateTailscale(ui->chkAutoUpdateTailscale->isChecked());
+#endif
 
     const QDir dir(ui->txtTailFilesDefaultSavePath->text().trimmed());
     if (dir.exists()) {

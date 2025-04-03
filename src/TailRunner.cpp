@@ -133,6 +133,13 @@ void TailRunner::applySettings(const TailSettings& s) {
     else
         args << "--shields-up";
 
+#if defined(WINDOWS_BUILD)
+    if (settings.autoUpdateTailscale())
+        args << "--auto-update";
+    else
+        args << "--auto-update=false";
+#endif
+
     if (settings.advertiseAsExitNode()) {
         args << "--advertise-exit-node";
 

@@ -33,6 +33,9 @@ public:
     [[nodiscard]] bool startOnLogin() const;
     void startOnLogin(bool enabled);
 
+    [[nodiscard]] bool autoUpdateTailscale() const;
+    void autoUpdateTailscale(bool enabled);
+
     [[nodiscard]] QString tailDriveMountPath() const;
     void tailDriveMountPath(const QString& path);
 

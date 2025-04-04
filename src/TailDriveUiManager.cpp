@@ -149,7 +149,7 @@ void TailDriveUiManager::tailDrivesToUi() const {
 
     for (int i = 0; i < drives.count(); i++) {
         const auto& drive = drives[i];
-        qDebug() << "Drive: " << drive.name << " (" << drive.path << ")";
+        //qDebug() << "Drive: " << drive.name << " (" << drive.path << ")";
 
         ui->twSharedDrives->setItem(i, 0, new QTableWidgetItem(drive.name));
         ui->twSharedDrives->setItem(i, 1, new QTableWidgetItem(drive.path));

@@ -84,7 +84,7 @@ public:
 
         // Iterate over each reconstructed entry and apply the regular expression
         for (const QString& entry : entries) {
-            qDebug() << "Parsing entry: " << entry;
+            //qDebug() << "Parsing entry: " << entry;
             retVal.emplace_back(TailAccountInfo::parse(entry));
         }
 

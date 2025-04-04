@@ -33,7 +33,7 @@ void TailFileReceiver::shutdown() {
 }
 
 void TailFileReceiver::startListening() {
-    qDebug() << "Starting to listening for files";
+    //qDebug() << "Starting to listening for files";
 
     if (m_process != nullptr) {
         qDebug() << "WARN: Process already running";

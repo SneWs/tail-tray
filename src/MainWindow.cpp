@@ -373,7 +373,7 @@ void MainWindow::onShowTailFileSaveLocationPicker() {
 }
 
 void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& results, QList<QPair<QString, float>>& latencies) const {
-    ui->twNetworkStatus->clearContents();
+    ui->twNetworkStatus->clear();
     ui->twNetworkStatus->setColumnCount(2);
     ui->twNetworkStatus->setHorizontalHeaderLabels(QStringList() << tr("Property") << tr("Value"));
     ui->twNetworkStatus->setRowCount(static_cast<int>(results.count() + latencies.count() + 1));

@@ -494,6 +494,7 @@ void TailRunner::parseStatusResponse(const QJsonObject& obj) {
 }
 
 void TailRunner::parseSettingsResponse(const QJsonObject& obj) {
+    (void*)currentPrefs.release();
     currentPrefs = std::move(CurrentTailPrefs::parse(obj));
 }
 

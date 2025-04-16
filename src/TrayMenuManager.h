@@ -1,7 +1,3 @@
-//
-// Created by marcus on 2024-07-06.
-//
-
 #ifndef TRAYMENUMANAGER_H
 #define TRAYMENUMANAGER_H
 

@@ -142,7 +142,7 @@ void TailDriveUiManager::tailDrivesToUi() const {
 
     const auto& drives = pTailStatus->drives;
 
-    ui->twSharedDrives->clearContents();
+    ui->twSharedDrives->clear();
     ui->twSharedDrives->setColumnCount(2);
     ui->twSharedDrives->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Path"));
     ui->twSharedDrives->setRowCount(static_cast<int>(drives.count()));

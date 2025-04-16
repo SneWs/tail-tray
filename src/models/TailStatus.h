@@ -8,6 +8,7 @@
 #include <QList>
 
 #include <memory>
+#include <vector>
 
 #include "TailDeviceInfo.h"
 #include "TailNetInfo.h"
@@ -33,7 +34,7 @@ public:
     QString magicDnsSuffix;
     TailNetInfo currentTailNet;
     QList<QString> certDomains;
-    QList<std::shared_ptr<TailDeviceInfo>> peers;
+    std::vector<std::shared_ptr<TailDeviceInfo>> peers;
     std::unique_ptr<TailUser> user;
     QString clientVersion;
 

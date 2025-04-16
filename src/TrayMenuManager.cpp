@@ -277,7 +277,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     pTrayMenu->addSeparator();
     auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
     exitNodes->addAction(pExitNodeNone.get());
-    for (int i = 0; i < pTailStatus->peers.count(); i++) {
+    for (int i = 0; i < pTailStatus->peers.size(); i++) {
         const auto& dev = pTailStatus->peers[i];
         if (dev->id != pTailStatus->self->id && dev->exitNodeOption) {
             auto name = dev->getShortDnsName();

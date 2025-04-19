@@ -45,7 +45,7 @@ public:
     [[nodiscard]] QProcess* process() const { return proc.get();}
     [[nodiscard]] Command command() const { return eCommand; }
     [[nodiscard]] void* userData() const { return pUserData; }
-    [[nodiscard]] bool isCompleted() const { return completed; }
+    [[nodiscard]] bool isRunning() const { return proc != nullptr && proc->state() != QProcess::NotRunning; }
 
 signals:
     void processCanReadStdOut(BufferedProcessWrapper* process);
@@ -62,7 +62,6 @@ private:
     std::unique_ptr<QProcess> proc;
     void* pUserData;
     Command eCommand;
-    bool completed;
     bool didReceiveStdErr;
     bool didReceiveStdOut;
 };

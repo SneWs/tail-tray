@@ -241,6 +241,9 @@ void TailRunner::sendFile(const QString& targetDevice, const QString& localFileP
 }
 
 void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QStringList& args, const bool jsonResult, const bool usePkExec, void* userData) {
+    if (hasPendingCommandOfType(cmdType))
+        return;
+
     auto wrapper = new BufferedProcessWrapper(cmdType, cmdType == Command::Login, this);
     processes.emplace_back(wrapper);
 
@@ -413,10 +416,6 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
 void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
     //qDebug() << "Process exit code " << exitCode << " - " << exitStatus;
 
-    // Cleanup processes that has completed, this will not include this current process that invoked the signal
-    // as it's not flagged as completed until after we return from this call
-    runCompletedCleanup();
-
     const auto commandInfo = process->command();
     if (exitCode != 0) {
         if (commandInfo == Command::Connect || commandInfo == Command::Disconnect) {
@@ -475,18 +474,9 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
         else if (commandInfo == Command::SendFile) {
             emit fileSent(true, QString{}, process->userData());
         }
-        else if (commandInfo != Command::Status && commandInfo != Command::Logout &&
-                 commandInfo != Command::GetDnsStatus
-#if defined(DAVFS_ENABLED)
-                 && commandInfo != Command::Drive
-#endif
-            )
-        {
-            QTimer::singleShot(1000, this, [this]() {
-                checkStatus();
-            });
-        }
     }
+
+    runCompletedCleanup();
 }
 
 void TailRunner::parseStatusResponse(const QJsonObject& obj) {
@@ -500,7 +490,7 @@ void TailRunner::parseSettingsResponse(const QJsonObject& obj) {
 
 bool TailRunner::hasPendingCommandOfType(const Command cmdType) const {
     for (const auto* process : processes) {
-        if (process->command() == cmdType && !process->isCompleted())
+        if (process->command() == cmdType && process->isRunning())
             return true;
     }
 
@@ -509,12 +499,13 @@ bool TailRunner::hasPendingCommandOfType(const Command cmdType) const {
 
 void TailRunner::runCompletedCleanup() {
     for (auto it = processes.begin(); it != processes.end();) {
-        if ((*it)->isCompleted()) {
+        if (!(*it)->isRunning()) {
             const auto cmd = commandToString((*it)->command());
-            //qDebug() << "Cleaning up process " << cmd;
+            qDebug() << "Cleaning up process " << cmd;
 
-            (*it)->deleteLater();
+            delete (*it);
             it = processes.erase(it);
+            qDebug() << "Processes active: " << processes.size();
         }
         else {
             ++it;
@@ -532,7 +523,6 @@ BufferedProcessWrapper::BufferedProcessWrapper(const Command cmd, bool emitOnAct
     , proc(std::make_unique<QProcess>(this))
     , pUserData(nullptr)
     , eCommand(cmd)
-    , completed(false)
     , didReceiveStdErr(false)
     , didReceiveStdOut(false)
 {
@@ -590,7 +580,4 @@ void BufferedProcessWrapper::onProcessFinished(int exitCode, QProcess::ExitStatu
         emit processCanReadStandardError(this);
 
     emit processFinished(this, exitCode, exitStatus);
-
-    // Should always be after emitting returns
-    completed = true;
 }

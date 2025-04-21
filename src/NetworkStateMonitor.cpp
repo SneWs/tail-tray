@@ -150,6 +150,13 @@ void NetworkStateMonitor::onProcessCanReadStandardError() {
 }
 
 void NetworkStateMonitor::startProcess() {
+    if (pProcess != nullptr) {
+        pProcess->kill();
+        pProcess->disconnect();
+        
+        pProcess.reset();
+    }
+
     pProcess = std::make_unique<QProcess>(this);
 
     connect(pProcess.get(), &QProcess::readyReadStandardOutput,

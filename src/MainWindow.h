@@ -46,7 +46,7 @@ private:
     std::unique_ptr<AccountsTabUiManager> accountsTabUi;
     std::unique_ptr<TrayMenuManager> pTrayManager;
     std::unique_ptr<TailRunner> pCurrentExecution;
-    std::unique_ptr<TailStatus> pTailStatus;
+    TailStatus pTailStatus{};
     TailDnsStatus pDnsStatus{};
     std::unique_ptr<TailFileReceiver> pFileReceiver;
     std::unique_ptr<NetworkStateMonitor> pNetworkStateMonitor;
@@ -71,7 +71,7 @@ private slots:
     void onIpnEvent(IpnEventData* eventData);
 
 #if defined(DAVFS_ENABLED)
-    void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const;
+    void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);
 #endif
 
     // Send file
@@ -94,7 +94,7 @@ private slots:
 private:
     // Switch to the new state and return the prev (old) state back to caller
     TailState changeToState(TailState newState);
-    void onTailStatusChanged(TailStatus* pNewStatus);
+    void onTailStatusChanged(const TailStatus& pNewStatus);
 
     static bool shallowCheckForNetworkAvailable();
 

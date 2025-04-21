@@ -14,14 +14,23 @@
 
 namespace {
     static QList<QAction*> disposableConnectedMenuActions = {};
+    static QList<QMenu*> disposableMenus = {};
 
     void cleanupDisposableActions() {
-        for (QAction* ac : disposableConnectedMenuActions)
-        {
+        for (QAction* ac : disposableConnectedMenuActions) {
             delete ac;
         }
 
         disposableConnectedMenuActions.clear();
+    }
+
+    void cleanupDisposableMenus() {
+        for (QMenu* m : disposableMenus) {
+            if (m)
+                m->deleteLater();
+        }
+
+        disposableMenus.clear();
     }
 }
 
@@ -57,16 +66,17 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     pRestartTailscale = std::make_unique<QAction>(tr("Restart Tailscale"));
 
     setupWellKnownActions();
-    stateChangedTo(TailState::NotLoggedIn, nullptr);
+    stateChangedTo(TailState::NotLoggedIn, TailStatus{});
 }
 
 void TrayMenuManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
     accounts = foundAccounts;
 }
 
-void TrayMenuManager::stateChangedTo(TailState newState, TailStatus const* pTailStatus) const
+void TrayMenuManager::stateChangedTo(TailState newState, const TailStatus& pTailStatus) const
 {
     cleanupDisposableActions();
+    cleanupDisposableMenus();
 
     switch (newState) {
         case TailState::Connected:
@@ -91,29 +101,42 @@ void TrayMenuManager::stateChangedTo(TailState newState, TailStatus const* pTail
 void TrayMenuManager::buildNotLoggedInMenu() const {
     pTrayMenu->clear();
     pTrayMenu->addAction(pLoginAction.get());
-    pTrayMenu->addSeparator();
+    disposableConnectedMenuActions.push_back(
+        pTrayMenu->addSeparator()
+    );
     pTrayMenu->addAction(pPreferences.get());
     pTrayMenu->addAction(pAbout.get());
-    pTrayMenu->addSeparator();
+    disposableConnectedMenuActions.push_back(
+        pTrayMenu->addSeparator()
+    );
     pTrayMenu->addAction(pQuitAction.get());
 
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
 }
 
-void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const {
+void TrayMenuManager::buildNotConnectedMenu(const TailStatus& pTailStatus) const {
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnect.get());
-    pTrayMenu->addSeparator();
-    if (pTailStatus != nullptr && pTailStatus->user.id > 0)
-        pThisDevice->setText(pTailStatus->user.loginName);
+    disposableConnectedMenuActions.push_back(
+        pTrayMenu->addSeparator()
+    );
+
+    if (pTailStatus.user.id > 0)
+        pThisDevice->setText(pTailStatus.user.loginName);
     pTrayMenu->addAction(pThisDevice.get());
     auto* actions = pTrayMenu->addMenu(tr("Custom Actions"));
+    disposableMenus.push_back(actions);
+
     actions->addAction(pRestartTailscale.get());
     actions->addAction(pRefreshLocalDns.get());
-    pTrayMenu->addSeparator();
+    disposableConnectedMenuActions.push_back(
+        pTrayMenu->addSeparator()
+    );
     pTrayMenu->addAction(pPreferences.get());
     pTrayMenu->addAction(pAbout.get());
-    pTrayMenu->addSeparator();
+    disposableConnectedMenuActions.push_back(
+        pTrayMenu->addSeparator()
+    );
     pTrayMenu->addAction(pQuitAction.get());
 
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
@@ -121,7 +144,7 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
     buildAccountsMenu();
 }
 
-void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
+void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) const {
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnected.get());
     pTrayMenu->addAction(pDisconnect.get());
@@ -130,12 +153,13 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
         pTrayMenu->addSeparator()
     );
 
-    pThisDevice->setText(pTailStatus->user.loginName);
+    pThisDevice->setText(pTailStatus.user.loginName);
     pTrayMenu->addAction(pThisDevice.get());
 
     auto* netDevs = pTrayMenu->addMenu(tr("Network devices"));
-    for (const auto& dev : pTailStatus->peers) {
-        if (dev.id != pTailStatus->self.id) {
+    disposableMenus.push_back(netDevs);
+    for (const auto& dev : pTailStatus.peers) {
+        if (dev.id != pTailStatus.self.id) {
             auto name = dev.getShortDnsName();
             QAction* action;
             if (!dev.online) {
@@ -151,6 +175,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                 }
 
                 auto* deviceMenu = netDevs->addMenu(name + ipStr);
+                disposableMenus.push_back(deviceMenu);
                 action = deviceMenu->addAction(tr("Copy IP address"));
                 connect(action, &QAction::triggered, this, [this, dev, name, ipStr](bool) {
                     QClipboard* clipboard = QApplication::clipboard();
@@ -198,7 +223,8 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     // Tail drives
     if (settings.tailDriveEnabled()) {
         auto* drives = pTrayMenu->addMenu(tr("Drives"));
-        if (!pTailStatus->drivesConfigured && pTailStatus->drives.count() < 1) {
+        disposableMenus.push_back(drives);
+        if (!pTailStatus.drivesConfigured && pTailStatus.drives.count() < 1) {
             auto* action = drives->addAction(tr("Not configured, click to configure"));
             disposableConnectedMenuActions.push_back(action);
             connect(action, &QAction::triggered, this, [this](bool) {
@@ -238,14 +264,15 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
                 (void)mountCmd.waitForFinished();
             });
 
-            if (pTailStatus->drives.count() > 0) {
+            if (pTailStatus.drives.count() > 0) {
                 disposableConnectedMenuActions.push_back(
                     drives->addSeparator()
                 );
             }
 
-            for (const auto& drive : pTailStatus->drives) {
+            for (const auto& drive : pTailStatus.drives) {
                 auto* driveMenu = drives->addMenu(drive.name);
+                disposableMenus.push_back(driveMenu);
 
                 auto* renameAction = driveMenu->addAction(tr("Rename"));
                 disposableConnectedMenuActions.push_back(renameAction);
@@ -285,6 +312,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     );
 
     auto* actions = pTrayMenu->addMenu(tr("Custom Actions"));
+    disposableMenus.push_back(actions);
     actions->addAction(pRestartTailscale.get());
     actions->addAction(pRefreshLocalDns.get());
 
@@ -293,10 +321,11 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
     );
 
     auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
+    disposableMenus.push_back(exitNodes);
     exitNodes->addAction(pExitNodeNone.get());
-    for (int i = 0; i < pTailStatus->peers.size(); i++) {
-        const auto& dev = pTailStatus->peers[i];
-        if (dev.id != pTailStatus->self.id && dev.exitNodeOption) {
+    for (int i = 0; i < pTailStatus.peers.size(); i++) {
+        const auto& dev = pTailStatus.peers[i];
+        if (dev.id != pTailStatus.self.id && dev.exitNodeOption) {
             auto name = dev.getShortDnsName();
             if (!dev.online)
                 name += tr(" (offline)");

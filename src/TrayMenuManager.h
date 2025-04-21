@@ -19,7 +19,7 @@ public:
     explicit TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent = nullptr);
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
-    void stateChangedTo(TailState newState, TailStatus const* pTailStatus) const;
+    void stateChangedTo(TailState newState, const TailStatus& pTailStatus) const;
 
     [[nodiscard]] QSystemTrayIcon* trayIcon() const { return pSysTray.get(); }
 
@@ -45,8 +45,8 @@ private:
 
 private:
     void buildNotLoggedInMenu() const;
-    void buildNotConnectedMenu(TailStatus const* pTailStatus) const;
-    void buildConnectedMenu(TailStatus const* pTailStatus) const;
+    void buildNotConnectedMenu(const TailStatus& pTailStatus) const;
+    void buildConnectedMenu(const TailStatus& pTailStatus) const;
     void buildAccountsMenu() const;
 
     void setupWellKnownActions() const;

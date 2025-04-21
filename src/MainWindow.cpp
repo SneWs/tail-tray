@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget* parent)
     , accountsTabUi(nullptr)
     , pTrayManager(nullptr)
     , pCurrentExecution(nullptr)
-    , pTailStatus(nullptr)
+    , pTailStatus()
     , pFileReceiver(nullptr)
     , eCurrentState(TailState::NoAccount)
     , pNetworkStateMonitor(std::make_unique<NetworkStateMonitor>(this))
@@ -223,10 +223,10 @@ void MainWindow::dnsStatusUpdated(const TailDnsStatus& dnsStatus) {
 void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
     accounts = foundAccounts;
     pTrayManager->onAccountsListed(foundAccounts);
-    pTrayManager->stateChangedTo(eCurrentState, pTailStatus.get());
+    pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
 
     accountsTabUi->onAccountsListed(foundAccounts);
-    accountsTabUi->onTailStatusChanged(pTailStatus.get());
+    accountsTabUi->onTailStatusChanged(pTailStatus);
 }
 
 void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
@@ -287,9 +287,9 @@ void MainWindow::onIpnEvent(IpnEventData* eventData) {
 }
 
 #if defined(DAVFS_ENABLED)
-void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) const {
+void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) {
     if (error) {
-        pTailStatus->drivesConfigured = false;
+        pTailStatus.drivesConfigured = false;
         qDebug() << errorMsg;
         qDebug() << "To read more about configuring tail drives, see https://tailscale.com/kb/1369/taildrive";
 
@@ -301,16 +301,16 @@ void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, co
         return; // Nothing more to do here
     }
 
-    pTailStatus->drivesConfigured = true;
+    pTailStatus.drivesConfigured = true;
 
     // Store available drives
-    pTailStatus->drives = QList(drives);
+    pTailStatus.drives = QList(drives);
 
     // Refresh the tray icon menus
-    pTrayManager->stateChangedTo(eCurrentState, pTailStatus.get());
+    pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
 
     // And the UI for it
-    pTailDriveUiManager->stateChangedTo(eCurrentState, pTailStatus.get());
+    pTailDriveUiManager->stateChangedTo(eCurrentState, pTailStatus);
 }
 #endif
 
@@ -518,8 +518,8 @@ TailState MainWindow::changeToState(TailState newState)
     if (eCurrentState == TailState::NotLoggedIn)
     {
         // Clear the status
-        pTailStatus = std::make_unique<TailStatus>();
-        pTailStatus->user = TailUser{};
+        pTailStatus = TailStatus{};
+        pTailStatus.user = TailUser{};
     }
 
     if (newState == TailState::Connected) {
@@ -532,8 +532,8 @@ TailState MainWindow::changeToState(TailState newState)
         setWindowIcon(QIcon(":/icons/tray-off.png"));
     }
 
-    pTrayManager->stateChangedTo(newState, pTailStatus.get());
-    accountsTabUi->onTailStatusChanged(pTailStatus.get());
+    pTrayManager->stateChangedTo(newState, pTailStatus);
+    accountsTabUi->onTailStatusChanged(pTailStatus);
 
     if (eCurrentState == TailState::NotConnected) {
         // Nothing more to do
@@ -545,7 +545,7 @@ TailState MainWindow::changeToState(TailState newState)
         startListeningForIncomingFiles();
 
 #if defined(DAVFS_ENABLED)
-    pTailDriveUiManager->stateChangedTo(newState, pTailStatus.get());
+    pTailDriveUiManager->stateChangedTo(newState, pTailStatus);
     if (settings.tailDriveEnabled()) {
         pCurrentExecution->listDrives();
     }
@@ -555,39 +555,34 @@ TailState MainWindow::changeToState(TailState newState)
     return retVal;
 }
 
-void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
+void MainWindow::onTailStatusChanged(const TailStatus& pNewStatus)
 {
     // NOTE: Make sure to capture any stored drive data from prev drive listing
     //       if not we will lose track of the drives
-    QList<TailDriveInfo> drives;
-    if (pTailStatus != nullptr) {
-        drives = pTailStatus->drives;
-    }
-    pTailStatus.reset(pNewStatus);
-
-    // And copy over to new status
-    pTailStatus->drives = drives;
+    QList<TailDriveInfo> drives = pTailStatus.drives;
+    pTailStatus = pNewStatus;
+    pTailStatus.drives = drives;
 
     const auto* tailscalePrefs = pCurrentExecution->currentSettings();
 
-    if (pTailStatus->user.id > 0) {
-        if (pTailStatus->self.online)
+    if (pTailStatus.user.id > 0) {
+        if (pTailStatus.self.online)
             changeToState(TailState::Connected);
         else
             changeToState(TailState::NotConnected);
 
-        if (pTailStatus->health.count() > 0)
+        if (pTailStatus.health.count() > 0)
         {
             auto now = QDateTime::currentDateTime();
             QString str{};
-            for (const auto& s : pTailStatus->health)
+            for (const auto& s : pTailStatus.health)
                 str += s + "\n";
 
             if (str.length() > 1)
                 showWarningMessage(tr("Warning"), str);
         }
 
-        auto formattedVersion = pTailStatus->version.mid(0, pTailStatus->version.indexOf("-"));
+        auto formattedVersion = pTailStatus.version.mid(0, pTailStatus.version.indexOf("-"));
         ui->lblVersionNumber->setText(tr("Version ") + formattedVersion);
     }
     else {
@@ -601,8 +596,8 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
         }
     }
 
-    accountsTabUi->onTailStatusChanged(pTailStatus.get());
-    pTailDriveUiManager->stateChangedTo(eCurrentState, pTailStatus.get());
+    accountsTabUi->onTailStatusChanged(pTailStatus);
+    pTailDriveUiManager->stateChangedTo(eCurrentState, pTailStatus);
 }
 
 bool MainWindow::shallowCheckForNetworkAvailable() {

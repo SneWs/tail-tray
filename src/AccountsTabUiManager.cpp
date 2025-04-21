@@ -15,7 +15,7 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     : QObject(parent)
     , ui(u)
     , pTailRunner(runner)
-    , pTailStatus(nullptr)
+    , pTailStatus()
 {
     connect(ui->btnAdminConsole, &QPushButton::clicked, this, [this]() {
             QDesktopServices::openUrl(QUrl("https://login.tailscale.com/admin"));
@@ -87,25 +87,25 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     }
 }
 
-void AccountsTabUiManager::onTailStatusChanged(TailStatus* status) {
+void AccountsTabUiManager::onTailStatusChanged(const TailStatus& status) {
     pTailStatus = status;
     showAccountDetails(false);
 
-    if (pTailStatus == nullptr || pTailStatus->user.id <= 0) {
+    if (pTailStatus.user.id <= 0) {
         // Not logged in
         return;
     }
 
     // Show account details view
-    ui->lblUsername->setText(pTailStatus->user.displayName);
-    ui->lblTailnetName->setText(pTailStatus->user.loginName);
-    ui->lblEmail->setText(pTailStatus->user.loginName);
-    ui->lblStatus->setText(pTailStatus->backendState);
+    ui->lblUsername->setText(pTailStatus.user.displayName);
+    ui->lblTailnetName->setText(pTailStatus.user.loginName);
+    ui->lblEmail->setText(pTailStatus.user.loginName);
+    ui->lblStatus->setText(pTailStatus.backendState);
     ui->lblKeyExpiry->setText("");
 
     // Show the key expiry date in a more human-readable format
     const auto now = QDateTime::currentDateTime();
-    const auto daysToExpiry = now.daysTo(pTailStatus->self.keyExpiry);
+    const auto daysToExpiry = now.daysTo(pTailStatus.self.keyExpiry);
     const auto monthsToExpiry = daysToExpiry / 30;
     if (monthsToExpiry > 0)
         ui->lblKeyExpiry->setText("in " + QString::number(monthsToExpiry) + " months");
@@ -120,7 +120,7 @@ void AccountsTabUiManager::onTailStatusChanged(TailStatus* status) {
 
     showAccountDetails(true);
 
-    if (!pTailStatus->user.profilePicUrl.isEmpty()) {
+    if (!pTailStatus.user.profilePicUrl.isEmpty()) {
         // ui->lblUsername->setPixmap(QPixmap(pTailStatus->user->profilePicUrl));
     }
 }

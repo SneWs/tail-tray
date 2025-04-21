@@ -22,7 +22,7 @@ public:
     explicit AccountsTabUiManager(Ui::MainWindow* ui, TailRunner* runner, QObject* parent = nullptr);
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
-    void onTailStatusChanged(TailStatus* status);
+    void onTailStatusChanged(const TailStatus& status);
 
 private:
     void showAccountDetails(bool show = true);
@@ -30,7 +30,7 @@ private:
 private:
     Ui::MainWindow* ui;
     TailRunner* pTailRunner;
-    TailStatus* pTailStatus;
+    TailStatus pTailStatus;
     QList<TailAccountInfo> accounts;
     TailSettings settings;
 };

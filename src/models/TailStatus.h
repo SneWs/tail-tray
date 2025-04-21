@@ -42,62 +42,108 @@ public:
     QList<TailDriveInfo> drives{};
     bool drivesConfigured = true;
 
-    static TailStatus* parse(const QJsonObject& obj) {
-        auto* newStatus = new TailStatus{};
-        newStatus->version = jsonReadString(obj, "Version");
-        newStatus->tun = jsonReadBool(obj, "TUN");
-        newStatus->backendState = jsonReadString(obj, "BackendState");
-        newStatus->haveNodeKey = jsonReadBool(obj, "HaveNodeKey");
-        newStatus->authUrl = jsonReadString(obj, "AuthURL");
+    TailStatus() {
+    }
+
+    TailStatus(const TailStatus& other) {
+        version = other.version;
+        tun = other.tun;
+        backendState = other.backendState;
+        haveNodeKey = other.haveNodeKey;
+        authUrl = other.authUrl;
+        tailscaleIPs = other.tailscaleIPs;
+        self = other.self;
+        health = other.health;
+        magicDnsSuffix = other.magicDnsSuffix;
+        currentTailNet = other.currentTailNet;
+        certDomains = other.certDomains;
+        peers = other.peers;
+        user = other.user;
+        clientVersion = other.clientVersion;
+        drives = other.drives;
+        drivesConfigured = other.drivesConfigured;
+    }
+
+    TailStatus& operator = (const TailStatus& other) {
+        version = other.version;
+        tun = other.tun;
+        backendState = other.backendState;
+        haveNodeKey = other.haveNodeKey;
+        authUrl = other.authUrl;
+        tailscaleIPs = other.tailscaleIPs;
+        self = other.self;
+        health = other.health;
+        magicDnsSuffix = other.magicDnsSuffix;
+        currentTailNet = other.currentTailNet;
+        certDomains = other.certDomains;
+        peers = other.peers;
+        user = other.user;
+        clientVersion = other.clientVersion;
+        drives = other.drives;
+        drivesConfigured = other.drivesConfigured;
+
+        return *this;
+    }
+
+    static TailStatus parse(const QJsonObject& obj) {
+        TailStatus newStatus{};
+        newStatus.version = jsonReadString(obj, "Version");
+        newStatus.tun = jsonReadBool(obj, "TUN");
+        newStatus.backendState = jsonReadString(obj, "BackendState");
+        newStatus.haveNodeKey = jsonReadBool(obj, "HaveNodeKey");
+        newStatus.authUrl = jsonReadString(obj, "AuthURL");
 
         // Will be null when not logged in for example
         if (!obj["TailscaleIPs"].isNull()) {
             for (const auto& ab : obj["TailscaleIPs"].toArray()) {
-                if (ab.isNull())
+                if (ab.isNull()) {
                     continue;
-                newStatus->tailscaleIPs.emplace_back(ab.toString(""));
+                }
+                newStatus.tailscaleIPs.emplace_back(ab.toString(""));
             }
         }
 
         if (obj.contains("Health") && !obj["Health"].isNull())
         {
             for (const auto& ab : obj["Health"].toArray()) {
-                if (ab.isNull())
+                if (ab.isNull()) {
                     continue;
-                newStatus->health.emplace_back(ab.toString(""));
+                }
+                newStatus.health.emplace_back(ab.toString(""));
             }
         }
 
-        newStatus->magicDnsSuffix = jsonReadString(obj, "MagicDNSSuffix");
-        newStatus->clientVersion = jsonReadString(obj, "ClientVersion");
+        newStatus.magicDnsSuffix = jsonReadString(obj, "MagicDNSSuffix");
+        newStatus.clientVersion = jsonReadString(obj, "ClientVersion");
 
         if (obj.contains("CurrentTailnet") && !obj["CurrentTailnet"].isNull()) {
-            newStatus->currentTailNet = TailNetInfo::parse(obj["CurrentTailnet"].toObject());
+            newStatus.currentTailNet = TailNetInfo::parse(obj["CurrentTailnet"].toObject());
         }
 
         if (obj.contains("CertDomains") && !obj["CertDomains"].isNull()) {
             for (const auto& ab : obj["CertDomains"].toArray()) {
-                newStatus->certDomains.emplace_back(ab.toString(""));
+                newStatus.certDomains.emplace_back(ab.toString(""));
             }
         }
 
         if (obj.contains("Self") && !obj["Self"].isNull())
-            newStatus->self = TailDeviceInfo::parse(obj["Self"].toObject());
+            newStatus.self = TailDeviceInfo::parse(obj["Self"].toObject());
 
         if (obj.contains("User") && !obj["User"].isNull()) {
-            newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self.userId);
+            newStatus.user = TailUser::parse(obj["User"].toObject(), newStatus.self.userId);
         }
         else {
-            newStatus->user = TailUser{};
+            newStatus.user = TailUser{};
         }
 
         // Peers
         if (obj.contains("Peer") && !obj["Peer"].isNull()) {
             auto peerObj = obj["Peer"].toObject();
             for (const auto& child : peerObj) {
-                if (child.isNull())
+                if (child.isNull()) {
                     continue;
-                newStatus->peers.push_back(TailDeviceInfo::parse(child.toObject()));
+                }
+                newStatus.peers.push_back(TailDeviceInfo::parse(child.toObject()));
             }
         }
 

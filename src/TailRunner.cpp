@@ -212,6 +212,7 @@ void TailRunner::addDrive(const TailDriveInfo& drive) {
     args << drive.name << drive.path;
 
     runCommand(Command::DriveAdd, "drive", args, false);
+    listDrives();
 }
 
 void TailRunner::renameDrive(const TailDriveInfo &drive, const QString &newName) {
@@ -220,6 +221,7 @@ void TailRunner::renameDrive(const TailDriveInfo &drive, const QString &newName)
     args << drive.name << newName;
 
     runCommand(Command::DriveRename, "drive", args, false);
+    listDrives();
 }
 
 void TailRunner::removeDrive(const TailDriveInfo& drive) {
@@ -228,6 +230,7 @@ void TailRunner::removeDrive(const TailDriveInfo& drive) {
     args << drive.name;
 
     runCommand(Command::DriveRemove, "drive", args, false);
+    listDrives();
 }
 #endif
 

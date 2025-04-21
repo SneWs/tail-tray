@@ -19,11 +19,11 @@ Q_OBJECT
 public:
     explicit TailDriveUiManager(Ui::MainWindow* mainWndUi, TailRunner* runner, QObject* parent = nullptr);
 
-    void stateChangedTo(TailState newState, TailStatus* tailStatus);
+    void stateChangedTo(TailState newState, const TailStatus& tailStatus);
 
 private slots:
-    void addTailDriveButtonClicked() const;
-    void removeTailDriveButtonClicked() const;
+    void addTailDriveButtonClicked();
+    void removeTailDriveButtonClicked();
     void selectTailDriveMountPath() const;
     void fixTailDriveDavFsSetup() const;
 
@@ -34,7 +34,7 @@ private:
 private:
     Ui::MainWindow* ui;
     TailRunner* pTailRunner;
-    TailStatus* pTailStatus;
+    TailStatus pTailStatus;
     TailSettings settings;
 };
 

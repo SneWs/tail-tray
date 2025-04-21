@@ -113,7 +113,7 @@ signals:
     void settingsRead();
     void dnsStatusRead(const TailDnsStatus& dnsStatus);
     void accountsListed(const QList<TailAccountInfo>& accounts);
-    void statusUpdated(TailStatus* newStatus);
+    void statusUpdated(const TailStatus& newStatus);
     void loginFlowCompleted();
     void driveListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);
     void fileSent(bool success, const QString& errorMsg, void* userData);

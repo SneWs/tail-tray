@@ -13,7 +13,7 @@ TailDriveUiManager::TailDriveUiManager(Ui::MainWindow* mainWndUi, TailRunner* ru
     : QObject(parent)
     , ui(mainWndUi)
     , pTailRunner(runner)
-    , pTailStatus(nullptr)
+    , pTailStatus()
     , settings(this)
 {
     connect(ui->btnAddTailDrive, &QPushButton::clicked,
@@ -50,31 +50,32 @@ TailDriveUiManager::TailDriveUiManager(Ui::MainWindow* mainWndUi, TailRunner* ru
     }
 }
 
-void TailDriveUiManager::stateChangedTo(TailState newState, TailStatus* tailStatus) {
+void TailDriveUiManager::stateChangedTo(TailState newState, const TailStatus& tailStatus) {
     pTailStatus = tailStatus;
     tailDrivesToUi();
 }
 
-void TailDriveUiManager::addTailDriveButtonClicked() const {
+void TailDriveUiManager::addTailDriveButtonClicked() {
     ManageDriveWindow dlg(TailDriveInfo{}, nullptr);
     auto result = dlg.exec();
     if (result == QDialog::Accepted) {
         auto newDrive = dlg.driveInfo();
+        pTailStatus.drives.push_back(newDrive);
+
         pTailRunner->addDrive(newDrive);
 
-        pTailStatus->drives.emplace_back(newDrive);
         tailDrivesToUi();
     }
 }
 
-void TailDriveUiManager::removeTailDriveButtonClicked() const {
+void TailDriveUiManager::removeTailDriveButtonClicked() {
     auto selectedItems = ui->twSharedDrives->selectedItems();
     if (selectedItems.count() < 1) {
         return;
     }
 
     auto row = ui->twSharedDrives->row(selectedItems.first());
-    const auto& drive = pTailStatus->drives[row];
+    const auto& drive = pTailStatus.drives[row];
 
     auto answer = QMessageBox::question(nullptr,
         tr("Are you sure?"),
@@ -87,7 +88,7 @@ void TailDriveUiManager::removeTailDriveButtonClicked() const {
 
     pTailRunner->removeDrive(drive);
 
-    pTailStatus->drives.removeAt(row);
+    pTailStatus.drives.removeAt(row);
     ui->twSharedDrives->removeRow(row);
     if (row > 0)
         ui->twSharedDrives->selectRow(row - 1);
@@ -136,19 +137,13 @@ void TailDriveUiManager::fixTailDriveDavFsSetup() const {
 }
 
 void TailDriveUiManager::tailDrivesToUi() const {
-    if (pTailStatus == nullptr) {
-        return;
-    }
-
-    const auto& drives = pTailStatus->drives;
-
     ui->twSharedDrives->clear();
     ui->twSharedDrives->setColumnCount(2);
     ui->twSharedDrives->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Path"));
-    ui->twSharedDrives->setRowCount(static_cast<int>(drives.count()));
+    ui->twSharedDrives->setRowCount(static_cast<int>(pTailStatus.drives.count()));
 
-    for (int i = 0; i < drives.count(); i++) {
-        const auto& drive = drives[i];
+    for (int i = 0; i < pTailStatus.drives.count(); i++) {
+        const auto& drive = pTailStatus.drives[i];
         //qDebug() << "Drive: " << drive.name << " (" << drive.path << ")";
 
         ui->twSharedDrives->setItem(i, 0, new QTableWidgetItem(drive.name));

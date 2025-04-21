@@ -105,7 +105,7 @@ void AccountsTabUiManager::onTailStatusChanged(TailStatus* status) {
 
     // Show the key expiry date in a more human-readable format
     const auto now = QDateTime::currentDateTime();
-    const auto daysToExpiry = now.daysTo(pTailStatus->self->keyExpiry);
+    const auto daysToExpiry = now.daysTo(pTailStatus->self.keyExpiry);
     const auto monthsToExpiry = daysToExpiry / 30;
     if (monthsToExpiry > 0)
         ui->lblKeyExpiry->setText("in " + QString::number(monthsToExpiry) + " months");

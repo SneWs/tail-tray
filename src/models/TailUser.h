@@ -15,11 +15,11 @@ class TailUser final : public QObject
 {
     Q_OBJECT
 public:
-    long long id;
-    QString loginName;
-    QString displayName;
-    QString profilePicUrl;
-    QList<QString> roles;
+    long long id = 0;
+    QString loginName{};
+    QString displayName{};
+    QString profilePicUrl{};
+    QList<QString> roles{};
 
     static std::unique_ptr<TailUser> parse(const QJsonObject& obj, long long userId) {
         auto idKey = QString::number(userId);

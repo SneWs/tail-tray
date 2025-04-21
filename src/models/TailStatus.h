@@ -23,23 +23,23 @@ class TailStatus final : public QObject
 {
     Q_OBJECT
 public:
-    QString version;
+    QString version{};
     bool tun{};
-    QString backendState;
+    QString backendState{};
     bool haveNodeKey{};
-    QString authUrl;
-    QList<QString> tailscaleIPs;
-    std::unique_ptr<TailDeviceInfo> self;
-    QList<QString> health;
-    QString magicDnsSuffix;
-    TailNetInfo currentTailNet;
-    QList<QString> certDomains;
-    std::vector<std::shared_ptr<TailDeviceInfo>> peers;
-    std::unique_ptr<TailUser> user;
-    QString clientVersion;
+    QString authUrl{};
+    QList<QString> tailscaleIPs{};
+    TailDeviceInfo self{};
+    QList<QString> health{};
+    QString magicDnsSuffix{};
+    TailNetInfo currentTailNet{};
+    QList<QString> certDomains{};
+    std::vector<TailDeviceInfo> peers{};
+    std::unique_ptr<TailUser> user{};
+    QString clientVersion{};
 
     // Drives that has been shared...
-    QList<TailDriveInfo> drives = {};
+    QList<TailDriveInfo> drives{};
     bool drivesConfigured = true;
 
     static TailStatus* parse(const QJsonObject& obj) {
@@ -85,7 +85,7 @@ public:
             newStatus->self = TailDeviceInfo::parse(obj["Self"].toObject());
 
         if (obj.contains("User") && !obj["User"].isNull()) {
-            newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self->userId);
+            newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self.userId);
         }
         else {
             newStatus->user = std::make_unique<TailUser>();
@@ -97,7 +97,7 @@ public:
             for (const auto& child : peerObj) {
                 if (child.isNull())
                     continue;
-                newStatus->peers.emplace_back(TailDeviceInfo::parse(child.toObject()));
+                newStatus->peers.push_back(TailDeviceInfo::parse(child.toObject()));
             }
         }
 

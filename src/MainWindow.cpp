@@ -522,7 +522,6 @@ TailState MainWindow::changeToState(TailState newState)
     {
         // Clear the status
         pTailStatus = std::make_unique<TailStatus>();
-        pTailStatus->self = std::make_unique<TailDeviceInfo>();
         pTailStatus->user = std::make_unique<TailUser>();
     }
 
@@ -575,7 +574,7 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
     const auto* tailscalePrefs = pCurrentExecution->currentSettings();
 
     if (pTailStatus->user->id > 0) {
-        if (pTailStatus->self->online)
+        if (pTailStatus->self.online)
             changeToState(TailState::Connected);
         else
             changeToState(TailState::NotConnected);

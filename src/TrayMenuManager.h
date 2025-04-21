@@ -27,7 +27,6 @@ private:
     QList<TailAccountInfo> accounts;
     TailSettings& settings;
     TailRunner* pTailRunner;
-    std::unique_ptr<QTimer> pStatusCheckTimer;
     std::unique_ptr<QSystemTrayIcon> pSysTray;
     std::unique_ptr<QMenu> pTrayMenu;
     std::unique_ptr<QAction> pQuitAction;

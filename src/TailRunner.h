@@ -111,7 +111,7 @@ private:
 
 signals:
     void settingsRead();
-    void dnsStatusRead(TailDnsStatus* dnsStatus);
+    void dnsStatusRead(const TailDnsStatus& dnsStatus);
     void accountsListed(const QList<TailAccountInfo>& accounts);
     void statusUpdated(TailStatus* newStatus);
     void loginFlowCompleted();

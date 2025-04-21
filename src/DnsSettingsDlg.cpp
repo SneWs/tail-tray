@@ -1,7 +1,7 @@
 #include "DnsSettingsDlg.h"
 #include "ui_DnsSettingsDlg.h"
 
-DnsSettingsDlg::DnsSettingsDlg(TailDnsStatus const* pDnsStatus, bool dnsEnabled, QWidget* parent)
+DnsSettingsDlg::DnsSettingsDlg(const TailDnsStatus& pDnsStatus, bool dnsEnabled, QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::DnsSettingsDlg)
     , dnsStatus(pDnsStatus)
@@ -12,10 +12,10 @@ DnsSettingsDlg::DnsSettingsDlg(TailDnsStatus const* pDnsStatus, bool dnsEnabled,
     connect(ui->chkUseTailscaleDns, &QCheckBox::toggled, this, &DnsSettingsDlg::dnsCheckStateChanged);
 
     // Sync the search domains and routes with the UI
-    for (const auto& domain : dnsStatus->searchDomains)
+    for (const auto& domain : dnsStatus.searchDomains)
         ui->lstSearchDomains->addItem(domain);
     
-    for (const auto& route : dnsStatus->splitDnsRoutes)
+    for (const auto& route : dnsStatus.splitDnsRoutes)
         ui->lstRoutes->addItem(route.first + ": " + route.second);
 
     ui->chkUseTailscaleDns->setChecked(dnsEnabled);

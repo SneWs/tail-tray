@@ -13,7 +13,7 @@ class DnsSettingsDlg : public QDialog
 {
     Q_OBJECT
 public:
-    explicit DnsSettingsDlg(TailDnsStatus const* pDnsStatus, bool dnsEnabled, QWidget* parent = nullptr);
+    explicit DnsSettingsDlg(const TailDnsStatus& pDnsStatus, bool dnsEnabled, QWidget* parent = nullptr);
     ~DnsSettingsDlg() override;
 
     void setTailscaleDnsEnabled(bool enabled);
@@ -27,7 +27,7 @@ private slots:
 
 private:
     Ui::DnsSettingsDlg* ui;
-    TailDnsStatus const* dnsStatus;
+    TailDnsStatus dnsStatus;
 };
 
 #endif // DNSSETTINGSDLG_H

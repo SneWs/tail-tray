@@ -91,15 +91,15 @@ void AccountsTabUiManager::onTailStatusChanged(TailStatus* status) {
     pTailStatus = status;
     showAccountDetails(false);
 
-    if (pTailStatus == nullptr || pTailStatus->user == nullptr || pTailStatus->user->id <= 0) {
+    if (pTailStatus == nullptr || pTailStatus->user.id <= 0) {
         // Not logged in
         return;
     }
 
     // Show account details view
-    ui->lblUsername->setText(pTailStatus->user->displayName);
-    ui->lblTailnetName->setText(pTailStatus->user->loginName);
-    ui->lblEmail->setText(pTailStatus->user->loginName);
+    ui->lblUsername->setText(pTailStatus->user.displayName);
+    ui->lblTailnetName->setText(pTailStatus->user.loginName);
+    ui->lblEmail->setText(pTailStatus->user.loginName);
     ui->lblStatus->setText(pTailStatus->backendState);
     ui->lblKeyExpiry->setText("");
 
@@ -120,7 +120,7 @@ void AccountsTabUiManager::onTailStatusChanged(TailStatus* status) {
 
     showAccountDetails(true);
 
-    if (!pTailStatus->user->profilePicUrl.isEmpty()) {
+    if (!pTailStatus->user.profilePicUrl.isEmpty()) {
         // ui->lblUsername->setPixmap(QPixmap(pTailStatus->user->profilePicUrl));
     }
 }

@@ -9,6 +9,10 @@ class TailNetInfo final : public QObject
 {
     Q_OBJECT
 public:
+    QString name{};
+    QString magicDnsSuffix{};
+    bool magicDnsEnabled = false;
+
     TailNetInfo()
         : name("")
         , magicDnsSuffix("")
@@ -28,10 +32,6 @@ public:
 
         return *this;
     }
-
-    QString name;
-    QString magicDnsSuffix;
-    bool magicDnsEnabled;
 
     static TailNetInfo parse(const QJsonObject& obj) {
         TailNetInfo retVal;

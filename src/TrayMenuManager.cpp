@@ -104,8 +104,8 @@ void TrayMenuManager::buildNotConnectedMenu(TailStatus const* pTailStatus) const
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnect.get());
     pTrayMenu->addSeparator();
-    if (pTailStatus != nullptr && pTailStatus->user != nullptr)
-        pThisDevice->setText(pTailStatus->user->loginName);
+    if (pTailStatus != nullptr && pTailStatus->user.id > 0)
+        pThisDevice->setText(pTailStatus->user.loginName);
     pTrayMenu->addAction(pThisDevice.get());
     auto* actions = pTrayMenu->addMenu(tr("Custom Actions"));
     actions->addAction(pRestartTailscale.get());
@@ -130,7 +130,7 @@ void TrayMenuManager::buildConnectedMenu(TailStatus const* pTailStatus) const {
         pTrayMenu->addSeparator()
     );
 
-    pThisDevice->setText(pTailStatus->user->loginName);
+    pThisDevice->setText(pTailStatus->user.loginName);
     pTrayMenu->addAction(pThisDevice.get());
 
     auto* netDevs = pTrayMenu->addMenu(tr("Network devices"));

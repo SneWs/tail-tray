@@ -17,13 +17,13 @@ class CurrentTailPrefs final : public QObject {
     Q_OBJECT
 public:
     // ControlURL is the URL of the control server to use.
-    QString controlURL;
+    QString controlURL{};
 
     // RouteAll specifies whether to accept subnets advertised by
 	// other nodes on the Tailscale network. Note that this does not
 	// include default routes (0.0.0.0/0 and ::/0), those are
 	// controlled by ExitNodeID/IP below.
-    bool routeAll;
+    bool routeAll = false;
 
     // ExitNodeID and ExitNodeIP specify the node that should be used
 	// as an exit node for internet traffic. At most one of these
@@ -40,8 +40,8 @@ public:
 	// the current tailnet), or it doesn't offer exit node services, a
 	// blackhole route will be installed on the local system to
 	// prevent any traffic escaping to the local network.
-    QString exitNodeId;
-    QString exitNodeIp;
+    QString exitNodeId{};
+    QString exitNodeIp{};
 
     // InternalExitNodePrior is the most recently used ExitNodeID in string form. It is set by
 	// the backend on transition from exit node on to off and used by the
@@ -49,31 +49,31 @@ public:
 	//
 	// As an Internal field, it can't be set by LocalAPI clients, rather it is set indirectly
 	// when the ExitNodeID value is zero'd and via the set-use-exit-node-enabled endpoint.
-    QString internalExitNodePrior;
+    QString internalExitNodePrior{};
 
     // ExitNodeAllowLANAccess indicates whether locally accessible subnets should be
     // routed directly or via the exit node.
-    bool exitNodeAllowLANAccess;
+    bool exitNodeAllowLANAccess = false;
 
     // CorpDNS specifies whether to install the Tailscale network's
     // DNS configuration, if it exists.
     // NOTE: Maps to Use Tailscale DNS settings
-    bool corpDNS;
+    bool corpDNS = false;
 
     // RunSSH bool is whether this node should run an SSH
     // server, permitting access to peers according to the
     // policies as configured by the Tailnet's admin(s).
-    bool runSSH;
+    bool runSSH = false;
 
     // RunWebClient bool is whether this node should expose
     // its web client over Tailscale at port 5252,
     // permitting access to peers according to the
     // policies as configured by the Tailnet's admin(s).
-    bool runWebClient;
+    bool runWebClient = false;
 
     // WantRunning indicates whether networking should be active on
     // this node.
-    bool wantRunning;
+    bool wantRunning = false;
 
     // LoggedOut indicates whether the user intends to be logged out.
     // There are other reasons we may be logged out, including no valid
@@ -81,24 +81,24 @@ public:
     // We need to remember this state so that, on next startup, we can
     // generate the "Login" vs "Connect" buttons correctly, without having
     // to contact the server to confirm our nodekey status first.
-    bool loggedOut;
+    bool loggedOut = false;
 
     // ShieldsUp indicates whether to block all incoming connections,
     // regardless of the control-provided packet filter. If false, we
     // use the packet filter as provided. If true, we block incoming
     // connections. This overrides tailcfg.Hostinfo's ShieldsUp.
-    bool shieldsUp;
+    bool shieldsUp = false;
 
     // AdvertiseTags specifies groups that this node wants to join, for
     // purposes of ACL enforcement. These can be referenced from the ACL
     // security policy. Note that advertising a tag doesn't guarantee that
     // the control server will allow you to take on the rights for that
     // tag.
-    QList<QString> advertiseTags;
+    QList<QString> advertiseTags{};
 
     // Hostname is the hostname to use for identifying the node. If
     // not set, os.Hostname is used.
-    QString hostname;
+    QString hostname{};
 
     // NotepadURLs is a debugging setting that opens OAuth URLs in
     // notepad.exe on Windows, rather than loading them in a browser.
@@ -106,7 +106,7 @@ public:
     // apenwarr 2020-04-29: Unfortunately this is still needed sometimes.
     // Windows' default browser setting is sometimes screwy and this helps
     // users narrow it down a bit.
-    bool notepadURLs;
+    bool notepadURLs = false;
 
 #if defined(WINDOWS_BUILD)
     // ForceDaemon specifies whether a platform that normally
@@ -119,19 +119,19 @@ public:
     // running even with no users logged in. This might also be
     // used for macOS in the future. This setting has no effect
     // for Linux/etc, which always operate in daemon mode.
-    bool forceDaemon;
+    bool forceDaemon = false;
 #endif
 
     // AdvertiseRoutes specifies CIDR prefixes to advertise into the
     // Tailscale network as reachable through the current
     // node.
-    QList<QString> advertiseRoutes;
+    QList<QString> advertiseRoutes{};
 
     // AdvertiseServices specifies the list of services that this
     // node can serve as a destination for. Note that an advertised
     // service must still go through the approval process from the
     // control server.
-    QList<QString> advertiseServices;
+    QList<QString> advertiseServices{};
 
     // NoSNAT specifies whether to source NAT traffic going to
     // destinations in AdvertiseRoutes. The default is to apply source
@@ -143,7 +143,7 @@ public:
     // machine.
     //
     // Linux-only.
-    bool noSNAT;
+    bool noSNAT = false;
 
     // NoStatefulFiltering specifies whether to apply stateful filtering when
     // advertising routes in AdvertiseRoutes. The default is to not apply
@@ -157,49 +157,52 @@ public:
     // removed since then, but the field remains an opt.Bool.
     //
     // Linux-only.
-    bool noStatefulFiltering;
+    bool noStatefulFiltering = false;
 
     // NetfilterMode specifies how much to manage netfilter rules for
     // Tailscale, if at all.
-    int netfilterMode;
+    int netfilterMode = 0;
 
     // OperatorUser is the local machine user name who is allowed to
     // operate tailscaled without being root or using sudo.
-    QString operatorUser;
+    QString operatorUser{};
 
     // TODO: Check/Parse in JSON
     // ProfileName is the desired name of the profile. If empty, then the user's
     // LoginName is used. It is only used for display purposes in the client UI
     // and CLI.
-    QString profileName;
+    QString profileName{};
 
     // AutoUpdate sets the auto-update preferences for the node agent. See
     // AutoUpdatePrefs docs for more details.
-    bool autoUpdate_Check;
-    bool autoUpdate_Apply;
+    bool autoUpdate_Check = false;
+    bool autoUpdate_Apply = false;
 
     // AppConnector sets the app connector preferences for the node agent. See
     // AppConnectorPrefs docs for more details.
-    bool appConnector_Advertise;
+    bool appConnector_Advertise = false;
 
     // PostureChecking enables the collection of information used for device
     // posture checks.
-    bool postureChecking;
+    bool postureChecking = false;
 
     // NetfilterKind specifies what netfilter implementation to use.
     //
     // Linux-only.
-    QString netfilterKind;
+    QString netfilterKind{};
 
     // DriveShares are the configured DriveShares, stored in increasing order
     // by name.
     // TODO: Parse from JSON. Data structure, see https://github.com/tailscale/tailscale/blob/main/drive/remote.go#L34
-    QList<QString> driveShares;
+    QList<QString> driveShares{};
 
     // No longer used...
-    bool allowSingleHosts;
+    bool allowSingleHosts = false;
 
-    std::unique_ptr<TailPrefsConfig> config;
+    TailPrefsConfig config{};
+
+    CurrentTailPrefs() {
+    }
 
     [[nodiscard]] bool isExitNode() const { return advertiseRoutes.count() > 0; }
 

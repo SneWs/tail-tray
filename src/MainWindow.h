@@ -47,7 +47,7 @@ private:
     std::unique_ptr<TrayMenuManager> pTrayManager;
     std::unique_ptr<TailRunner> pCurrentExecution;
     std::unique_ptr<TailStatus> pTailStatus;
-    std::unique_ptr<TailDnsStatus> pDnsStatus;
+    TailDnsStatus pDnsStatus{};
     std::unique_ptr<TailFileReceiver> pFileReceiver;
     std::unique_ptr<NetworkStateMonitor> pNetworkStateMonitor;
     std::unique_ptr<IpnWatcher> pIpnWatcher;
@@ -63,7 +63,7 @@ private:
 
 private slots:
     void settingsReadyToRead();
-    void dnsStatusUpdated(TailDnsStatus* dnsStatus);
+    void dnsStatusUpdated(const TailDnsStatus& dnsStatus);
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();

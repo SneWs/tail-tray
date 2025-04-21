@@ -35,7 +35,7 @@ public:
     TailNetInfo currentTailNet{};
     QList<QString> certDomains{};
     std::vector<TailDeviceInfo> peers{};
-    std::unique_ptr<TailUser> user{};
+    TailUser user{};
     QString clientVersion{};
 
     // Drives that has been shared...
@@ -88,7 +88,7 @@ public:
             newStatus->user = TailUser::parse(obj["User"].toObject(), newStatus->self.userId);
         }
         else {
-            newStatus->user = std::make_unique<TailUser>();
+            newStatus->user = TailUser{};
         }
 
         // Peers
@@ -108,19 +108,40 @@ public:
 class TailPrefsConfig final : QObject {
     Q_OBJECT
 public:
-    QString privateNodeKey;
-    QString oldPrivateNodeKey;
-    std::unique_ptr<TailUser> user;
-    QString networkLockKey;
-    QString nodeID;
+    QString privateNodeKey{};
+    QString oldPrivateNodeKey{};
+    TailUser user{};
+    QString networkLockKey{};
+    QString nodeID{};
 
-    static std::unique_ptr<TailPrefsConfig> parse(const QJsonObject& obj) {
-        auto config = std::make_unique<TailPrefsConfig>();
-        config->privateNodeKey = jsonReadString(obj, "PrivateNodeKey");
-        config->oldPrivateNodeKey = jsonReadString(obj, "OldPrivateNodeKey");
-        config->networkLockKey = jsonReadString(obj, "NetworkLockKey");
-        config->nodeID = jsonReadString(obj, "NodeID");
-        config->user = TailUser::parse(obj["UserProfile"].toObject());
+    TailPrefsConfig() {
+    }
+
+    TailPrefsConfig(const TailPrefsConfig& other) {
+        privateNodeKey = other.privateNodeKey;
+        oldPrivateNodeKey = other.oldPrivateNodeKey;
+        user = other.user;
+        networkLockKey = other.networkLockKey;
+        nodeID = other.nodeID;
+    }
+
+    TailPrefsConfig& operator = (const TailPrefsConfig& other) {
+        privateNodeKey = other.privateNodeKey;
+        oldPrivateNodeKey = other.oldPrivateNodeKey;
+        user = other.user;
+        networkLockKey = other.networkLockKey;
+        nodeID = other.nodeID;
+
+        return *this;
+    }
+
+    static TailPrefsConfig parse(const QJsonObject& obj) {
+        TailPrefsConfig config{};
+        config.privateNodeKey = jsonReadString(obj, "PrivateNodeKey");
+        config.oldPrivateNodeKey = jsonReadString(obj, "OldPrivateNodeKey");
+        config.networkLockKey = jsonReadString(obj, "NetworkLockKey");
+        config.nodeID = jsonReadString(obj, "NodeID");
+        config.user = TailUser::parse(obj["UserProfile"].toObject());
         return config;
     }
 };

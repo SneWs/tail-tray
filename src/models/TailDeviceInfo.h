@@ -107,9 +107,8 @@ public:
         return dnsName;
     }
 
-    static TailDeviceInfo parse(const QJsonObject& obj)
-    {
-        auto self = TailDeviceInfo{};
+    static TailDeviceInfo parse(const QJsonObject& obj) {
+        TailDeviceInfo self{};
 
         self.id = jsonReadString(obj, "ID");
         self.publicKey = jsonReadString(obj, "PublicKey");

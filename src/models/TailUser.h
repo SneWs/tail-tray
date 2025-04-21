@@ -21,10 +21,34 @@ public:
     QString profilePicUrl{};
     QList<QString> roles{};
 
-    static std::unique_ptr<TailUser> parse(const QJsonObject& obj, long long userId) {
+    TailUser() {
+
+    }
+
+    TailUser(const TailUser& other)
+    {
+        id = other.id;
+        loginName = other.loginName;
+        displayName = other.displayName;
+        profilePicUrl = other.profilePicUrl;
+        roles = other.roles;
+    }
+
+    TailUser& operator = (const TailUser& other)
+    {
+        id = other.id;
+        loginName = other.loginName;
+        displayName = other.displayName;
+        profilePicUrl = other.profilePicUrl;
+        roles = other.roles;
+
+        return *this;
+    }
+
+    static TailUser parse(const QJsonObject& obj, long long userId) {
         auto idKey = QString::number(userId);
         if (!obj.contains(idKey) || obj[idKey].isNull()) {
-            return std::make_unique<TailUser>();
+            return TailUser{};
         }
 
         // Get the user object based on the user id (user id comes from the self part in the same doc)
@@ -32,13 +56,13 @@ public:
         return parse(thisUser);
     }
 
-    static std::unique_ptr<TailUser> parse(const QJsonObject& thisUser) {
-        auto user = std::make_unique<TailUser>();
+    static TailUser parse(const QJsonObject& thisUser) {
+        TailUser user{};
 
-        user->id = jsonReadLong(thisUser, "ID");
-        user->loginName = jsonReadString(thisUser, "LoginName");
-        user->displayName = jsonReadString(thisUser, "DisplayName");
-        user->profilePicUrl = jsonReadString(thisUser, "ProfilePicUrl");
+        user.id = jsonReadLong(thisUser, "ID");
+        user.loginName = jsonReadString(thisUser, "LoginName");
+        user.displayName = jsonReadString(thisUser, "DisplayName");
+        user.profilePicUrl = jsonReadString(thisUser, "ProfilePicUrl");
 
         if (thisUser.contains("roles"))
         {
@@ -46,7 +70,7 @@ public:
                 if (ab.isNull())
                     continue;
 
-                user->roles.emplace_back(ab.toString(""));
+                user.roles.emplace_back(ab.toString(""));
             }
         }
 

@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget* parent)
     , eCurrentState(TailState::NoAccount)
     , pNetworkStateMonitor(std::make_unique<NetworkStateMonitor>(this))
     , pIpnWatcher(std::make_unique<IpnWatcher>(this))
-    , pDnsStatus(std::make_unique<TailDnsStatus>())
+    , pDnsStatus()
 #if defined(DAVFS_ENABLED)
     , pTailDriveUiManager()
 #endif
@@ -206,11 +206,8 @@ void MainWindow::settingsReadyToRead() {
     }
 }
 
-void MainWindow::dnsStatusUpdated(TailDnsStatus* dnsStatus) {
-    if (dnsStatus == nullptr)
-        return;
-    
-    pDnsStatus.reset(dnsStatus);
+void MainWindow::dnsStatusUpdated(const TailDnsStatus& dnsStatus) {
+    pDnsStatus = dnsStatus;
 
     // qDebug() << "DNS Status recv from Tailscale:";
     //
@@ -439,7 +436,7 @@ void MainWindow::showAdvertiseRoutesDialog() const {
 }
 
 void MainWindow::showDnsSettingsDialog() const {    
-    DnsSettingsDlg dlg(pDnsStatus.get(), ui->chkUseTailscaleDns->isChecked());
+    DnsSettingsDlg dlg(pDnsStatus, ui->chkUseTailscaleDns->isChecked());
     dlg.setWindowIcon(windowIcon());
     dlg.exec();
 
@@ -522,7 +519,7 @@ TailState MainWindow::changeToState(TailState newState)
     {
         // Clear the status
         pTailStatus = std::make_unique<TailStatus>();
-        pTailStatus->user = std::make_unique<TailUser>();
+        pTailStatus->user = TailUser{};
     }
 
     if (newState == TailState::Connected) {
@@ -573,7 +570,7 @@ void MainWindow::onTailStatusChanged(TailStatus* pNewStatus)
 
     const auto* tailscalePrefs = pCurrentExecution->currentSettings();
 
-    if (pTailStatus->user->id > 0) {
+    if (pTailStatus->user.id > 0) {
         if (pTailStatus->self.online)
             changeToState(TailState::Connected);
         else

@@ -102,11 +102,11 @@ public:
 
     void sendFile(const QString& targetDevice, const QString& localFilePath, void* userData = nullptr);
 
-    [[nodiscard]] const CurrentTailPrefs* currentSettings() const { return currentPrefs.get(); }
+    [[nodiscard]] const CurrentTailPrefs& currentSettings() const { return currentPrefs; }
 
 private:
     const TailSettings& settings;
-    std::unique_ptr<CurrentTailPrefs> currentPrefs;
+    CurrentTailPrefs currentPrefs;
     std::vector<BufferedProcessWrapper*> processes;
 
 signals:

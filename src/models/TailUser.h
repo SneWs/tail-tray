@@ -22,20 +22,17 @@ public:
     QList<QString> roles{};
 
     TailUser() {
-
     }
 
     TailUser(const TailUser& other)
-    {
-        id = other.id;
-        loginName = other.loginName;
-        displayName = other.displayName;
-        profilePicUrl = other.profilePicUrl;
-        roles = other.roles;
-    }
+        : id(other.id)
+        , loginName(other.loginName)
+        , displayName(other.displayName)
+        , profilePicUrl(other.profilePicUrl)
+        , roles(other.roles)
+    {}
 
-    TailUser& operator = (const TailUser& other)
-    {
+    TailUser& operator = (const TailUser& other) {
         id = other.id;
         loginName = other.loginName;
         displayName = other.displayName;

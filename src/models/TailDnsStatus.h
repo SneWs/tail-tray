@@ -13,16 +13,18 @@ class TailDnsStatus final : public QObject
 {
     Q_OBJECT
 public:
-    QList<QPair<QString, QString>> splitDnsRoutes{};
-    QList<QString> searchDomains{};
+    QList<QPair<QString, QString>> splitDnsRoutes;
+    QList<QString> searchDomains;
 
-    TailDnsStatus() {
-    }
+    TailDnsStatus()
+        : splitDnsRoutes()
+        , searchDomains()
+    { }
 
-    TailDnsStatus(const TailDnsStatus& other) {
-        splitDnsRoutes = other.splitDnsRoutes;
-        searchDomains = other.searchDomains;
-    }
+    TailDnsStatus(const TailDnsStatus& other)
+        : splitDnsRoutes(other.splitDnsRoutes)
+        , searchDomains(other.searchDomains)
+    { }
 
     TailDnsStatus& operator = (const TailDnsStatus& other) {
         splitDnsRoutes = other.splitDnsRoutes;

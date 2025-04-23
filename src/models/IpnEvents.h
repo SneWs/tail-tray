@@ -89,24 +89,65 @@ public:
     QString State;
     QString Version;
 
+    IpnEventData()
+        : BrowseToURL()
+        , DriveShares()
+        , Engine()
+        , ErrMessage()
+        , Health()
+        , LoginFinished()
+        , NetMap()
+        , Prefs()
+        , State()
+        , Version()
+    { }
+
+    IpnEventData(const IpnEventData& other)
+        : BrowseToURL(other.BrowseToURL)
+        , DriveShares(other.DriveShares)
+        , Engine(other.Engine)
+        , ErrMessage(other.ErrMessage)
+        , Health(other.Health)
+        , LoginFinished(other.LoginFinished)
+        , NetMap(other.NetMap)
+        , Prefs(other.Prefs)
+        , State(other.State)
+        , Version(other.Version)
+    { }
+
+    IpnEventData& operator = (const IpnEventData& other) {
+        BrowseToURL = other.BrowseToURL;
+        DriveShares = other.DriveShares;
+        Engine = other.Engine;
+        ErrMessage = other.ErrMessage;
+        Health = other.Health;
+        LoginFinished = other.LoginFinished;
+        NetMap = other.NetMap;
+        Prefs = other.Prefs;
+        State = other.State;
+        Version = other.Version;
+
+        return *this;
+    }
+
     // Deserialize from QJsonObject
-    static IpnEventData* parse(const QJsonObject& json) {
-        IpnEventData* model = new IpnEventData{};
-        model->BrowseToURL = JsonHelpers::jsonReadString(json, "BrowseToURL");
-        model->DriveShares = JsonHelpers::jsonReadString(json, "DriveShares");
-        model->Engine = JsonHelpers::jsonReadString(json, "Engine");
-        model->ErrMessage = JsonHelpers::jsonReadString(json, "ErrMessage");
+    static IpnEventData parse(const QJsonObject& json) {
+        IpnEventData model{};
+        model.BrowseToURL = JsonHelpers::jsonReadString(json, "BrowseToURL");
+        model.DriveShares = JsonHelpers::jsonReadString(json, "DriveShares");
+        model.Engine = JsonHelpers::jsonReadString(json, "Engine");
+        model.ErrMessage = JsonHelpers::jsonReadString(json, "ErrMessage");
         if (json.contains("Health") && !json["Health"].isNull()) {
-            model->Health = IpnHealthModel::parse(json["Health"].toObject());
+            model.Health = IpnHealthModel::parse(json["Health"].toObject());
         }
         else {
-            model->Health = IpnHealthModel{};
+            model.Health = IpnHealthModel{};
         }
-        model->LoginFinished = JsonHelpers::jsonReadString(json, "LoginFinished");
-        // model->NetMap = json["NetMap"].toString();
-        // model->Prefs = json["Prefs"].toString();
-        // model->State = json["State"].toString();
-        model->Version = JsonHelpers::jsonReadString(json, "Version");
+        model.LoginFinished = JsonHelpers::jsonReadString(json, "LoginFinished");
+        // model.NetMap = json["NetMap"].toString();
+        // model.Prefs = json["Prefs"].toString();
+        model.State = json["State"].toString();
+        model.Version = JsonHelpers::jsonReadString(json, "Version");
 
         return model;
     }

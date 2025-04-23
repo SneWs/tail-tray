@@ -1,7 +1,3 @@
-//
-// Created by marcus on 2024-07-10.
-//
-
 #ifndef TAILSETTINGS_H
 #define TAILSETTINGS_H
 

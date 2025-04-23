@@ -45,24 +45,24 @@ public:
     TailStatus() {
     }
 
-    TailStatus(const TailStatus& other) {
-        version = other.version;
-        tun = other.tun;
-        backendState = other.backendState;
-        haveNodeKey = other.haveNodeKey;
-        authUrl = other.authUrl;
-        tailscaleIPs = other.tailscaleIPs;
-        self = other.self;
-        health = other.health;
-        magicDnsSuffix = other.magicDnsSuffix;
-        currentTailNet = other.currentTailNet;
-        certDomains = other.certDomains;
-        peers = other.peers;
-        user = other.user;
-        clientVersion = other.clientVersion;
-        drives = other.drives;
-        drivesConfigured = other.drivesConfigured;
-    }
+    TailStatus(const TailStatus& other)
+        : version(other.version)
+        , tun(other.tun) 
+        , backendState(other.backendState)
+        , haveNodeKey(other.haveNodeKey)
+        , authUrl(other.authUrl)
+        , tailscaleIPs(other.tailscaleIPs)
+        , self(other.self)
+        , health(other.health)
+        , magicDnsSuffix(other.magicDnsSuffix)
+        , currentTailNet(other.currentTailNet)
+        , certDomains(other.certDomains)
+        , peers(other.peers)
+        , user(other.user)
+        , clientVersion(other.clientVersion)
+        , drives(other.drives)
+        , drivesConfigured(other.drivesConfigured)
+    { }
 
     TailStatus& operator = (const TailStatus& other) {
         version = other.version;

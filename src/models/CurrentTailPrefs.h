@@ -81,7 +81,7 @@ public:
     // We need to remember this state so that, on next startup, we can
     // generate the "Login" vs "Connect" buttons correctly, without having
     // to contact the server to confirm our nodekey status first.
-    bool loggedOut = false;
+    bool loggedOut = true;
 
     // ShieldsUp indicates whether to block all incoming connections,
     // regardless of the control-provided packet filter. If false, we
@@ -201,7 +201,115 @@ public:
 
     TailPrefsConfig config{};
 
-    CurrentTailPrefs() {
+    CurrentTailPrefs()
+        : controlURL()
+        , routeAll()
+        , exitNodeId()
+        , exitNodeIp()
+        , internalExitNodePrior()
+        , exitNodeAllowLANAccess()
+        , corpDNS()
+        , runSSH()
+        , runWebClient()
+        , wantRunning()
+        , loggedOut()
+        , shieldsUp()
+        , advertiseTags()
+        , hostname()
+        , notepadURLs()
+    #if defined(WINDOWS_BUILD)
+        , forceDaemon()
+    #endif
+        , advertiseRoutes()
+        , advertiseServices()
+        , noSNAT()
+        , noStatefulFiltering()
+        , netfilterMode()
+        , operatorUser()
+        , profileName()
+        , autoUpdate_Check()
+        , autoUpdate_Apply()
+        , appConnector_Advertise()
+        , postureChecking()
+        , netfilterKind()
+        , driveShares()
+        , allowSingleHosts()
+        , config()
+    { }
+
+    CurrentTailPrefs(const CurrentTailPrefs& other)
+        : controlURL(other.controlURL)
+        , routeAll(other.routeAll)
+        , exitNodeId(other.exitNodeId)
+        , exitNodeIp(other.exitNodeIp)
+        , internalExitNodePrior(other.internalExitNodePrior)
+        , exitNodeAllowLANAccess(other.exitNodeAllowLANAccess)
+        , corpDNS(other.corpDNS)
+        , runSSH(other.runSSH)
+        , runWebClient(other.runWebClient)
+        , wantRunning(other.wantRunning)
+        , loggedOut(other.loggedOut)
+        , shieldsUp(other.shieldsUp)
+        , advertiseTags(other.advertiseTags)
+        , hostname(other.hostname)
+        , notepadURLs(other.notepadURLs)
+#if defined(WINDOWS_BUILD)
+        , forceDaemon(other.forceDaemon)
+#endif
+        , advertiseRoutes(other.advertiseRoutes)
+        , advertiseServices(other.advertiseServices)
+        , noSNAT(other.noSNAT)
+        , noStatefulFiltering(other.noStatefulFiltering)
+        , netfilterMode(other.netfilterMode)
+        , operatorUser(other.operatorUser)
+        , profileName(other.profileName)
+        , autoUpdate_Check(other.autoUpdate_Check)
+        , autoUpdate_Apply(other.autoUpdate_Apply)
+        , appConnector_Advertise(other.appConnector_Advertise)
+        , postureChecking(other.postureChecking)
+        , netfilterKind(other.netfilterKind)
+        , driveShares(other.driveShares)
+        , allowSingleHosts(other.allowSingleHosts)
+        , config(other.config)
+    { }
+
+    CurrentTailPrefs& operator = (const CurrentTailPrefs& other)
+    {
+        controlURL = other.controlURL;
+        routeAll = other.routeAll;
+        exitNodeId = other.exitNodeId;
+        exitNodeIp = other.exitNodeIp;
+        internalExitNodePrior = other.internalExitNodePrior;
+        exitNodeAllowLANAccess = other.exitNodeAllowLANAccess;
+        corpDNS = other.corpDNS;
+        runSSH = other.runSSH;
+        runWebClient = other.runWebClient;
+        wantRunning = other.wantRunning;
+        loggedOut = other.loggedOut;
+        shieldsUp = other.shieldsUp;
+        advertiseTags = other.advertiseTags;
+        hostname = other.hostname;
+        notepadURLs = other.notepadURLs;
+#if defined(WINDOWS_BUILD)
+        forceDaemon = other.forceDaemon;
+#endif
+        advertiseRoutes = other.advertiseRoutes;
+        advertiseServices = other.advertiseServices;
+        noSNAT = other.noSNAT;
+        noStatefulFiltering = other.noStatefulFiltering;
+        netfilterMode = other.netfilterMode;
+        operatorUser = other.operatorUser;
+        profileName = other.profileName;
+        autoUpdate_Check = other.autoUpdate_Check;
+        autoUpdate_Apply = other.autoUpdate_Apply;
+        appConnector_Advertise = other.appConnector_Advertise;
+        postureChecking = other.postureChecking;
+        netfilterKind = other.netfilterKind;
+        driveShares = other.driveShares;
+        allowSingleHosts = other.allowSingleHosts;
+        config = other.config;
+
+        return *this;
     }
 
     [[nodiscard]] bool isExitNode() const { return advertiseRoutes.count() > 0; }
@@ -217,56 +325,56 @@ public:
         return filteredRoutes;
     }
 
-    static std::unique_ptr<CurrentTailPrefs> parse(const QJsonObject& obj) {
-        auto prefs = std::make_unique<CurrentTailPrefs>();
+    static CurrentTailPrefs parse(const QJsonObject& obj) {
+        CurrentTailPrefs prefs{};
 
-        prefs->controlURL = jsonReadString(obj, "ControlURL");
-        prefs->routeAll = jsonReadBool(obj, "RouteAll");
-        prefs->exitNodeId = jsonReadString(obj, "ExitNodeID");
-        prefs->exitNodeIp = jsonReadString(obj, "ExitNodeIP");
-        prefs->internalExitNodePrior = jsonReadString(obj, "InternalExitNodePrior");
-        prefs->exitNodeAllowLANAccess = jsonReadBool(obj, "ExitNodeAllowLANAccess");
-        prefs->corpDNS = jsonReadBool(obj, "CorpDNS");
-        prefs->runSSH = jsonReadBool(obj, "RunSSH");
-        prefs->runWebClient = jsonReadBool(obj, "RunWebClient");
-        prefs->wantRunning = jsonReadBool(obj, "WantRunning");
-        prefs->loggedOut = jsonReadBool(obj, "LoggedOut");
-        prefs->shieldsUp = jsonReadBool(obj, "ShieldsUp");
+        prefs.controlURL = jsonReadString(obj, "ControlURL");
+        prefs.routeAll = jsonReadBool(obj, "RouteAll");
+        prefs.exitNodeId = jsonReadString(obj, "ExitNodeID");
+        prefs.exitNodeIp = jsonReadString(obj, "ExitNodeIP");
+        prefs.internalExitNodePrior = jsonReadString(obj, "InternalExitNodePrior");
+        prefs.exitNodeAllowLANAccess = jsonReadBool(obj, "ExitNodeAllowLANAccess");
+        prefs.corpDNS = jsonReadBool(obj, "CorpDNS");
+        prefs.runSSH = jsonReadBool(obj, "RunSSH");
+        prefs.runWebClient = jsonReadBool(obj, "RunWebClient");
+        prefs.wantRunning = jsonReadBool(obj, "WantRunning");
+        prefs.loggedOut = jsonReadBool(obj, "LoggedOut");
+        prefs.shieldsUp = jsonReadBool(obj, "ShieldsUp");
 
         if (obj.contains("AutoUpdate") && !obj["AutoUpdate"].isNull()) {
             const auto& autoUpdateObj = obj["AutoUpdate"].toObject();
-            prefs->autoUpdate_Check = jsonReadBool(autoUpdateObj, "Check");
-            prefs->autoUpdate_Apply = jsonReadBool(autoUpdateObj, "Apply");
+            prefs.autoUpdate_Check = jsonReadBool(autoUpdateObj, "Check");
+            prefs.autoUpdate_Apply = jsonReadBool(autoUpdateObj, "Apply");
         }
 
         // AdvertiseTags
         if (obj.contains("AdvertiseTags") && !obj["AdvertiseTags"].isNull()) {
             for (const auto& tag : obj["AdvertiseTags"].toArray()) {
-                prefs->advertiseTags.emplace_back(tag.toString());
+                prefs.advertiseTags.emplace_back(tag.toString());
             }
         }
 
-        prefs->hostname = jsonReadString(obj, "Hostname");
-        prefs->notepadURLs = jsonReadBool(obj, "NotepadURLs");
+        prefs.hostname = jsonReadString(obj, "Hostname");
+        prefs.notepadURLs = jsonReadBool(obj, "NotepadURLs");
 
         // AdvertiseRoutes
         if (obj.contains("AdvertiseRoutes") && !obj["AdvertiseRoutes"].isNull()) {
             for (const auto& route : obj["AdvertiseRoutes"].toArray()) {
-                prefs->advertiseRoutes.emplace_back(route.toString());
+                prefs.advertiseRoutes.emplace_back(route.toString());
             }
         }
 
         // AdvertiseServices
         if (obj.contains("AdvertiseServices") && !obj["AdvertiseServices"].isNull()) {
             for (const auto& route : obj["AdvertiseRoutes"].toArray()) {
-                prefs->advertiseRoutes.emplace_back(route.toString());
+                prefs.advertiseRoutes.emplace_back(route.toString());
             }
         }
 
-        prefs->noSNAT = jsonReadBool(obj, "NoSNAT");
-        prefs->noStatefulFiltering = jsonReadBool(obj, "NoStatefulFiltering");
-        prefs->netfilterMode = jsonReadInt(obj, "NetfilterMode");
-        prefs->operatorUser = jsonReadString(obj, "OperatorUser");
+        prefs.noSNAT = jsonReadBool(obj, "NoSNAT");
+        prefs.noStatefulFiltering = jsonReadBool(obj, "NoStatefulFiltering");
+        prefs.netfilterMode = jsonReadInt(obj, "NetfilterMode");
+        prefs.operatorUser = jsonReadString(obj, "OperatorUser");
 
         // AutoUpdate
         // TBD
@@ -274,19 +382,19 @@ public:
         // AppConnector
         // TBD
 
-        prefs->postureChecking = jsonReadBool(obj, "PostureChecking");
-        prefs->netfilterKind = jsonReadString(obj, "NetfilterKind");
-        prefs->allowSingleHosts = jsonReadBool(obj, "AllowSingleHosts");
+        prefs.postureChecking = jsonReadBool(obj, "PostureChecking");
+        prefs.netfilterKind = jsonReadString(obj, "NetfilterKind");
+        prefs.allowSingleHosts = jsonReadBool(obj, "AllowSingleHosts");
 
         // DriveShares
         if (obj.contains("DriveShares") && !obj["DriveShares"].isNull()) {
             for (const auto& drive : obj["DriveShares"].toArray()) {
-                prefs->driveShares.emplace_back(drive.toString());
+                prefs.driveShares.emplace_back(drive.toString());
             }
         }
 
         // Config
-        prefs->config = TailPrefsConfig::parse(obj["Config"].toObject());
+        prefs.config = TailPrefsConfig::parse(obj["Config"].toObject());
         return prefs;
     }
 };

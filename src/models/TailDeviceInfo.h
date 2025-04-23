@@ -41,33 +41,55 @@ public:
     bool inEngine = false;
     QDateTime keyExpiry{};
 
-    TailDeviceInfo() {
-    }
+    TailDeviceInfo()
+        : id()
+        , publicKey()
+        , hostName()
+        , dnsName()
+        , os()
+        , userId()
+        , tailscaleIPs()
+        , allowedIPs()
+        , addrs()
+        , curAddr()
+        , relay()
+        , online()
+        , exitNode()
+        , exitNodeOption()
+        , active()
+        , peerApiUrl()
+        , capabilities()
+        , capMap()
+        , inNetworkMap()
+        , inMagicSock()
+        , inEngine()
+        , keyExpiry()
+    { }
 
-    TailDeviceInfo(const TailDeviceInfo& other) {
-        id = other.id;
-        publicKey = other.publicKey;
-        hostName = other.hostName;
-        dnsName = other.dnsName;
-        os = other.os;
-        userId = other.userId;
-        tailscaleIPs = other.tailscaleIPs;
-        allowedIPs = other.allowedIPs;
-        addrs = other.addrs;
-        curAddr = other.curAddr;
-        relay = other.relay;
-        online = other.online;
-        exitNode = other.exitNode;
-        exitNodeOption = other.exitNodeOption;
-        active = other.active;
-        peerApiUrl = other.peerApiUrl;
-        capabilities = other.capabilities;
-        capMap = other.capMap;
-        inNetworkMap = other.inNetworkMap;
-        inMagicSock = other.inMagicSock;
-        inEngine = other.inEngine;
-        keyExpiry = other.keyExpiry;
-    }
+    TailDeviceInfo(const TailDeviceInfo& other)
+        : id(other.id)
+        , publicKey(other.publicKey)
+        , hostName(other.hostName)
+        , dnsName(other.dnsName)
+        , os(other.os)
+        , userId(other.userId)
+        , tailscaleIPs(other.tailscaleIPs)
+        , allowedIPs(other.allowedIPs)
+        , addrs(other.addrs)
+        , curAddr(other.curAddr)
+        , relay(other.relay)
+        , online(other.online)
+        , exitNode(other.exitNode)
+        , exitNodeOption(other.exitNodeOption)
+        , active(other.active)
+        , peerApiUrl(other.peerApiUrl)
+        , capabilities(other.capabilities)
+        , capMap(other.capMap)
+        , inNetworkMap(other.inNetworkMap)
+        , inMagicSock(other.inMagicSock)
+        , inEngine(other.inEngine)
+        , keyExpiry(other.keyExpiry)
+    { }
 
     TailDeviceInfo& operator = (const TailDeviceInfo& other) {
         id = other.id;

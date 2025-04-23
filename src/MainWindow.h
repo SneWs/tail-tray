@@ -68,7 +68,7 @@ private slots:
     void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();
     void loginFlowCompleted() const;
-    void onIpnEvent(IpnEventData* eventData);
+    void onIpnEvent(const IpnEventData& eventData);
 
 #if defined(DAVFS_ENABLED)
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);
@@ -101,7 +101,7 @@ private:
     [[nodiscard]] static bool isTailDriveFileAlreadySetup();
 
 protected:
-    void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent* event) override;
 };
 
 #endif // MAINWINDOW_H

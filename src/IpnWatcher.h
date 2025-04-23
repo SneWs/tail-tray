@@ -17,7 +17,7 @@ public:
 signals:
     /// This will signal any time a new event comes in from the IPN watcher.
     /// The receiver needs to take ownership of the event data.
-    void eventReceived(IpnEventData* eventData);
+    void eventReceived(const IpnEventData& eventData);
 
 private slots:
     void onProcessCanReadStdOut();

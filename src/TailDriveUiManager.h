@@ -21,6 +21,8 @@ public:
 
     void stateChangedTo(TailState newState, const TailStatus& tailStatus);
 
+    void clear();
+
 private slots:
     void addTailDriveButtonClicked();
     void removeTailDriveButtonClicked();

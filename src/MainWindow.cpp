@@ -7,6 +7,7 @@
 #include <QList>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QShowEvent>
 
 #include "ManageDriveWindow.h"
 #include "KnownValues.h"
@@ -156,7 +157,7 @@ void MainWindow::settingsReadyToRead() {
     // qDebug() << "Run SSH: " << tailscalePrefs->runSSH;
     // qDebug() << "No SNAT: " << tailscalePrefs->noSNAT;
     // qDebug() << "Allow Exit node LAN Access: " << tailscalePrefs->exitNodeAllowLANAccess;
-    auto isExitNode = tailscalePrefs->isExitNode();
+    auto isExitNode = tailscalePrefs.isExitNode();
     // if (isExitNode) {
     //     qDebug() << "Advertise routes (We are exit node and advertising)";
     //     for (const auto& r : tailscalePrefs->advertiseRoutes)
@@ -180,17 +181,17 @@ void MainWindow::settingsReadyToRead() {
 #endif
 
     // Sync settings with local settings
-    settings.allowIncomingConnections(!tailscalePrefs->shieldsUp);
-    settings.useTailscaleDns(tailscalePrefs->corpDNS);
-    settings.exitNodeAllowLanAccess(tailscalePrefs->exitNodeAllowLANAccess);
+    settings.allowIncomingConnections(!tailscalePrefs.shieldsUp);
+    settings.useTailscaleDns(tailscalePrefs.corpDNS);
+    settings.exitNodeAllowLanAccess(tailscalePrefs.exitNodeAllowLANAccess);
     settings.advertiseAsExitNode(isExitNode);
-    settings.autoUpdateTailscale(tailscalePrefs->autoUpdate_Apply);
+    settings.autoUpdateTailscale(tailscalePrefs.autoUpdate_Apply);
 
     syncSettingsToUi();
 
     // Make sure current user is operator
-    auto isUserOperator = tailscalePrefs->operatorUser == qEnvironmentVariable("USER");
-    if (!isUserOperator && !tailscalePrefs->loggedOut) {
+    auto isUserOperator = tailscalePrefs.operatorUser == qEnvironmentVariable("USER");
+    if (!isUserOperator && !tailscalePrefs.loggedOut) {
         const auto response = QMessageBox::warning(nullptr,
            "Failed to run command",
            "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
@@ -232,8 +233,8 @@ void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
 void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
     if (isSudoRequired)
     {
-        const auto* prefs = pCurrentExecution->currentSettings();
-        if (prefs != nullptr && prefs->loggedOut) {
+        const auto& prefs = pCurrentExecution->currentSettings();
+        if (prefs.loggedOut) {
             return;
         }
 
@@ -262,24 +263,24 @@ void MainWindow::loginFlowCompleted() const {
     pCurrentExecution->start();
 }
 
-void MainWindow::onIpnEvent(IpnEventData* eventData) {
-    if (eventData->Health.Warnings.networkStatus.ImpactsConnectivity) {
-        if (eventData->Health.Warnings.networkStatus.WarnableCode == "network-status") {
+void MainWindow::onIpnEvent(const IpnEventData& eventData) {
+    if (eventData.Health.Warnings.networkStatus.ImpactsConnectivity) {
+        if (eventData.Health.Warnings.networkStatus.WarnableCode == "network-status") {
             if (eCurrentState != TailState::Connected) {
-                if (!eventData->Health.Warnings.networkStatus.Text.isEmpty()) {
-                    showWarningMessage(eventData->Health.Warnings.networkStatus.Title, eventData->Health.Warnings.networkStatus.Text);
+                if (!eventData.Health.Warnings.networkStatus.Text.isEmpty()) {
+                    showWarningMessage(eventData.Health.Warnings.networkStatus.Title, eventData.Health.Warnings.networkStatus.Text);
                 }
             }
         }
     }
     else {
-        if (eventData->Health.Warnings.networkStatus.Severity == "warning") {
-            if (!eventData->Health.Warnings.networkStatus.Text.isEmpty())
-                showWarningMessage(eventData->Health.Warnings.networkStatus.Title, eventData->Health.Warnings.networkStatus.Text);
+        if (eventData.Health.Warnings.networkStatus.Severity == "warning") {
+            if (!eventData.Health.Warnings.networkStatus.Text.isEmpty())
+                showWarningMessage(eventData.Health.Warnings.networkStatus.Title, eventData.Health.Warnings.networkStatus.Text);
         }
-        else if (eventData->Health.Warnings.networkStatus.Severity == "error") {
-            if (!eventData->Health.Warnings.networkStatus.Text.isEmpty())
-                showErrorMessage(eventData->Health.Warnings.networkStatus.Title, eventData->Health.Warnings.networkStatus.Text);
+        else if (eventData.Health.Warnings.networkStatus.Severity == "error") {
+            if (!eventData.Health.Warnings.networkStatus.Text.isEmpty())
+                showErrorMessage(eventData.Health.Warnings.networkStatus.Title, eventData.Health.Warnings.networkStatus.Text);
         }
     }
 
@@ -369,7 +370,21 @@ void MainWindow::onShowTailFileSaveLocationPicker() {
     startListeningForIncomingFiles();
 }
 
+namespace
+{
+    static QList<QTableWidgetItem*> netCheckWidgetItems{};
+
+    static void cleanupDisposableNetCheckWidgetItems() {
+        for (auto* wi : netCheckWidgetItems) {
+            delete wi;
+        }
+        netCheckWidgetItems.clear();
+    }
+}
+
 void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& results, QList<QPair<QString, float>>& latencies) const {
+    cleanupDisposableNetCheckWidgetItems();
+
     ui->twNetworkStatus->clear();
     ui->twNetworkStatus->setColumnCount(2);
     ui->twNetworkStatus->setHorizontalHeaderLabels(QStringList() << tr("Property") << tr("Value"));
@@ -385,8 +400,13 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
     for (auto it = results.begin(); it != results.end(); ++it) {
         const auto& key = it.key();
         const auto& value = it.value();
-        ui->twNetworkStatus->setItem(i, 0, new QTableWidgetItem(key));
-        ui->twNetworkStatus->setItem(i, 1, new QTableWidgetItem(value));
+        auto* w1 = new QTableWidgetItem(key);
+        auto* w2 = new QTableWidgetItem(value);
+        netCheckWidgetItems.push_back(w1);
+        netCheckWidgetItems.push_back(w2);
+
+        ui->twNetworkStatus->setItem(i, 0, w1);
+        ui->twNetworkStatus->setItem(i, 1, w2);
 
         if (key == "Nearest DERP") {
             // Find the DERP Latency
@@ -402,14 +422,21 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
     }
 
     // Add DERP header
-    ui->twNetworkStatus->setItem(i, 0, new QTableWidgetItem("DERP Latencies"));
-    ui->twNetworkStatus->setItem(i, 1, new QTableWidgetItem(""));
+    auto* w1 = new QTableWidgetItem("DERP Latencies");
+    auto* w2 = new QTableWidgetItem("");
+    netCheckWidgetItems.push_back(w1);
+    netCheckWidgetItems.push_back(w2);
+
+    ui->twNetworkStatus->setItem(i, 0, w1);
+    ui->twNetworkStatus->setItem(i, 1, w2);
     ++i;
 
     for (auto it = latencies.begin(); it != latencies.end(); ++it) {
         const auto& key = it->first;
         const auto& value = it->second;
-        ui->twNetworkStatus->setItem(i, 0, new QTableWidgetItem(key));
+        w1 = new QTableWidgetItem(key);
+        netCheckWidgetItems.push_back(w1);
+        ui->twNetworkStatus->setItem(i, 0, w1);
 
         QString val;
         if (value >= 999999)
@@ -417,13 +444,15 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
         else
             val = QString::number(value) + "ms";
 
-        ui->twNetworkStatus->setItem(i, 1, new QTableWidgetItem(val));
+        w2 = new QTableWidgetItem(val);
+        netCheckWidgetItems.push_back(w2);
+        ui->twNetworkStatus->setItem(i, 1, w2);
         ++i;
     }
 }
 
 void MainWindow::showAdvertiseRoutesDialog() const {
-    auto knownRoutes = pCurrentExecution->currentSettings()->getFilteredAdvertiseRoutes();
+    auto knownRoutes = pCurrentExecution->currentSettings().getFilteredAdvertiseRoutes();
     
     AdvertiseRoutesDlg dlg(knownRoutes);
     dlg.setWindowIcon(windowIcon());
@@ -502,7 +531,7 @@ bool MainWindow::isTailDriveFileAlreadySetup() {
     return false;
 }
 
-void MainWindow::showEvent(QShowEvent *event) {
+void MainWindow::showEvent(QShowEvent* event) {
     QMainWindow::showEvent(event);
 
     // Read settings, and it will be synced to UI once read
@@ -563,7 +592,7 @@ void MainWindow::onTailStatusChanged(const TailStatus& pNewStatus)
     pTailStatus = pNewStatus;
     pTailStatus.drives = drives;
 
-    const auto* tailscalePrefs = pCurrentExecution->currentSettings();
+    const auto& tailscalePrefs = pCurrentExecution->currentSettings();
 
     if (pTailStatus.user.id > 0) {
         if (pTailStatus.self.online)
@@ -586,14 +615,8 @@ void MainWindow::onTailStatusChanged(const TailStatus& pNewStatus)
         ui->lblVersionNumber->setText(tr("Version ") + formattedVersion);
     }
     else {
-        if (tailscalePrefs != nullptr) {
-            if (tailscalePrefs->loggedOut)
-                changeToState(TailState::NotLoggedIn);
-        }
-        else {
-            // Assume (fairly safely) that we are not logged in
+        if (tailscalePrefs.loggedOut)
             changeToState(TailState::NotLoggedIn);
-        }
     }
 
     accountsTabUi->onTailStatusChanged(pTailStatus);
@@ -632,7 +655,7 @@ void MainWindow::syncSettingsToUi() const {
     ui->tabSettings->layout()->removeItem(ui->layoutAutoUpdate);
 #endif
 
-    auto advertisedRoutes = pCurrentExecution->currentSettings()->getFilteredAdvertiseRoutes();
+    auto advertisedRoutes = pCurrentExecution->currentSettings().getFilteredAdvertiseRoutes();
     if (advertisedRoutes.count() > 0) {
         ui->lblAdvertisingNumRoutes->setText(tr("Advertising %1 routes")
             .arg(advertisedRoutes.count())

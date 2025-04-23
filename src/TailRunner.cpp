@@ -43,7 +43,9 @@ namespace
 TailRunner::TailRunner(const TailSettings& s, QObject* parent)
     : QObject(parent)
     , settings(s)
-    , processes() {
+    , processes()
+    , currentPrefs()
+{
 }
 
 TailRunner::~TailRunner()
@@ -436,9 +438,7 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
             }
             else {
                 bool isUserOperator = false;
-                if (currentPrefs != nullptr) {
-                    isUserOperator = currentPrefs->operatorUser == qEnvironmentVariable("USER");
-                }
+                isUserOperator = currentPrefs.operatorUser == qEnvironmentVariable("USER");
 
                 qDebug() << "Failed to execute. Is current user operator? " << (isUserOperator ? "Yes" : "No");
             }
@@ -481,8 +481,7 @@ void TailRunner::parseStatusResponse(const QJsonObject& obj) {
 }
 
 void TailRunner::parseSettingsResponse(const QJsonObject& obj) {
-    currentPrefs = nullptr;
-    currentPrefs = std::move(CurrentTailPrefs::parse(obj));
+    currentPrefs = CurrentTailPrefs::parse(obj);
 }
 
 bool TailRunner::hasPendingCommandOfType(const Command cmdType) const {

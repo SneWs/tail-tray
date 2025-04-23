@@ -9,6 +9,16 @@
 
 #if defined(DAVFS_ENABLED)
 
+namespace {
+    static QList<QTableWidgetItem*> disposableWidgetItems{};
+    static void cleanupDisposableWidgetItems() {
+        for (auto* wi : disposableWidgetItems) {
+            delete wi;
+        }
+        disposableWidgetItems.clear();
+    }
+}
+
 TailDriveUiManager::TailDriveUiManager(Ui::MainWindow* mainWndUi, TailRunner* runner, QObject* parent)
     : QObject(parent)
     , ui(mainWndUi)
@@ -53,6 +63,10 @@ TailDriveUiManager::TailDriveUiManager(Ui::MainWindow* mainWndUi, TailRunner* ru
 void TailDriveUiManager::stateChangedTo(TailState newState, const TailStatus& tailStatus) {
     pTailStatus = tailStatus;
     tailDrivesToUi();
+}
+
+void TailDriveUiManager::clear() {
+    cleanupDisposableWidgetItems();
 }
 
 void TailDriveUiManager::addTailDriveButtonClicked() {
@@ -137,6 +151,8 @@ void TailDriveUiManager::fixTailDriveDavFsSetup() const {
 }
 
 void TailDriveUiManager::tailDrivesToUi() const {
+    cleanupDisposableWidgetItems();
+
     ui->twSharedDrives->clear();
     ui->twSharedDrives->setColumnCount(2);
     ui->twSharedDrives->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Path"));
@@ -146,8 +162,13 @@ void TailDriveUiManager::tailDrivesToUi() const {
         const auto& drive = pTailStatus.drives[i];
         //qDebug() << "Drive: " << drive.name << " (" << drive.path << ")";
 
-        ui->twSharedDrives->setItem(i, 0, new QTableWidgetItem(drive.name));
-        ui->twSharedDrives->setItem(i, 1, new QTableWidgetItem(drive.path));
+        auto* w1 = new QTableWidgetItem(drive.name);
+        auto* w2 = new QTableWidgetItem(drive.path);
+        disposableWidgetItems.push_back(w1);
+        disposableWidgetItems.push_back(w2);
+
+        ui->twSharedDrives->setItem(i, 0, w1);
+        ui->twSharedDrives->setItem(i, 1, w2);
     }
 }
 

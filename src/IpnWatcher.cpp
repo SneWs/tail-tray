@@ -10,8 +10,7 @@ IpnWatcher::IpnWatcher(QObject *parent)
     : QObject(parent)
     , m_process(nullptr)
     , m_isShuttingDown(false)
-{
-}
+{ }
 
 IpnWatcher::~IpnWatcher() {
     stop();
@@ -46,7 +45,7 @@ void IpnWatcher::stop() {
         m_process->terminate();
     }
 
-    m_process->reset();
+    m_process.reset();
 }
 
 void IpnWatcher::onProcessCanReadStdOut() {
@@ -68,17 +67,16 @@ void IpnWatcher::onProcessCanReadStdOut() {
     QJsonObject obj = doc.object();
     qDebug() << "IPN Event received";
 
-    IpnEventData* eventData = IpnEventData::parse(obj);
+    IpnEventData eventData = IpnEventData::parse(obj);
     
-    if (!eventData->Health.Warnings.networkStatus.Severity.isEmpty()) {
-        qDebug() << "Nw" << (eventData->Health.Warnings.networkStatus.ImpactsConnectivity ? "Connectivity Disruption" : "Connection OK");
-        qDebug() << "Severity: " << eventData->Health.Warnings.networkStatus.Severity;
-        qDebug() << "Text: " << eventData->Health.Warnings.networkStatus.Text;
-        qDebug() << "Title: " << eventData->Health.Warnings.networkStatus.Title;
+    if (!eventData.Health.Warnings.networkStatus.Severity.isEmpty()) {
+        qDebug() << "Nw" << (eventData.Health.Warnings.networkStatus.ImpactsConnectivity ? "Connectivity Disruption" : "Connection OK");
+        qDebug() << "Severity: " << eventData.Health.Warnings.networkStatus.Severity;
+        qDebug() << "Text: " << eventData.Health.Warnings.networkStatus.Text;
+        qDebug() << "Title: " << eventData.Health.Warnings.networkStatus.Title;
     }
 
     emit eventReceived(eventData);
-    eventData->deleteLater();
 }
 
 void IpnWatcher::onProcessCanReadStandardError() {

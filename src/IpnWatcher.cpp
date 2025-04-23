@@ -41,6 +41,10 @@ void IpnWatcher::start() {
 
 void IpnWatcher::stop() {
     m_isShuttingDown = true;
+    if (m_process == nullptr) {
+        return;
+    }
+
     if (m_process->state() == QProcess::Running) {
         m_process->terminate();
     }

@@ -12,6 +12,7 @@ namespace
 {
     static QString commandToString(const Command cmd) {
         switch (cmd) {
+            case Command::CheckIfInstalled: return "CheckIfInstalled";
             case Command::SetOperator: return "SetOperator";
             case Command::ListAccounts: return "ListAccounts";
             case Command::SwitchAccount: return "SwitchAccount";
@@ -58,14 +59,21 @@ void TailRunner::shutdown() {
     // - When the user is in a pending login state, then the process is waiting for user to complete web auth flows
     
     for (const auto& proc : processes) {
-        if (proc->process()->state() == QProcess::Running) {
-            proc->process()->kill();
-            proc->process()->waitForFinished();
-            proc->process()->close();
+        auto* p = proc->process();
+        if (!p)
+            continue;
+
+        if (p->state() == QProcess::Running) {
+            p->terminate();
+            p->close();
         }
     }
 
     runCompletedCleanup();
+}
+
+void TailRunner::checkIfInstalled() {
+    runCommand(Command::CheckIfInstalled, "--version", QStringList());
 }
 
 void TailRunner::bootstrap() {
@@ -260,6 +268,9 @@ void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QSt
     auto wrapper = new BufferedProcessWrapper(cmdType, cmdType == Command::Login, this);
     processes.emplace_back(wrapper);
 
+    connect(wrapper, &BufferedProcessWrapper::processErrorOccurred,
+        this, &TailRunner::onProcessErrorOccurred);
+
     connect(wrapper, &BufferedProcessWrapper::processFinished,
         this, &TailRunner::onProcessFinished);
 
@@ -295,6 +306,11 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
 
             const QJsonObject obj = doc.object();
             parseStatusResponse(obj);
+            break;
+        }
+        case Command::CheckIfInstalled: {
+            auto hasData = data.size() > 0;
+            emit tailscaleIsInstalled(hasData);
             break;
         }
         case Command::GetSettings: {
@@ -352,6 +368,7 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
             const QString raw(data);
             const QList<TailDriveInfo> drives = TailDriveInfo::parse(raw);
             emit driveListed(drives, false, QString());
+            break;
         }
 #endif
         default:
@@ -400,6 +417,9 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
             }
         }
     }
+    else if (commandInfo == Command::CheckIfInstalled) {
+        emit tailscaleIsInstalled(false);
+    }
 #if defined(DAVFS_ENABLED)
     else if (commandInfo == Command::Drive) {
         // ACL not allowing drives most likely
@@ -422,6 +442,16 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
             }
         }
     }
+}
+
+void TailRunner::onProcessErrorOccurred(const BufferedProcessWrapper* wrapper, QProcess::ProcessError error) {
+    const auto commandInfo = wrapper->command();
+
+    if (commandInfo == Command::CheckIfInstalled) {
+        emit tailscaleIsInstalled(false);
+    }
+
+    runCompletedCleanup();
 }
 
 void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
@@ -540,6 +570,9 @@ BufferedProcessWrapper::BufferedProcessWrapper(const Command cmd, bool emitOnAct
     connect(proc.get(), &QProcess::readyReadStandardOutput,
             this, &BufferedProcessWrapper::onProcessCanReadStdOut);
 
+    connect(proc.get(), &QProcess::errorOccurred,
+        this, &BufferedProcessWrapper::onProcessErrorOccurred);
+
     connect(proc.get(), &QProcess::readyReadStandardError,
             this, &BufferedProcessWrapper::onProcessCanReadStandardError);
 }
@@ -566,6 +599,10 @@ void BufferedProcessWrapper::start(const QString& cmd, QStringList args, const b
     // Windows don't have pkexec etc and we don't need to set operator
     proc->start("tailscale", args);
 #endif
+}
+
+void BufferedProcessWrapper::onProcessErrorOccurred(QProcess::ProcessError error) {
+    emit processErrorOccurred(this, error);
 }
 
 void BufferedProcessWrapper::onProcessCanReadStdOut() {

@@ -9,6 +9,7 @@
 #include "TailSettings.h"
 
 enum class Command {
+    CheckIfInstalled,
     SetOperator,
     SetExitNode,
     GetSettings,
@@ -57,11 +58,13 @@ public:
     }
 
 signals:
+    void processErrorOccurred(const BufferedProcessWrapper* wrapper, QProcess::ProcessError error);
     void processCanReadStdOut(BufferedProcessWrapper* process);
     void processCanReadStandardError(BufferedProcessWrapper* process);
     void processFinished(BufferedProcessWrapper* process, int exitCode, QProcess::ExitStatus exitStatus);
 
 private slots:
+    void onProcessErrorOccurred(QProcess::ProcessError error);
     void onProcessCanReadStdOut();
     void onProcessCanReadStandardError();
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -84,6 +87,7 @@ public:
 
     void shutdown();
 
+    void checkIfInstalled();
     void bootstrap();
     void readSettings();
     void readDnsStatus();
@@ -119,6 +123,7 @@ private:
     std::vector<BufferedProcessWrapper*> processes;
 
 signals:
+    void tailscaleIsInstalled(bool installed);
     void settingsRead();
     void dnsStatusRead(const TailDnsStatus& dnsStatus);
     void accountsListed(const QList<TailAccountInfo>& accounts);
@@ -139,6 +144,7 @@ private:
     void runCompletedCleanup();
 
 private slots:
+    void onProcessErrorOccurred(const BufferedProcessWrapper* wrapper, QProcess::ProcessError error);
     void onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper);
     void onProcessCanReadStandardError(const BufferedProcessWrapper* wrapper);
     void onProcessFinished(const BufferedProcessWrapper* wrapper, int exitCode, QProcess::ExitStatus exitStatus);

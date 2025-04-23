@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnSelectTailFileDefaultSaveLocation, &QPushButton::clicked,
         this, &MainWindow::onShowTailFileSaveLocationPicker);
 
+    connect(pCurrentExecution.get(), &TailRunner::tailscaleIsInstalled, this, &MainWindow::tailscaleIsInstalled);
     connect(pCurrentExecution.get(), &TailRunner::settingsRead, this, &MainWindow::settingsReadyToRead);
     connect(pCurrentExecution.get(), &TailRunner::dnsStatusRead, this, &MainWindow::dnsStatusUpdated);
     connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
@@ -81,12 +82,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     changeToState(TailState::NotConnected);
 
-    // NOTE: The bootstrap to get this started is as follows:
-    // 1. Read settings from Tailscale daemon
-    // 2. Once that is successfully read, it will internally call getAccounts()
-    // 3. Once getAccounts() have returned it will once again internally call getStatus()
-    // 4. Once getStatus() returns we are in a running state, eg logged in and connected OR logged out OR logged in and disconnected etc...
-    pCurrentExecution->bootstrap();
+    // NOTE! We first check and validate that the tailscale binary / service / daemon is installed
+    // if we get a positive outcome from that, we will bootstrap the rest of the flow.
+    pCurrentExecution->checkIfInstalled();
 
     connect(ui->btnSettingsClose, &QPushButton::clicked, this, &MainWindow::settingsClosed);
 
@@ -98,8 +96,6 @@ MainWindow::MainWindow(QWidget* parent)
     ui->lblTailnetLockTitle->setEnabled(false);
     ui->btnManageTailnetLocks->setEnabled(false);
 
-    pIpnWatcher->start();
-
 #if defined(WINDOWS_BUILD)
     // On windows this looks like crap, so don't use it
     ui->twNetworkStatus->setAlternatingRowColors(false);
@@ -107,11 +103,17 @@ MainWindow::MainWindow(QWidget* parent)
 }
 
 void MainWindow::shutdown() {
-    pIpnWatcher->stop();
+    if (pIpnWatcher != nullptr)
+        pIpnWatcher->stop();
 
-    pNetworkStateMonitor->shutdown();
-    pFileReceiver->shutdown();
-    pCurrentExecution->shutdown();
+    if (pNetworkStateMonitor != nullptr)
+        pNetworkStateMonitor->shutdown();
+
+    if (pFileReceiver != nullptr)
+        pFileReceiver->shutdown();
+
+    if (pCurrentExecution != nullptr)
+        pCurrentExecution->shutdown();
 }
 
 void MainWindow::showSettingsTab() {
@@ -136,6 +138,36 @@ void MainWindow::showAboutTab() {
 void MainWindow::showNetworkStatusTab() {
     ui->tabWidget->setCurrentIndex(2);
     showNormal();
+}
+
+void MainWindow::tailscaleIsInstalled(bool installed) {
+    if (!installed) {
+        qDebug() << "WARNING! Tailscale isn't installed. We will not be able to continue running Tail Tray!";
+        qDebug() << "You can download and install tailscale from https://tailscale.com";
+
+        changeToState(TailState::NotLoggedIn);
+        showNormal();
+
+        QMessageBox::warning(this, tr("Error"), tr("It does not look like you have installed Tailscale on this machine.\nOr tailscale isn't in your PATH.\n\nYou can download and install tailscale from https://tailscale.com"));
+
+        close();
+        // Since we are getting the signal from within a process, delay the exit a bit to allow the invoking process to 
+        // complete before exiting the application
+        QTimer::singleShot(500, [this]() {
+            QApplication::exit(-1);
+        });
+        return;
+    }
+
+    qDebug() << "Tailscale seems to be installed, let's bootstrap and run!";
+
+    // NOTE: The bootstrap to get this started is as follows:
+    // 1. Read settings from Tailscale daemon
+    // 2. Once that is successfully read, it will internally call getAccounts()
+    // 3. Once getAccounts() have returned it will once again internally call getStatus()
+    // 4. Once getStatus() returns we are in a running state, eg logged in and connected OR logged out OR logged in and disconnected etc...
+    pCurrentExecution->bootstrap();
+    pIpnWatcher->start();
 }
 
 void MainWindow::settingsReadyToRead() {

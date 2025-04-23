@@ -64,6 +64,7 @@ private:
     QMap<QString, QDateTime> seenWarningsAndErrors;
 
 private slots:
+    void tailscaleIsInstalled(bool installed);
     void settingsReadyToRead();
     void dnsStatusUpdated(const TailDnsStatus& dnsStatus);
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);

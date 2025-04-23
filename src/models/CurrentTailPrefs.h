@@ -212,7 +212,7 @@ public:
         , runSSH()
         , runWebClient()
         , wantRunning()
-        , loggedOut()
+        , loggedOut(true)
         , shieldsUp()
         , advertiseTags()
         , hostname()

@@ -46,6 +46,15 @@ public:
     [[nodiscard]] Command command() const { return eCommand; }
     [[nodiscard]] void* userData() const { return pUserData; }
     [[nodiscard]] bool isRunning() const { return proc != nullptr && proc->state() != QProcess::NotRunning; }
+    void cancel(bool raiseEvents = true) {
+        if (proc != nullptr) {
+            proc->terminate();
+        }
+
+        if (raiseEvents) {
+            emit processFinished(this, 0, QProcess::NormalExit);
+        }
+    }
 
 signals:
     void processCanReadStdOut(BufferedProcessWrapper* process);
@@ -76,7 +85,6 @@ public:
     void shutdown();
 
     void bootstrap();
-
     void readSettings();
     void readDnsStatus();
     void setOperator();
@@ -89,6 +97,7 @@ public:
 
     void login();
     void logout();
+    void cancelLoginFlow();
 
     void start(bool usePkExec = false);
     void stop();
@@ -114,7 +123,8 @@ signals:
     void dnsStatusRead(const TailDnsStatus& dnsStatus);
     void accountsListed(const QList<TailAccountInfo>& accounts);
     void statusUpdated(const TailStatus& newStatus);
-    void loginFlowCompleted();
+    void loginFlowStarting();
+    void loginFlowCompleted(bool success);
     void driveListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);
     void fileSent(bool success, const QString& errorMsg, void* userData);
 

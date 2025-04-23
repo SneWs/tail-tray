@@ -6,6 +6,7 @@
 #include <QNetworkInformation>
 #include <QMap>
 #include <QDateTime>
+#include <QDialog>
 
 #include "./ui_MainWindow.h"
 #include "TailRunner.h"
@@ -46,6 +47,7 @@ private:
     std::unique_ptr<AccountsTabUiManager> accountsTabUi;
     std::unique_ptr<TrayMenuManager> pTrayManager;
     std::unique_ptr<TailRunner> pCurrentExecution;
+    std::unique_ptr<QDialog> pLoginInProgressDlg;
     TailStatus pTailStatus{};
     TailDnsStatus pDnsStatus{};
     std::unique_ptr<TailFileReceiver> pFileReceiver;
@@ -67,7 +69,8 @@ private slots:
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void onCommandError(const QString& error, bool isSudoRequired);
     void settingsClosed();
-    void loginFlowCompleted() const;
+    void loginFlowStarting();
+    void loginFlowCompleted(bool success = true);
     void onIpnEvent(const IpnEventData& eventData);
 
 #if defined(DAVFS_ENABLED)

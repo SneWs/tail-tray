@@ -190,6 +190,14 @@ void TailRunner::logout() {
     runCommand(Command::Logout, "logout", QStringList(), false, true);
 }
 
+void TailRunner::cancelLoginFlow() {
+    for (const auto& proc : processes) {
+        if (proc->command() == Command::Login) {
+            proc->cancel();
+        }
+    }
+}
+
 void TailRunner::start(const bool usePkExec) {
     applySettings(settings);
 
@@ -367,7 +375,7 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
                 // Wait for a bit before triggering flow completed
                 //  will call start etc
                 QTimer::singleShot(1000, this, [this]() {
-                    emit loginFlowCompleted();
+                    emit loginFlowCompleted(true);
                 });
             }
             else {
@@ -377,10 +385,14 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
                     const QString url = match.captured(0);
                     const auto res = QMessageBox::information(nullptr, "Login", "To login you will have to visit " + url + "\n\nPress OK to open the URL",
                                                               QMessageBox::Ok, QMessageBox::Ok);
-                    if (res == QMessageBox::Ok)
+                    if (res == QMessageBox::Ok) {
+                        emit loginFlowStarting();
                         QDesktopServices::openUrl(QUrl(url));
+                    }
                 }
                 else {
+                    emit loginFlowCompleted(false);
+
                     // Failure
                     QMessageBox::warning(nullptr, "Login failure", "Login failed. Message: \n" + message,
                         QMessageBox::Ok, QMessageBox::Ok);

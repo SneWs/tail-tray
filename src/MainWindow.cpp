@@ -1,5 +1,6 @@
 #include <QDir>
 #include <QFile>
+#include <QDialog>
 
 #include "MainWindow.h"
 #include "Paths.h"
@@ -20,6 +21,7 @@ MainWindow::MainWindow(QWidget* parent)
     , accountsTabUi(nullptr)
     , pTrayManager(nullptr)
     , pCurrentExecution(nullptr)
+    , pLoginInProgressDlg(nullptr)
     , pTailStatus()
     , pFileReceiver(nullptr)
     , eCurrentState(TailState::NoAccount)
@@ -64,6 +66,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
     connect(pCurrentExecution.get(), &TailRunner::commandError, this, &MainWindow::onCommandError);
     connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
+    connect(pCurrentExecution.get(), &TailRunner::loginFlowStarting, this, &MainWindow::loginFlowStarting);
     connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
     connect(pCurrentExecution.get(), &TailRunner::fileSent, this, &MainWindow::fileSentToDevice);
 
@@ -113,12 +116,12 @@ void MainWindow::shutdown() {
 
 void MainWindow::showSettingsTab() {
     ui->tabWidget->setCurrentIndex(1);
-    show();
+    showNormal();
 }
 
 void MainWindow::showAccountsTab() {
     ui->tabWidget->setCurrentIndex(0);
-    show();
+    showNormal();
 }
 
 void MainWindow::showAboutTab() {
@@ -127,12 +130,12 @@ void MainWindow::showAboutTab() {
         tabIndex = 4;
 
     ui->tabWidget->setCurrentIndex(tabIndex);
-    show();
+    showNormal();
 }
 
 void MainWindow::showNetworkStatusTab() {
     ui->tabWidget->setCurrentIndex(2);
-    show();
+    showNormal();
 }
 
 void MainWindow::settingsReadyToRead() {
@@ -256,11 +259,59 @@ void MainWindow::settingsClosed() {
 
     if (eCurrentState == TailState::Connected)
         pCurrentExecution->start();
+
     hide();
 }
 
-void MainWindow::loginFlowCompleted() const {
-    pCurrentExecution->start();
+void MainWindow::loginFlowStarting() {
+    qDebug() << "Login flow starting...";
+
+    // Show main window - accounts tab
+    showAccountsTab();
+    ui->tabWidget->setDisabled(true);
+
+    // And create and show dialog for login flow...
+    pLoginInProgressDlg.reset(new QDialog(this));
+    pLoginInProgressDlg->setModal(false);
+    pLoginInProgressDlg->setFixedSize(300, 200);
+
+    auto* pLayout = new QVBoxLayout(pLoginInProgressDlg.get());
+    pLayout->addWidget(new QLabel("Please wait, login flow is running..."), Qt::AlignCenter | Qt::AlignVCenter);
+
+    auto* btnLayout = new QHBoxLayout();
+    btnLayout->addSpacerItem(new QSpacerItem(100, 20, QSizePolicy::Expanding));
+
+    auto* cancelButton = new QPushButton(tr("&Cancel"), pLoginInProgressDlg.get());
+    cancelButton->setAutoDefault(true);
+    cancelButton->setDefault(true);
+    connect(cancelButton, &QPushButton::clicked, this, [this](bool) {
+        qDebug() << "User cancelling Login flow...";
+
+        pCurrentExecution->cancelLoginFlow();
+        loginFlowCompleted(false);
+    });
+    btnLayout->addWidget(cancelButton);
+    pLayout->addLayout(btnLayout);
+
+    pLoginInProgressDlg->setLayout(pLayout);
+    pLoginInProgressDlg->show();
+}
+
+void MainWindow::loginFlowCompleted(bool success) {
+    qDebug() << "Login flow completed with" << (success ? "Success" : "Failure/Cancelled");
+
+    // Re-enable tabs
+    ui->tabWidget->setDisabled(false);
+
+    pLoginInProgressDlg->accept();
+    pLoginInProgressDlg.reset();
+
+    // And hide main window...
+    hide();
+
+    if (success) {
+        pCurrentExecution->start();
+    }
 }
 
 void MainWindow::onIpnEvent(const IpnEventData& eventData) {
@@ -551,14 +602,27 @@ TailState MainWindow::changeToState(TailState newState)
         pTailStatus.user = TailUser{};
     }
 
-    if (newState == TailState::Connected) {
-        setWindowIcon(QIcon(":/icons/tray-on.png"));
-        if (didChangeState) {
-            seenWarningsAndErrors.clear();
+    if (didChangeState) {
+        // If we're not connected, don't allow showing/changing tabs etc
+        if (newState == TailState::Connected) {
+            ui->tabWidget->setCurrentIndex(1);
+            ui->tabNetworkStatus->setDisabled(false);
+            ui->tabSettings->setDisabled(false);
+            ui->tabTailDrive->setDisabled(false);
+
+            setWindowIcon(QIcon(":/icons/tray-on.png"));
+            if (didChangeState) {
+                seenWarningsAndErrors.clear();
+            }
         }
-    }
-    else {
-        setWindowIcon(QIcon(":/icons/tray-off.png"));
+        else {
+            ui->tabNetworkStatus->setDisabled(true);
+            ui->tabSettings->setDisabled(true);
+            ui->tabTailDrive->setDisabled(true);
+            ui->tabWidget->setCurrentIndex(0);
+
+            setWindowIcon(QIcon(":/icons/tray-off.png"));
+        }
     }
 
     pTrayManager->stateChangedTo(newState, pTailStatus);
@@ -615,8 +679,7 @@ void MainWindow::onTailStatusChanged(const TailStatus& pNewStatus)
         ui->lblVersionNumber->setText(tr("Version ") + formattedVersion);
     }
     else {
-        if (tailscalePrefs.loggedOut)
-            changeToState(TailState::NotLoggedIn);
+        changeToState(TailState::NotLoggedIn);
     }
 
     accountsTabUi->onTailStatusChanged(pTailStatus);

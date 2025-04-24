@@ -78,6 +78,9 @@ set(PROJECT_SOURCES
         src/IpnWatcher.cpp
         src/IpnWatcher.h
         src/SingleApplicationImpl.h
+        src/PleaseWaitDlg.h
+        src/PleaseWaitDlg.cpp
+        src/PleaseWaitDlg.ui
 )
 
 if (APPLE)

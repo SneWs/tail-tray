@@ -441,11 +441,15 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
                 emit commandError(errorInfo, true);
             }
         }
+
+        qDebug() << "Command" << commandToString(commandInfo) << "recv. std error";
     }
 }
 
 void TailRunner::onProcessErrorOccurred(const BufferedProcessWrapper* wrapper, QProcess::ProcessError error) {
     const auto commandInfo = wrapper->command();
+    qDebug() << "Command" << commandToString(commandInfo) << "failed to execute!";
+    qDebug() << "Command error" << error;
 
     if (commandInfo == Command::CheckIfInstalled) {
         emit tailscaleIsInstalled(false);

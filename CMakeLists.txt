@@ -28,11 +28,8 @@ add_definitions(-DTRANSLATIONS_DIR="${FULL_LIBDIR_PATH}")
 
 message(STATUS "Full path of translations install path: ${FULL_LIBDIR_PATH}")
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
-
-# Translations
-find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
 
 set(PROJECT_SOURCES
         src/main.cpp

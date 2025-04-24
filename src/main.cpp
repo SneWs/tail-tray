@@ -1,17 +1,22 @@
 #include "MainWindow.h"
+#include "SingleApplicationImpl.h"
 
 #include <QApplication>
 #include <QDir>
 #include <QLocale>
 #include <QTranslator>
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     QCoreApplication::setOrganizationName("grenangen");
     QCoreApplication::setOrganizationDomain("grenangen.se");
     QCoreApplication::setApplicationName("Tail Tray");
 
-    QApplication a(argc, argv);
+    SingleApplicationImpl a(argc, argv);
+    if (!a.claimInstance()) {
+        qDebug() << "Secondary instance not allowed, will quite this instance";
+        return -1;
+    }
+
     QApplication::setQuitOnLastWindowClosed(false);
 
     // Locale setup
@@ -64,5 +69,6 @@ int main(int argc, char** argv)
     MainWindow w;
     w.hide();
 
-    return a.exec();
+    auto ec = a.exec();
+    return ec;
 }

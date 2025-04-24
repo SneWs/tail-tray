@@ -77,6 +77,7 @@ set(PROJECT_SOURCES
         src/DnsSettingsDlg.ui
         src/IpnWatcher.cpp
         src/IpnWatcher.h
+        src/SingleApplicationImpl.h
 )
 
 if (APPLE)

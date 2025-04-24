@@ -70,10 +70,10 @@ private slots:
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
-    bool bEmitOnActualSignals;
-    std::unique_ptr<QProcess> proc;
     void* pUserData;
+    std::unique_ptr<QProcess> proc;
     Command eCommand;
+    bool bEmitOnActualSignals;
     bool didReceiveStdErr;
     bool didReceiveStdOut;
 };
@@ -128,7 +128,7 @@ signals:
     void dnsStatusRead(const TailDnsStatus& dnsStatus);
     void accountsListed(const QList<TailAccountInfo>& accounts);
     void statusUpdated(const TailStatus& newStatus);
-    void loginFlowStarting();
+    void loginFlowStarting(const QString& loginUrl);
     void loginFlowCompleted(bool success);
     void driveListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);
     void fileSent(bool success, const QString& errorMsg, void* userData);

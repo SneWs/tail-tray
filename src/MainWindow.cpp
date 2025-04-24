@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QShowEvent>
 #include <memory>
+#include <QDesktopServices>
 
 #include "ManageDriveWindow.h"
 #include "KnownValues.h"
@@ -81,7 +82,7 @@ MainWindow::MainWindow(QWidget* parent)
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
     pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
 
-    changeToState(TailState::NotConnected);
+    changeToState(TailState::NotLoggedIn);
 
     // NOTE! We first check and validate that the tailscale binary / service / daemon is installed
     // if we get a positive outcome from that, we will bootstrap the rest of the flow.
@@ -296,43 +297,47 @@ void MainWindow::settingsClosed() {
     hide();
 }
 
-void MainWindow::loginFlowStarting() {
-    qDebug() << "Login flow starting...";
+void MainWindow::loginFlowStarting(const QString& loginUrl) {
+    qDebug() << "Login flow starting... Will send user to" << (loginUrl.isEmpty() ? "Waiting for URL..." : loginUrl);
+
+    if (!loginUrl.isEmpty()) {
+        QDesktopServices::openUrl(QUrl(loginUrl));
+    }
 
     // Show main window - accounts tab
     showAccountsTab();
-    ui->tabWidget->setCurrentIndex(0);
-    ui->tabWidget->setDisabled(true);
 
     // And create and show dialog for login flow...
-    pLoginInProgressDlg = std::make_unique<PleaseWaitDlg>(tr("Please wait, login flow is running..."), this);
-    pLoginInProgressDlg->setModal(false);
-    pLoginInProgressDlg->setFixedSize(300, 200);
-    connect(pLoginInProgressDlg.get(), &PleaseWaitDlg::userCancelled, this, [this]() {
-        qDebug() << "User cancelling Login flow...";
+    if (pLoginInProgressDlg == nullptr) {
+        pLoginInProgressDlg = std::make_unique<PleaseWaitDlg>(tr("Please wait, login flow is running..."));
+        pLoginInProgressDlg->setModal(true);
+        pLoginInProgressDlg->setFixedSize(300, 200);
+        connect(pLoginInProgressDlg.get(), &PleaseWaitDlg::userCancelled, this, [this]() {
+            qDebug() << "User cancelling Login flow...";
 
-        pCurrentExecution->cancelLoginFlow();
-        loginFlowCompleted(false);
-    });
+            pCurrentExecution->cancelLoginFlow();
+            loginFlowCompleted(false);
+        });
+    }
+
     pLoginInProgressDlg->show();
 }
 
 void MainWindow::loginFlowCompleted(bool success) {
     qDebug() << "Login flow completed with" << (success ? "Success" : "Failure/Cancelled");
 
-    // Re-enable tabs
-    ui->tabWidget->setDisabled(false);
-
-    if (pLoginInProgressDlg != nullptr) {
-        pLoginInProgressDlg->accept();
-        pLoginInProgressDlg.reset();
-    }
-
-    // And hide main window...
-    hide();
+    pLoginInProgressDlg.reset();
 
     if (success) {
+        // And bring the settings tab front and center
+        showSettingsTab();
+
         pCurrentExecution->start();
+    }
+    else {
+        // Failure
+        QMessageBox::warning(this, tr("Login failure"), tr("Login failed. Please try again"),
+            QMessageBox::Ok, QMessageBox::Ok);
     }
 }
 

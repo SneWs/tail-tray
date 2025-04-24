@@ -22,5 +22,4 @@ void PleaseWaitDlg::setMessage(const QString &text) const {
 
 void PleaseWaitDlg::onCancelButtonClicked() {
     emit userCancelled();
-    close();
 }

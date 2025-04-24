@@ -281,12 +281,6 @@ void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QSt
         this, &TailRunner::onProcessCanReadStandardError);
 
     wrapper->start(cmd, args, jsonResult, usePkExec, userData);
-
-    // We need to handle the login by reading as soon as there is output available since
-    // the process will be running until the login flow have completed
-    if (cmdType == Command::Login) {
-        wrapper->process()->waitForReadyRead();
-    }
 }
 
 void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
@@ -400,19 +394,12 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
                 const QRegularExpressionMatch match = regex.match(message);
                 if (match.hasMatch()) {
                     const QString url = match.captured(0);
-                    const auto res = QMessageBox::information(nullptr, "Login", "To login you will have to visit " + url + "\n\nPress OK to open the URL",
-                                                              QMessageBox::Ok, QMessageBox::Ok);
-                    if (res == QMessageBox::Ok) {
-                        emit loginFlowStarting();
-                        QDesktopServices::openUrl(QUrl(url));
-                    }
+                    QTimer::singleShot(500, this, [this, url]() {
+                        emit loginFlowStarting(url);
+                    });
                 }
                 else {
                     emit loginFlowCompleted(false);
-
-                    // Failure
-                    QMessageBox::warning(nullptr, "Login failure", "Login failed. Message: \n" + message,
-                        QMessageBox::Ok, QMessageBox::Ok);
                 }
             }
         }

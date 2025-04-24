@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QShowEvent>
+#include <memory>
 
 #include "ManageDriveWindow.h"
 #include "KnownValues.h"
@@ -300,32 +301,19 @@ void MainWindow::loginFlowStarting() {
 
     // Show main window - accounts tab
     showAccountsTab();
+    ui->tabWidget->setCurrentIndex(0);
     ui->tabWidget->setDisabled(true);
 
     // And create and show dialog for login flow...
-    pLoginInProgressDlg.reset(new QDialog(this));
+    pLoginInProgressDlg = std::make_unique<PleaseWaitDlg>(tr("Please wait, login flow is running..."), this);
     pLoginInProgressDlg->setModal(false);
     pLoginInProgressDlg->setFixedSize(300, 200);
-
-    auto* pLayout = new QVBoxLayout(pLoginInProgressDlg.get());
-    pLayout->addWidget(new QLabel("Please wait, login flow is running..."), Qt::AlignCenter | Qt::AlignVCenter);
-
-    auto* btnLayout = new QHBoxLayout();
-    btnLayout->addSpacerItem(new QSpacerItem(100, 20, QSizePolicy::Expanding));
-
-    auto* cancelButton = new QPushButton(tr("&Cancel"), pLoginInProgressDlg.get());
-    cancelButton->setAutoDefault(true);
-    cancelButton->setDefault(true);
-    connect(cancelButton, &QPushButton::clicked, this, [this](bool) {
+    connect(pLoginInProgressDlg.get(), &PleaseWaitDlg::userCancelled, this, [this]() {
         qDebug() << "User cancelling Login flow...";
 
         pCurrentExecution->cancelLoginFlow();
         loginFlowCompleted(false);
     });
-    btnLayout->addWidget(cancelButton);
-    pLayout->addLayout(btnLayout);
-
-    pLoginInProgressDlg->setLayout(pLayout);
     pLoginInProgressDlg->show();
 }
 
@@ -335,8 +323,10 @@ void MainWindow::loginFlowCompleted(bool success) {
     // Re-enable tabs
     ui->tabWidget->setDisabled(false);
 
-    pLoginInProgressDlg->accept();
-    pLoginInProgressDlg.reset();
+    if (pLoginInProgressDlg != nullptr) {
+        pLoginInProgressDlg->accept();
+        pLoginInProgressDlg.reset();
+    }
 
     // And hide main window...
     hide();

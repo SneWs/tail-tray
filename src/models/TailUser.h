@@ -21,8 +21,7 @@ public:
     QString profilePicUrl{};
     QList<QString> roles{};
 
-    TailUser() {
-    }
+    TailUser() = default;
 
     TailUser(const TailUser& other)
         : id(other.id)

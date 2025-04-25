@@ -13,8 +13,7 @@ public:
     QString magicDnsSuffix{};
     bool magicDnsEnabled = false;
 
-    TailNetInfo() {
-    }
+    TailNetInfo() = default;
 
     TailNetInfo(const TailNetInfo& o)
         : name(o.name)

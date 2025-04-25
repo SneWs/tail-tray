@@ -13,13 +13,10 @@ class TailDnsStatus final : public QObject
 {
     Q_OBJECT
 public:
-    QList<QPair<QString, QString>> splitDnsRoutes;
-    QList<QString> searchDomains;
+    QList<QPair<QString, QString>> splitDnsRoutes{};
+    QList<QString> searchDomains{};
 
-    TailDnsStatus()
-        : splitDnsRoutes()
-        , searchDomains()
-    { }
+    TailDnsStatus() = default;
 
     TailDnsStatus(const TailDnsStatus& other)
         : splitDnsRoutes(other.splitDnsRoutes)
@@ -33,7 +30,7 @@ public:
         return *this;
     }
 
-    static TailDnsStatus parse(const QString rawOutput) {
+    static TailDnsStatus parse(const QString &rawOutput) {
         TailDnsStatus newStatus{};
 
         // Regular expression to match Split DNS Routes

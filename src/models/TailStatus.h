@@ -23,27 +23,24 @@ class TailStatus final : public QObject
 {
     Q_OBJECT
 public:
-    QString version{};
-    bool tun{};
-    QString backendState{};
-    bool haveNodeKey{};
-    QString authUrl{};
-    QList<QString> tailscaleIPs{};
     TailDeviceInfo self{};
-    QList<QString> health{};
-    QString magicDnsSuffix{};
     TailNetInfo currentTailNet{};
-    QList<QString> certDomains{};
-    std::vector<TailDeviceInfo> peers{};
     TailUser user{};
+    QString version{};
+    QString backendState{};
+    QString authUrl{};
+    QString magicDnsSuffix{};
     QString clientVersion{};
-
-    // Drives that has been shared...
+    QList<QString> tailscaleIPs{};
+    QList<QString> health{};
+    QList<QString> certDomains{};
     QList<TailDriveInfo> drives{};
+    std::vector<TailDeviceInfo> peers{};
+    bool tun{};
+    bool haveNodeKey{};
     bool drivesConfigured = true;
 
-    TailStatus() {
-    }
+    TailStatus() = default;
 
     TailStatus(const TailStatus& other)
         : version(other.version)

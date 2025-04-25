@@ -73,8 +73,7 @@ void TrayMenuManager::onAccountsListed(const QList<TailAccountInfo>& foundAccoun
     accounts = foundAccounts;
 }
 
-void TrayMenuManager::stateChangedTo(TailState newState, const TailStatus& pTailStatus) const
-{
+void TrayMenuManager::stateChangedTo(TailState newState, const TailStatus& pTailStatus) const {
     cleanupDisposableActions();
     cleanupDisposableMenus();
 

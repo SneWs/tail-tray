@@ -16,14 +16,14 @@ using namespace JsonHelpers;
 class CurrentTailPrefs final : public QObject {
     Q_OBJECT
 public:
+    TailPrefsConfig config{};
+
+    // NetfilterMode specifies how much to manage netfilter rules for
+    // Tailscale, if at all.
+    int netfilterMode = 0;
+
     // ControlURL is the URL of the control server to use.
     QString controlURL{};
-
-    // RouteAll specifies whether to accept subnets advertised by
-	// other nodes on the Tailscale network. Note that this does not
-	// include default routes (0.0.0.0/0 and ::/0), those are
-	// controlled by ExitNodeID/IP below.
-    bool routeAll = false;
 
     // ExitNodeID and ExitNodeIP specify the node that should be used
 	// as an exit node for internet traffic. At most one of these
@@ -50,6 +50,54 @@ public:
 	// As an Internal field, it can't be set by LocalAPI clients, rather it is set indirectly
 	// when the ExitNodeID value is zero'd and via the set-use-exit-node-enabled endpoint.
     QString internalExitNodePrior{};
+
+    // AdvertiseTags specifies groups that this node wants to join, for
+    // purposes of ACL enforcement. These can be referenced from the ACL
+    // security policy. Note that advertising a tag doesn't guarantee that
+    // the control server will allow you to take on the rights for that
+    // tag.
+    QList<QString> advertiseTags{};
+
+    // Hostname is the hostname to use for identifying the node. If
+    // not set, os.Hostname is used.
+    QString hostname{};
+
+    // AdvertiseRoutes specifies CIDR prefixes to advertise into the
+    // Tailscale network as reachable through the current
+    // node.
+    QList<QString> advertiseRoutes{};
+
+    // AdvertiseServices specifies the list of services that this
+    // node can serve as a destination for. Note that an advertised
+    // service must still go through the approval process from the
+    // control server.
+    QList<QString> advertiseServices{};
+
+    // OperatorUser is the local machine user name who is allowed to
+    // operate tailscaled without being root or using sudo.
+    QString operatorUser{};
+
+    // TODO: Check/Parse in JSON
+    // ProfileName is the desired name of the profile. If empty, then the user's
+    // LoginName is used. It is only used for display purposes in the client UI
+    // and CLI.
+    QString profileName{};
+
+    // NetfilterKind specifies what netfilter implementation to use.
+    //
+    // Linux-only.
+    QString netfilterKind{};
+
+    // DriveShares are the configured DriveShares, stored in increasing order
+    // by name.
+    // TODO: Parse from JSON. Data structure, see https://github.com/tailscale/tailscale/blob/main/drive/remote.go#L34
+    QList<QString> driveShares{};
+
+    // RouteAll specifies whether to accept subnets advertised by
+    // other nodes on the Tailscale network. Note that this does not
+    // include default routes (0.0.0.0/0 and ::/0), those are
+    // controlled by ExitNodeID/IP below.
+    bool routeAll = false;
 
     // ExitNodeAllowLANAccess indicates whether locally accessible subnets should be
     // routed directly or via the exit node.
@@ -89,17 +137,6 @@ public:
     // connections. This overrides tailcfg.Hostinfo's ShieldsUp.
     bool shieldsUp = false;
 
-    // AdvertiseTags specifies groups that this node wants to join, for
-    // purposes of ACL enforcement. These can be referenced from the ACL
-    // security policy. Note that advertising a tag doesn't guarantee that
-    // the control server will allow you to take on the rights for that
-    // tag.
-    QList<QString> advertiseTags{};
-
-    // Hostname is the hostname to use for identifying the node. If
-    // not set, os.Hostname is used.
-    QString hostname{};
-
     // NotepadURLs is a debugging setting that opens OAuth URLs in
     // notepad.exe on Windows, rather than loading them in a browser.
     //
@@ -121,17 +158,6 @@ public:
     // for Linux/etc, which always operate in daemon mode.
     bool forceDaemon = false;
 #endif
-
-    // AdvertiseRoutes specifies CIDR prefixes to advertise into the
-    // Tailscale network as reachable through the current
-    // node.
-    QList<QString> advertiseRoutes{};
-
-    // AdvertiseServices specifies the list of services that this
-    // node can serve as a destination for. Note that an advertised
-    // service must still go through the approval process from the
-    // control server.
-    QList<QString> advertiseServices{};
 
     // NoSNAT specifies whether to source NAT traffic going to
     // destinations in AdvertiseRoutes. The default is to apply source
@@ -159,20 +185,6 @@ public:
     // Linux-only.
     bool noStatefulFiltering = false;
 
-    // NetfilterMode specifies how much to manage netfilter rules for
-    // Tailscale, if at all.
-    int netfilterMode = 0;
-
-    // OperatorUser is the local machine user name who is allowed to
-    // operate tailscaled without being root or using sudo.
-    QString operatorUser{};
-
-    // TODO: Check/Parse in JSON
-    // ProfileName is the desired name of the profile. If empty, then the user's
-    // LoginName is used. It is only used for display purposes in the client UI
-    // and CLI.
-    QString profileName{};
-
     // AutoUpdate sets the auto-update preferences for the node agent. See
     // AutoUpdatePrefs docs for more details.
     bool autoUpdate_Check = false;
@@ -186,56 +198,10 @@ public:
     // posture checks.
     bool postureChecking = false;
 
-    // NetfilterKind specifies what netfilter implementation to use.
-    //
-    // Linux-only.
-    QString netfilterKind{};
-
-    // DriveShares are the configured DriveShares, stored in increasing order
-    // by name.
-    // TODO: Parse from JSON. Data structure, see https://github.com/tailscale/tailscale/blob/main/drive/remote.go#L34
-    QList<QString> driveShares{};
-
     // No longer used...
     bool allowSingleHosts = false;
-
-    TailPrefsConfig config{};
-
-    CurrentTailPrefs()
-        : controlURL()
-        , routeAll()
-        , exitNodeId()
-        , exitNodeIp()
-        , internalExitNodePrior()
-        , exitNodeAllowLANAccess()
-        , corpDNS()
-        , runSSH()
-        , runWebClient()
-        , wantRunning()
-        , loggedOut(true)
-        , shieldsUp()
-        , advertiseTags()
-        , hostname()
-        , notepadURLs()
-    #if defined(WINDOWS_BUILD)
-        , forceDaemon()
-    #endif
-        , advertiseRoutes()
-        , advertiseServices()
-        , noSNAT()
-        , noStatefulFiltering()
-        , netfilterMode()
-        , operatorUser()
-        , profileName()
-        , autoUpdate_Check()
-        , autoUpdate_Apply()
-        , appConnector_Advertise()
-        , postureChecking()
-        , netfilterKind()
-        , driveShares()
-        , allowSingleHosts()
-        , config()
-    { }
+    
+    CurrentTailPrefs() = default;
 
     CurrentTailPrefs(const CurrentTailPrefs& other)
         : controlURL(other.controlURL)

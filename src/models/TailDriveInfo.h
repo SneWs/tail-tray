@@ -10,9 +10,9 @@ class TailDriveInfo final : public QObject
 {
     Q_OBJECT
 public:
-    QString name;
-    QString path;
-    QString as;
+    QString name{};
+    QString path{};
+    QString as{};
 
     explicit TailDriveInfo(QString n = QString(), QString p = QString(), QString a = QString())
         : QObject()

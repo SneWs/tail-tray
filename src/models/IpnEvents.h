@@ -12,13 +12,13 @@
 using namespace JsonHelpers;
 
 struct IpnHealthWarningsNetworkStatusModel {
-    QString BrokenSince;
-    QList<QString> DependsOn;
-    bool ImpactsConnectivity;
-    QString Severity;
-    QString Text;
-    QString Title;
-    QString WarnableCode;
+    QString BrokenSince{};
+    QString Severity{};
+    QString Text{};
+    QString Title{};
+    QString WarnableCode{};
+    QList<QString> DependsOn{};
+    bool ImpactsConnectivity{};
 
     static IpnHealthWarningsNetworkStatusModel parse(const QJsonObject& json) {
         IpnHealthWarningsNetworkStatusModel model;
@@ -46,7 +46,7 @@ struct IpnHealthWarningsNetworkStatusModel {
 };
 
 struct IpnHealthWarningsModel {
-    IpnHealthWarningsNetworkStatusModel networkStatus;
+    IpnHealthWarningsNetworkStatusModel networkStatus{};
 
     static IpnHealthWarningsModel parse(const QJsonObject& json) {
         IpnHealthWarningsModel model;
@@ -61,7 +61,7 @@ struct IpnHealthWarningsModel {
 };
 
 struct IpnHealthModel {
-    IpnHealthWarningsModel Warnings;
+    IpnHealthWarningsModel Warnings{};
 
     static IpnHealthModel parse(const QJsonObject& json) {
         IpnHealthModel model;
@@ -78,29 +78,18 @@ struct IpnHealthModel {
 class IpnEventData final : public QObject {
     Q_OBJECT
 public:
-    QString BrowseToURL;
-    QString DriveShares;
-    QString Engine;
-    QString ErrMessage;
-    IpnHealthModel Health;
-    QString LoginFinished;
-    QString NetMap;
-    QString Prefs;
-    QString State;
-    QString Version;
+    IpnHealthModel Health{};
+    QString BrowseToURL{};
+    QString DriveShares{};
+    QString Engine{};
+    QString ErrMessage{};
+    QString LoginFinished{};
+    QString NetMap{};
+    QString Prefs{};
+    QString State{};
+    QString Version{};
 
-    IpnEventData()
-        : BrowseToURL()
-        , DriveShares()
-        , Engine()
-        , ErrMessage()
-        , Health()
-        , LoginFinished()
-        , NetMap()
-        , Prefs()
-        , State()
-        , Version()
-    { }
+    IpnEventData() = default;
 
     IpnEventData(const IpnEventData& other)
         : BrowseToURL(other.BrowseToURL)

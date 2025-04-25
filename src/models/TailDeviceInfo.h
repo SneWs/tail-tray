@@ -18,53 +18,30 @@ class TailDeviceInfo final : public QObject
 {
     Q_OBJECT
 public:
+    long long userId = 0;
     QString id{};
     QString publicKey{};
     QString hostName{};
     QString dnsName{};
     QString os{};
-    long long userId = 0;
+    QString curAddr{};
+    QString relay{};
     QList<QString> tailscaleIPs{};
     QList<QString> allowedIPs{};
     QList<QString> addrs{};
-    QString curAddr{};
-    QString relay{};
+    QList<QString> peerApiUrl{};
+    QList<QString> capabilities{};
+    QList<QString> capMap{};
+    QDateTime keyExpiry{};
     bool online = false;
     bool exitNode = false;
     bool exitNodeOption = false;
     bool active = false;
-    QList<QString> peerApiUrl{};
-    QList<QString> capabilities{};
-    QList<QString> capMap{};
     bool inNetworkMap = false;
     bool inMagicSock = false;
     bool inEngine = false;
-    QDateTime keyExpiry{};
 
-    TailDeviceInfo()
-        : id()
-        , publicKey()
-        , hostName()
-        , dnsName()
-        , os()
-        , userId()
-        , tailscaleIPs()
-        , allowedIPs()
-        , addrs()
-        , curAddr()
-        , relay()
-        , online()
-        , exitNode()
-        , exitNodeOption()
-        , active()
-        , peerApiUrl()
-        , capabilities()
-        , capMap()
-        , inNetworkMap()
-        , inMagicSock()
-        , inEngine()
-        , keyExpiry()
-    { }
+    TailDeviceInfo() = default;
 
     TailDeviceInfo(const TailDeviceInfo& other)
         : id(other.id)

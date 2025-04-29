@@ -32,7 +32,7 @@ find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
 
 # Use KNotifications
-option(KNOTIFICATIONS_ENABLED "Enable KNotifications" ON)
+option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
 if (KNOTIFICATIONS_ENABLED)
     message("KNotifications has been enabled! Make sure that you have KDE Frameworks installed and min. version 6+.")
 
@@ -45,7 +45,6 @@ if (KNOTIFICATIONS_ENABLED)
     find_package(KF6Notifications)
 else ()
     message("KNotifications has not been enabled!")
-    set(KNOTIFICATIONS_ENABLED OFF)
 endif (KNOTIFICATIONS_ENABLED)
 
 set(PROJECT_SOURCES

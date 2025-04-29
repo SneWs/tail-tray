@@ -32,9 +32,9 @@ find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
 
 # Use KNotifications
-option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
+option(KNOTIFICATIONS_ENABLED "Enable KNotifications" ON)
 if (KNOTIFICATIONS_ENABLED)
-    message("KNotifications has been enabled! Make sure that you have KDE Frameworks installed and min. version 6+.")
+    message("KNotifications has been enabled! This requires Plasma 6")
 
     find_package(ECM REQUIRED NO_MODULE)
     set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})

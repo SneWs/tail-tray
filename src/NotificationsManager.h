@@ -1,12 +1,12 @@
 #ifndef NOTIFICATIONS_MANAGER
 #define NOTIFICATIONS_MANAGER
 
+#if defined(KNOTIFICATIONS_ENABLED)
+
 #include <QObject>
 #include <QList>
 #include <QVariant>
 #include <KNotification>
-
-#if defined(KNOTIFICATIONS_ENABLED)
 
 class NotificationsManager : public QObject
 {

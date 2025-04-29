@@ -35,62 +35,68 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistT
 option(KNOTIFICATIONS_ENABLED "Enable KNotifications" ON)
 if (KNOTIFICATIONS_ENABLED)
     message("KNotifications has been enabled!")
+    find_package(ECM REQUIRED NO_MODULE)
+    set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+    include(KDEInstallDirs)
+    include(KDECMakeSettings)
+    include(KDECompilerSettings NO_POLICY_SCOPE)
+
     add_definitions(-DKNOTIFICATIONS_ENABLED)
     find_package(KF6Notifications)
 endif (KNOTIFICATIONS_ENABLED)
 
 set(PROJECT_SOURCES
-        src/main.cpp
-        src/MainWindow.cpp
-        src/MainWindow.h
-        src/MainWindow.ui
-        resources.qrc
-        src/models/TailAccountInfo.h
-        src/models/TailDeviceInfo.h
-        src/models/TailUser.h
-        src/models/TailNetInfo.h
-        src/models/TailDriveInfo.h
-        src/models/TailStatus.h
-        src/models/TailState.h
-        src/models/TailDnsStatus.h
-        src/models/CurrentTailPrefs.h
-        src/models/JsonHelpers.h
-        src/models/Models.h
-        src/models/IpnEvents.h 
-        src/TrayMenuManager.cpp
-        src/TrayMenuManager.h
-        src/TailSettings.cpp
-        src/TailSettings.h
-        src/AccountsTabUiManager.cpp
-        src/AccountsTabUiManager.h
-        src/SysCommand.cpp
-        src/SysCommand.h
-        src/KnownValues.h
-        src/TailFileReceiver.cpp
-        src/TailFileReceiver.h
-        src/TailRunner.h
-        src/TailRunner.cpp
-        src/TailDriveUiManager.h
-        src/TailDriveUiManager.cpp
-        src/ManageDriveWindow.h
-        src/ManageDriveWindow.cpp
-        src/ManageDriveWindow.ui
-        src/NetworkStateMonitor.cpp
-        src/NetworkStateMonitor.h
-        src/AdvertiseRoutesDlg.h
-        src/AdvertiseRoutesDlg.cpp
-        src/AdvertiseRoutesDlg.ui
-        src/DnsSettingsDlg.h
-        src/DnsSettingsDlg.cpp
-        src/DnsSettingsDlg.ui
-        src/IpnWatcher.cpp
-        src/IpnWatcher.h
-        src/SingleApplicationImpl.h
-        src/PleaseWaitDlg.h
-        src/PleaseWaitDlg.cpp
-        src/PleaseWaitDlg.ui
-        src/NotificationsManager.h
-        src/NotificationsManager.cpp
+    src/main.cpp
+    src/MainWindow.cpp
+    src/MainWindow.h
+    src/MainWindow.ui
+    resources.qrc
+    src/models/TailAccountInfo.h
+    src/models/TailDeviceInfo.h
+    src/models/TailUser.h
+    src/models/TailNetInfo.h
+    src/models/TailDriveInfo.h
+    src/models/TailStatus.h
+    src/models/TailState.h
+    src/models/TailDnsStatus.h
+    src/models/CurrentTailPrefs.h
+    src/models/JsonHelpers.h
+    src/models/Models.h
+    src/models/IpnEvents.h 
+    src/TrayMenuManager.cpp
+    src/TrayMenuManager.h
+    src/TailSettings.cpp
+    src/TailSettings.h
+    src/AccountsTabUiManager.cpp
+    src/AccountsTabUiManager.h
+    src/SysCommand.cpp
+    src/SysCommand.h
+    src/KnownValues.h
+    src/TailFileReceiver.cpp
+    src/TailFileReceiver.h
+    src/TailRunner.h
+    src/TailRunner.cpp
+    src/TailDriveUiManager.h
+    src/TailDriveUiManager.cpp
+    src/ManageDriveWindow.h
+    src/ManageDriveWindow.cpp
+    src/ManageDriveWindow.ui
+    src/NetworkStateMonitor.cpp
+    src/NetworkStateMonitor.h
+    src/AdvertiseRoutesDlg.h
+    src/AdvertiseRoutesDlg.cpp
+    src/AdvertiseRoutesDlg.ui
+    src/DnsSettingsDlg.h
+    src/DnsSettingsDlg.cpp
+    src/DnsSettingsDlg.ui
+    src/IpnWatcher.cpp
+    src/IpnWatcher.h
+    src/SingleApplicationImpl.h
+    src/PleaseWaitDlg.h
+    src/PleaseWaitDlg.cpp
+    src/PleaseWaitDlg.ui
+    src/NotificationsManager.h
+    src/NotificationsManager.cpp
 )
 
 if (APPLE)
@@ -145,16 +151,17 @@ target_link_libraries(
     KF6::Notifications
 )
 
+if (KNOTIFICATIONS_ENABLED)
+    target_link_libraries(
+        tail-tray PRIVATE 
+        KF6::Notifications
+    )
+endif (KNOTIFICATIONS_ENABLED)
+
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
 
 if (UNIX AND NOT APPLE)
-    find_package(ECM REQUIRED NO_MODULE)
-    set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
-
     include(GNUInstallDirs)
-    include(KDEInstallDirs)
-    include(KDECMakeSettings)
-    include(KDECompilerSettings NO_POLICY_SCOPE)
 endif ()
 
 install(TARGETS tail-tray

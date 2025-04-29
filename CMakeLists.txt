@@ -34,7 +34,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistT
 # Use KNotifications
 option(KNOTIFICATIONS_ENABLED "Enable KNotifications" ON)
 if (KNOTIFICATIONS_ENABLED)
-    message("KNotifications has been enabled!")
+    message("KNotifications has been enabled! Make sure that you have KDE Frameworks installed and min. version 6+.")
+    
     find_package(ECM REQUIRED NO_MODULE)
     set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
     include(KDEInstallDirs)
@@ -43,6 +44,9 @@ if (KNOTIFICATIONS_ENABLED)
 
     add_definitions(-DKNOTIFICATIONS_ENABLED)
     find_package(KF6Notifications)
+else ()
+    message("KNotifications has not been enabled!")
+    set(KNOTIFICATIONS_ENABLED OFF)
 endif (KNOTIFICATIONS_ENABLED)
 
 set(PROJECT_SOURCES

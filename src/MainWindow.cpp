@@ -409,7 +409,7 @@ void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* u
 #if defined(KNOTIFICATIONS_ENABLED)
     pNotificationsManager->showNotification(tr("File sent"), 
         tr("The file %1 has been sent!").arg(*userDataStr), 
-        QVariant{}, "document-send");
+        QVariant{});
 #else
     pTrayManager->trayIcon()->showMessage(tr("File sent"), *userDataStr, QSystemTrayIcon::MessageIcon::Information, 5000);
 #endif
@@ -437,7 +437,7 @@ void MainWindow::onTailnetFileReceived(QString filePath) const {
 #if defined(KNOTIFICATIONS_ENABLED)
     pNotificationsManager->showFileNotification(tr("File received"), 
         tr("File %1 has been saved in %2").arg(file.fileName()).arg(file.absolutePath()), 
-            file.absolutePath(), QVariant{}, "document-received");
+            file, QVariant{});
 #else
     const QString msg("File " + file.fileName() + " was received and saved in " + file.absolutePath());
     pTrayManager->trayIcon()->showMessage(tr("File received"), msg,

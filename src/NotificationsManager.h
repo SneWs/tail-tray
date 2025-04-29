@@ -3,9 +3,8 @@
 
 #if defined(KNOTIFICATIONS_ENABLED)
 
-#include <QObject>
 #include <QList>
-#include <QVariant>
+#include <QFileInfo>
 #include <KNotification>
 
 class NotificationsManager : public QObject
@@ -16,7 +15,8 @@ public:
     ~NotificationsManager() override;
 
     void showNotification(const QString &title, const QString& message, const QVariant& data, const QString& iconName = QString());
-    void showFileNotification(const QString& title, const QString& message, const QString& filePath, const QVariant& data, const QString& iconName = QString());
+    void showFileNotification(const QString& title, const QString& message, const QFileInfo& fileInfo,
+        const QVariant& data, const QString& iconName = QString());
 };
 
 #endif // KNOTIFICATIONS_ENABLED

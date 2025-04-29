@@ -6,17 +6,12 @@
 
 NotificationsManager::NotificationsManager(QObject* parent)
     : QObject(parent)
-{
-    
-}
+{ }
 
-NotificationsManager::~NotificationsManager()
-{
-
-}
+NotificationsManager::~NotificationsManager() = default;
 
 void NotificationsManager::showNotification(const QString& title, const QString& message, const QVariant& data, const QString& iconName) {
-    KNotification* notification = new KNotification("BasicNotification", KNotification::NotificationFlag::CloseOnTimeout, this);
+    auto* notification = new KNotification("BasicNotification", KNotification::NotificationFlag::Persistent, this);
     notification->setTitle(title);
     notification->setText(message);
 
@@ -25,35 +20,24 @@ void NotificationsManager::showNotification(const QString& title, const QString&
         notification->setIconName(iconName);
     }
 
-    KNotificationAction* action = notification->addDefaultAction("View");
-    connect(action, &KNotificationAction::activated, this, [this, notification, action]() {
-        notification->close();
-
-        notification->deleteLater();
-        action->deleteLater();
-    });
- 
     notification->sendEvent();
 }
 
-void NotificationsManager::showFileNotification(const QString& title, const QString& message, const QString& filePath, const QVariant& data, const QString& iconName) {
-    KNotification* notification = new KNotification("FileTransfer", KNotification::NotificationFlag::CloseOnTimeout, this);
+void NotificationsManager::showFileNotification(const QString& title, const QString& message, const QFileInfo& fileInfo,
+    const QVariant& data, const QString& iconName) {
+
+    auto* notification = new KNotification("FileTransfer", KNotification::NotificationFlag::Persistent, this);
     notification->setTitle(title);
     notification->setText(message);
+
+    // Setting the file URI will trigger the hamburger menu where one can select to open the file etc
+    QUrl fileUrl("file://" + fileInfo.absoluteFilePath());
+    notification->setUrls(QList{fileUrl});
 
     notification->setUrgency(KNotification::Urgency::HighUrgency);
     if (!iconName.isEmpty()) {
         notification->setIconName(iconName);
     }
-
-    KNotificationAction* action = notification->addDefaultAction("Open Folder");
-    connect(action, &KNotificationAction::activated, this, [this, notification, action, filePath]() {
-        notification->close();
-        QDesktopServices::openUrl(QUrl("file://" + filePath));
-
-        notification->deleteLater();
-        action->deleteLater();
-    });
 
     notification->sendEvent();
 }

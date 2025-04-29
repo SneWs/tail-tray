@@ -148,7 +148,13 @@ target_link_libraries(
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
 
 if (UNIX AND NOT APPLE)
+    find_package(ECM REQUIRED NO_MODULE)
+    set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+
     include(GNUInstallDirs)
+    include(KDEInstallDirs)
+    include(KDECMakeSettings)
+    include(KDECompilerSettings NO_POLICY_SCOPE)
 endif ()
 
 install(TARGETS tail-tray
@@ -168,7 +174,7 @@ if (UNIX AND NOT APPLE)
     )
 
 if (KNOTIFICATIONS_ENABLED)
-    install(FILES tail-tray.notifyrc DESTINATION "/usr/share/knotifications6")
+    install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
 endif (KNOTIFICATIONS_ENABLED)
 
     install(FILES "${CMAKE_BINARY_DIR}/tail_tray_en_US.qm"

@@ -40,7 +40,6 @@ if (KNOTIFICATIONS_ENABLED)
     set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
     include(KDEInstallDirs)
     include(KDECMakeSettings)
-    include(KDECompilerSettings NO_POLICY_SCOPE)
 
     add_definitions(-DKNOTIFICATIONS_ENABLED)
     find_package(KF6Notifications)

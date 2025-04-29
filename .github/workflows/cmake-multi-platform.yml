@@ -24,14 +24,6 @@ jobs:
         version: '6.4.2'
         target: 'desktop'
         set-env: 'true'
-    
-    - name: Install KDE Deps - Linux
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          plasma-workspace-dev \
-          extra-cmake-modules
 
     - name: Install Qt - Windows
       if: runner.os == 'Windows'
@@ -55,6 +47,7 @@ jobs:
         echo "Running Linux build"
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DKNOTIFICATIONS_ENABLED=OFF
             -S ${{ github.workspace }} \
             -G "Unix Makefiles" # Use Unix Makefiles for Ubuntu
       shell: bash  # This makes sure we use Bash on both platforms.

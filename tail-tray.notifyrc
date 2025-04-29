@@ -1,0 +1,17 @@
+[Global]
+    IconName=tailscale
+    Name=Tail Tray
+    Comment=A Tailscale Tray Application
+    DesktopEntry=Tail Tray
+
+[Event/BasicNotification]
+    Name=BasicNotification
+    Comment=Basic notifications without actions
+    Action=Sound|Popup
+    Urgency=Normal
+
+[Event/FileTransfer]
+    Name=FileTransfer
+    Comment=A file have been sent or received on this machine over Tailscale/Wireguard
+    Action=Sound|Popup
+    Urgency=Normal

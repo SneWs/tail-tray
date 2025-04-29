@@ -31,6 +31,14 @@ message(STATUS "Full path of translations install path: ${FULL_LIBDIR_PATH}")
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
 
+# Use KNotifications
+option(KNOTIFICATIONS_ENABLED "Enable KNotifications" ON)
+if (KNOTIFICATIONS_ENABLED)
+    message("KNotifications has been enabled!")
+    add_definitions(-DKNOTIFICATIONS_ENABLED)
+    find_package(KF6Notifications)
+endif (KNOTIFICATIONS_ENABLED)
+
 set(PROJECT_SOURCES
         src/main.cpp
         src/MainWindow.cpp
@@ -81,6 +89,8 @@ set(PROJECT_SOURCES
         src/PleaseWaitDlg.h
         src/PleaseWaitDlg.cpp
         src/PleaseWaitDlg.ui
+        src/NotificationsManager.h
+        src/NotificationsManager.cpp
 )
 
 if (APPLE)
@@ -128,7 +138,12 @@ qt_add_translations(tail-tray TS_FILES
 )
 qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
-target_link_libraries(tail-tray PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
+target_link_libraries(
+    tail-tray PRIVATE 
+    Qt${QT_VERSION_MAJOR}::Widgets 
+    Qt${QT_VERSION_MAJOR}::Network 
+    KF6::Notifications
+)
 
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
 
@@ -151,6 +166,10 @@ if (UNIX AND NOT APPLE)
     install(FILES tail-tray.desktop
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
     )
+
+if (KNOTIFICATIONS_ENABLED)
+    install(FILES tail-tray.notifyrc DESTINATION "/usr/share/knotifications6")
+endif (KNOTIFICATIONS_ENABLED)
 
     install(FILES "${CMAKE_BINARY_DIR}/tail_tray_en_US.qm"
             "${CMAKE_BINARY_DIR}/tail_tray_sv_SE.qm"

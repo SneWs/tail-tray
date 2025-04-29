@@ -33,6 +33,9 @@ MainWindow::MainWindow(QWidget* parent)
 #if defined(DAVFS_ENABLED)
     , pTailDriveUiManager()
 #endif
+#if defined(KNOTIFICATIONS_ENABLED)
+    , pNotificationsManager()
+#endif
     , settings(this)
 {
     ui->setupUi(this);
@@ -403,9 +406,14 @@ void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* u
     }
 
     auto userDataStr = static_cast<QString*>(userData);
+#if defined(KNOTIFICATIONS_ENABLED)
+    pNotificationsManager->showNotification(tr("File sent"), 
+        tr("The file %1 has been sent!").arg(*userDataStr), 
+        QVariant{}, "document-send");
+#else
     pTrayManager->trayIcon()->showMessage(tr("File sent"), *userDataStr, QSystemTrayIcon::MessageIcon::Information, 5000);
+#endif
 
-    // We need to delete this here
     delete userDataStr;
 }
 
@@ -426,10 +434,15 @@ void MainWindow::startListeningForIncomingFiles() {
 
 void MainWindow::onTailnetFileReceived(QString filePath) const {
     const QFileInfo file(filePath);
+#if defined(KNOTIFICATIONS_ENABLED)
+    pNotificationsManager->showFileNotification(tr("File received"), 
+        tr("File %1 has been saved in %2").arg(file.fileName()).arg(file.absolutePath()), 
+            file.absolutePath(), QVariant{}, "document-received");
+#else
     const QString msg("File " + file.fileName() + " was received and saved in " + file.absolutePath());
-
     pTrayManager->trayIcon()->showMessage(tr("File received"), msg,
         QSystemTrayIcon::MessageIcon::Information, 8000);
+#endif
 }
 
 void MainWindow::onShowTailFileSaveLocationPicker() {

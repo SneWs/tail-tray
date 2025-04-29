@@ -17,6 +17,7 @@
 #include "IpnWatcher.h"
 #include "models/TailStatus.h"
 #include "PleaseWaitDlg.h"
+#include "NotificationsManager.h"
 
 #if defined(DAVFS_ENABLED)
 #include "TailDriveUiManager.h"
@@ -55,6 +56,9 @@ private:
     std::unique_ptr<IpnWatcher> pIpnWatcher;
 #if defined(DAVFS_ENABLED)
     std::unique_ptr<TailDriveUiManager> pTailDriveUiManager;
+#endif
+#if defined(KNOTIFICATIONS_ENABLED)
+    std::unique_ptr<NotificationsManager> pNotificationsManager;
 #endif
 
     TailState eCurrentState;

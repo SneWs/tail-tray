@@ -31,7 +31,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y \
           plasma-workspace-dev \
-          kf6-plasma-dev \
           extra-cmake-modules
 
     - name: Install Qt - Windows

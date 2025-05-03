@@ -57,9 +57,7 @@ private:
 #if defined(DAVFS_ENABLED)
     std::unique_ptr<TailDriveUiManager> pTailDriveUiManager;
 #endif
-#if defined(KNOTIFICATIONS_ENABLED)
     std::unique_ptr<NotificationsManager> pNotificationsManager;
-#endif
 
     TailState eCurrentState;
     TailSettings settings;

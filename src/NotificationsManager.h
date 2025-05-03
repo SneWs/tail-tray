@@ -1,24 +1,30 @@
 #ifndef NOTIFICATIONS_MANAGER
 #define NOTIFICATIONS_MANAGER
 
-#if defined(KNOTIFICATIONS_ENABLED)
-
-#include <QList>
 #include <QFileInfo>
+
+#if defined(KNOTIFICATIONS_ENABLED)
 #include <KNotification>
+#endif
+
+#include "TrayMenuManager.h"
 
 class NotificationsManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit NotificationsManager(QObject* parent = nullptr);
+    explicit NotificationsManager(TrayMenuManager const* pTrayMgr, QObject* parent = nullptr);
     ~NotificationsManager() override;
 
-    void showNotification(const QString &title, const QString& message, const QVariant& data, const QString& iconName = QString());
+    void showNotification(const QString &title, const QString& message, const QString& iconName = QString());
     void showFileNotification(const QString& title, const QString& message, const QFileInfo& fileInfo,
-        const QVariant& data, const QString& iconName = QString());
-};
+        const QString& iconName = QString());
 
-#endif // KNOTIFICATIONS_ENABLED
+    void showWarningNotification(const QString& title, const QString& message, const QString& iconName = QString());
+    void showErrorNotification(const QString& title, const QString& message, const QString& iconName = QString());
+
+private:
+    TrayMenuManager const* m_pTrayMgr;
+};
 
 #endif // NOTIFICATIONS_MANAGER

@@ -1,16 +1,16 @@
 #include "NotificationsManager.h"
 
-#if defined(KNOTIFICATIONS_ENABLED)
-
 #include <QDesktopServices>
 
-NotificationsManager::NotificationsManager(QObject* parent)
+NotificationsManager::NotificationsManager(TrayMenuManager const* pTrayMgr, QObject* parent)
     : QObject(parent)
+    , m_pTrayMgr(pTrayMgr)
 { }
 
 NotificationsManager::~NotificationsManager() = default;
 
-void NotificationsManager::showNotification(const QString& title, const QString& message, const QVariant& data, const QString& iconName) {
+void NotificationsManager::showNotification(const QString& title, const QString& message, const QString& iconName) {
+#if defined(KNOTIFICATIONS_ENABLED)
     auto* notification = new KNotification("BasicNotification", KNotification::NotificationFlag::Persistent, this);
     notification->setTitle(title);
     notification->setText(message);
@@ -21,11 +21,16 @@ void NotificationsManager::showNotification(const QString& title, const QString&
     }
 
     notification->sendEvent();
+#else
+    m_pTrayMgr->trayIcon()->showMessage(title, message,
+        QSystemTrayIcon::MessageIcon::Information, 5000);
+#endif
 }
 
 void NotificationsManager::showFileNotification(const QString& title, const QString& message, const QFileInfo& fileInfo,
-    const QVariant& data, const QString& iconName) {
+    const QString& iconName) {
 
+#if defined(KNOTIFICATIONS_ENABLED)
     auto* notification = new KNotification("FileTransfer", KNotification::NotificationFlag::Persistent, this);
     notification->setTitle(title);
     notification->setText(message);
@@ -40,6 +45,24 @@ void NotificationsManager::showFileNotification(const QString& title, const QStr
     }
 
     notification->sendEvent();
+#else
+    m_pTrayMgr->trayIcon()->showMessage(title, message,
+        QSystemTrayIcon::MessageIcon::Information, 5000);
+#endif
 }
 
+void NotificationsManager::showWarningNotification(const QString& title, const QString& message, const QString& iconName) {
+#if defined(KNOTIFICATIONS_ENABLED)
+    m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Warning, 5000);
+#else
+    m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Warning, 5000);
 #endif
+}
+
+void NotificationsManager::showErrorNotification(const QString& title, const QString& message, const QString& iconName) {
+#if defined(KNOTIFICATIONS_ENABLED)
+    m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Critical, 5000);
+#else
+    m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Critical, 5000);
+#endif
+}

@@ -32,7 +32,7 @@ find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
 
 # Use KNotifications
-option(KNOTIFICATIONS_ENABLED "Enable KNotifications" ON)
+option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
 if (KNOTIFICATIONS_ENABLED)
     message("KNotifications has been enabled! This requires Plasma 6")
 

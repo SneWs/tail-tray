@@ -25,8 +25,10 @@
       * If you are running Gnome and not using Ubuntu, make sure to install AppIndicator so you can see your tray icons. See https://extensions.gnome.org/extension/615/appindicator-support/
 2. Clone the repo
 3. cd into the repo `cd tail-tray`
-4. Run `cmake -B "./build" -DCMAKE_BUILD_TYPE="Release"`
-   * If you want to disable DAVFS: `cmake -B "./build" -DDAVFS_ENABLED=OFF -DCMAKE_BUILD_TYPE="Release"`
+   * NOTE: There are several options that can be toggled ON/OFF dep on needs and wants.
+   * For exampel: `KNOTIFICATIONS_ENABLED` to use rich notifications, this requires KDE Plasma 6 and later with KNotification support
+4. Run `cmake -B "./build" -DKNOTIFICATIONS_ENABLED=ON -DCMAKE_BUILD_TYPE="Release"`
+   * If you want to disable DAVFS: `cmake -B "./build" -DDAVFS_ENABLED=OFF -DKNOTIFICATIONS_ENABLED=ON -DCMAKE_BUILD_TYPE="Release"`
 5. Run `cmake --build "./build" --config Release`
 6. Run `cd build`
 7. Run `sudo make install`

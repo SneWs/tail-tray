@@ -73,7 +73,7 @@ void TrayMenuManager::onAccountsListed(const QList<TailAccountInfo>& foundAccoun
     accounts = foundAccounts;
 }
 
-void TrayMenuManager::stateChangedTo(TailState newState, const TailStatus& pTailStatus) const {
+void TrayMenuManager::stateChangedTo(TailState newState, const TailStatus& pTailStatus) {
     cleanupDisposableActions();
     cleanupDisposableMenus();
 
@@ -143,7 +143,7 @@ void TrayMenuManager::buildNotConnectedMenu(const TailStatus& pTailStatus) const
     buildAccountsMenu();
 }
 
-void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) const {
+void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
     pTrayMenu->clear();
     pTrayMenu->addAction(pConnected.get());
     pTrayMenu->addAction(pDisconnect.get());
@@ -176,18 +176,13 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) const {
                 auto* deviceMenu = netDevs->addMenu(name + ipStr);
                 disposableMenus.push_back(deviceMenu);
                 action = deviceMenu->addAction(tr("Copy IP address"));
-                connect(action, &QAction::triggered, this, [this, dev, name, ipStr](bool) {
+                connect(action, &QAction::triggered, this, [this, dev, name](bool) {
                     QClipboard* clipboard = QApplication::clipboard();
                     const auto& str = dev.tailscaleIPs.first();
                     qDebug() << str;
                     clipboard->setText(str, QClipboard::Clipboard);
-                    if (clipboard->supportsSelection()) {
-                        clipboard->setText(str, QClipboard::Selection);
-                    }
 
-                    pSysTray->showMessage(tr("IP address copied"),
-                        "IP Address " + ipStr + " for " + name + " have been copied to clipboard!",
-                        QSystemTrayIcon::Information, 5000);
+                    emit ipAddressCopiedToClipboard(str, name);
                 });
 
                 disposableConnectedMenuActions.push_back(
@@ -212,7 +207,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) const {
 
                     // The user data will be cleaned up when the signal is triggered back to us
                     pTailRunner->sendFile(name, file,
-                        new QString("File " + file + " sent to " + name));
+                        new QString(file));
                 });
             }
             disposableConnectedMenuActions.push_back(action);
@@ -432,9 +427,6 @@ void TrayMenuManager::setupWellKnownActions() const {
     });
 
     connect(pConnect.get(), &QAction::triggered, this, [this](bool) {
-        pSysTray->showMessage(tr("Please wait"), tr("Connecting to your Tailscale network"),
-            QSystemTrayIcon::MessageIcon::Information, 3000);
-
         pTailRunner->start();
     });
 

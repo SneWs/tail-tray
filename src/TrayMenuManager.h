@@ -19,9 +19,12 @@ public:
     explicit TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent = nullptr);
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
-    void stateChangedTo(TailState newState, const TailStatus& pTailStatus) const;
+    void stateChangedTo(TailState newState, const TailStatus& pTailStatus);
 
     [[nodiscard]] QSystemTrayIcon* trayIcon() const { return pSysTray.get(); }
+
+signals:
+    void ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname);
 
 private:
     QList<TailAccountInfo> accounts;
@@ -46,7 +49,7 @@ private:
 private:
     void buildNotLoggedInMenu() const;
     void buildNotConnectedMenu(const TailStatus& pTailStatus) const;
-    void buildConnectedMenu(const TailStatus& pTailStatus) const;
+    void buildConnectedMenu(const TailStatus& pTailStatus);
     void buildAccountsMenu() const;
 
     void setupWellKnownActions() const;

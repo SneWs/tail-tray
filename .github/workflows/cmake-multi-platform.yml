@@ -47,6 +47,7 @@ jobs:
         echo "Running Linux build"
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DKNOTIFICATIONS_ENABLED=OFF \
             -S ${{ github.workspace }} \
             -G "Unix Makefiles" # Use Unix Makefiles for Ubuntu
       shell: bash  # This makes sure we use Bash on both platforms.
@@ -56,7 +57,7 @@ jobs:
       run: |
         echo "Running Windows build"
         echo "Build output directory: ${{ steps.strings.outputs.build-output-dir }}" 
-        cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -S ${{ github.workspace }} -G "Visual Studio 17 2022"
+        cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DKNOTIFICATIONS_ENABLED=OFF -S ${{ github.workspace }} -G "Visual Studio 17 2022"
       shell: pwsh
 
     - name: Build

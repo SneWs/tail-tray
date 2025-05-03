@@ -1,6 +1,5 @@
 #include <QDir>
 #include <QFile>
-#include <QDialog>
 
 #include "MainWindow.h"
 #include "Paths.h"
@@ -24,20 +23,18 @@ MainWindow::MainWindow(QWidget* parent)
     , pTrayManager(nullptr)
     , pCurrentExecution(nullptr)
     , pLoginInProgressDlg(nullptr)
-    , pTailStatus()
     , pFileReceiver(nullptr)
-    , eCurrentState(TailState::NoAccount)
     , pNetworkStateMonitor(std::make_unique<NetworkStateMonitor>(this))
     , pIpnWatcher(std::make_unique<IpnWatcher>(this))
-    , pDnsStatus()
-#if defined(DAVFS_ENABLED)
-    , pTailDriveUiManager()
-#endif
+    , eCurrentState(TailState::NoAccount)
     , settings(this)
 {
     ui->setupUi(this);
 
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
+    accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
+    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
+    pNotificationsManager = std::make_unique<NotificationsManager>(pTrayManager.get(), this);
 
     // Remove the tail drive tab by default
     ui->tabWidget->removeTab(2);
@@ -79,8 +76,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnAdvertiseRoutes, &QPushButton::clicked, this, &MainWindow::showAdvertiseRoutesDialog);
     connect(ui->btnTailscaleDnsSettings, &QPushButton::clicked, this, &MainWindow::showDnsSettingsDialog);
 
-    accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
-    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
+    connect(pTrayManager.get(), &TrayMenuManager::ipAddressCopiedToClipboard, this, &MainWindow::ipAddressCopiedToClipboard);
 
     changeToState(TailState::NotLoggedIn);
 
@@ -365,6 +361,11 @@ void MainWindow::onIpnEvent(const IpnEventData& eventData) {
     pCurrentExecution->bootstrap();
 }
 
+void MainWindow::ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname) {
+        pNotificationsManager->showNotification(tr("IP address copied"),
+            "IP Address " + ipAddress + " for " + hostname + " have been copied to clipboard!");
+}
+
 #if defined(DAVFS_ENABLED)
 void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) {
     if (error) {
@@ -395,7 +396,7 @@ void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, co
 
 void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* userData) const {
     if (!success) {
-        pTrayManager->trayIcon()->showMessage(tr("Failed to send file"), errorMsg, QSystemTrayIcon::MessageIcon::Critical, 5000);
+        pNotificationsManager->showErrorNotification(tr("Failed to send file"), errorMsg);
     }
 
     if (userData == nullptr) {
@@ -403,9 +404,10 @@ void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* u
     }
 
     auto userDataStr = static_cast<QString*>(userData);
-    pTrayManager->trayIcon()->showMessage(tr("File sent"), *userDataStr, QSystemTrayIcon::MessageIcon::Information, 5000);
+    QFileInfo fileInfo(*userDataStr);
+    pNotificationsManager->showFileNotification(tr("File sent"),
+        tr("The file %1 has been sent!").arg(*userDataStr), fileInfo);
 
-    // We need to delete this here
     delete userDataStr;
 }
 
@@ -419,17 +421,15 @@ void MainWindow::startListeningForIncomingFiles() {
 
     connect(pFileReceiver.get(), &TailFileReceiver::errorListening,
         this, [this](const QString& errorMsg) {
-            pTrayManager->trayIcon()->showMessage(tr("Error"), errorMsg,
-                QSystemTrayIcon::MessageIcon::Critical, 5000);
+            pNotificationsManager->showErrorNotification(tr("Error"), errorMsg);
         });
 }
 
 void MainWindow::onTailnetFileReceived(QString filePath) const {
     const QFileInfo file(filePath);
-    const QString msg("File " + file.fileName() + " was received and saved in " + file.absolutePath());
-
-    pTrayManager->trayIcon()->showMessage(tr("File received"), msg,
-        QSystemTrayIcon::MessageIcon::Information, 8000);
+    pNotificationsManager->showFileNotification(tr("File received"),
+        tr("File %1 has been saved in %2").arg(file.fileName()).arg(file.absolutePath()),
+            file);
 }
 
 void MainWindow::onShowTailFileSaveLocationPicker() {
@@ -565,7 +565,7 @@ void MainWindow::showWarningMessage(const QString& title, const QString& message
         }
     }
 
-    pTrayManager->trayIcon()->showMessage(title, message, QSystemTrayIcon::MessageIcon::Warning, 5000);
+    pNotificationsManager->showWarningNotification(title, message);
 }
 
 void MainWindow::showErrorMessage(const QString& title, const QString& message, bool timeLimited) {
@@ -583,7 +583,7 @@ void MainWindow::showErrorMessage(const QString& title, const QString& message, 
         }
     }
 
-    pTrayManager->trayIcon()->showMessage(title, message, QSystemTrayIcon::MessageIcon::Critical, 5000);
+    pNotificationsManager->showErrorNotification(title, message);
 }
 
 bool MainWindow::isTailDriveFileAlreadySetup() {

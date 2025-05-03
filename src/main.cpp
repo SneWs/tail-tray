@@ -9,7 +9,7 @@
 int main(int argc, char** argv) {
     QCoreApplication::setOrganizationName("grenangen");
     QCoreApplication::setOrganizationDomain("grenangen.se");
-    QCoreApplication::setApplicationName("Tail Tray");
+    QCoreApplication::setApplicationName("tail-tray");
 
     SingleApplicationImpl a(argc, argv);
     if (!a.claimInstance()) {

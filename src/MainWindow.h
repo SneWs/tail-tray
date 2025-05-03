@@ -17,6 +17,7 @@
 #include "IpnWatcher.h"
 #include "models/TailStatus.h"
 #include "PleaseWaitDlg.h"
+#include "NotificationsManager.h"
 
 #if defined(DAVFS_ENABLED)
 #include "TailDriveUiManager.h"
@@ -56,6 +57,7 @@ private:
 #if defined(DAVFS_ENABLED)
     std::unique_ptr<TailDriveUiManager> pTailDriveUiManager;
 #endif
+    std::unique_ptr<NotificationsManager> pNotificationsManager;
 
     TailState eCurrentState;
     TailSettings settings;
@@ -73,6 +75,7 @@ private slots:
     void loginFlowStarting(const QString& loginUrl);
     void loginFlowCompleted(bool success = true);
     void onIpnEvent(const IpnEventData& eventData);
+    void ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname);
 
 #if defined(DAVFS_ENABLED)
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);

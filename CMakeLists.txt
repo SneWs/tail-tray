@@ -31,56 +31,74 @@ message(STATUS "Full path of translations install path: ${FULL_LIBDIR_PATH}")
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
 
+# Use KNotifications
+option(KNOTIFICATIONS_ENABLED "Enable KNotifications" ON)
+if (KNOTIFICATIONS_ENABLED)
+    message("KNotifications has been enabled! This requires Plasma 6")
+
+    find_package(ECM REQUIRED NO_MODULE)
+    set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+    include(KDEInstallDirs)
+    include(KDECMakeSettings)
+
+    add_definitions(-DKNOTIFICATIONS_ENABLED)
+    find_package(KF6Notifications)
+else ()
+    message("KNotifications has not been enabled!")
+endif (KNOTIFICATIONS_ENABLED)
+
 set(PROJECT_SOURCES
-        src/main.cpp
-        src/MainWindow.cpp
-        src/MainWindow.h
-        src/MainWindow.ui
-        resources.qrc
-        src/models/TailAccountInfo.h
-        src/models/TailDeviceInfo.h
-        src/models/TailUser.h
-        src/models/TailNetInfo.h
-        src/models/TailDriveInfo.h
-        src/models/TailStatus.h
-        src/models/TailState.h
-        src/models/TailDnsStatus.h
-        src/models/CurrentTailPrefs.h
-        src/models/JsonHelpers.h
-        src/models/Models.h
-        src/models/IpnEvents.h 
-        src/TrayMenuManager.cpp
-        src/TrayMenuManager.h
-        src/TailSettings.cpp
-        src/TailSettings.h
-        src/AccountsTabUiManager.cpp
-        src/AccountsTabUiManager.h
-        src/SysCommand.cpp
-        src/SysCommand.h
-        src/KnownValues.h
-        src/TailFileReceiver.cpp
-        src/TailFileReceiver.h
-        src/TailRunner.h
-        src/TailRunner.cpp
-        src/TailDriveUiManager.h
-        src/TailDriveUiManager.cpp
-        src/ManageDriveWindow.h
-        src/ManageDriveWindow.cpp
-        src/ManageDriveWindow.ui
-        src/NetworkStateMonitor.cpp
-        src/NetworkStateMonitor.h
-        src/AdvertiseRoutesDlg.h
-        src/AdvertiseRoutesDlg.cpp
-        src/AdvertiseRoutesDlg.ui
-        src/DnsSettingsDlg.h
-        src/DnsSettingsDlg.cpp
-        src/DnsSettingsDlg.ui
-        src/IpnWatcher.cpp
-        src/IpnWatcher.h
-        src/SingleApplicationImpl.h
-        src/PleaseWaitDlg.h
-        src/PleaseWaitDlg.cpp
-        src/PleaseWaitDlg.ui
+    src/main.cpp
+    src/MainWindow.cpp
+    src/MainWindow.h
+    src/MainWindow.ui
+    resources.qrc
+    src/models/TailAccountInfo.h
+    src/models/TailDeviceInfo.h
+    src/models/TailUser.h
+    src/models/TailNetInfo.h
+    src/models/TailDriveInfo.h
+    src/models/TailStatus.h
+    src/models/TailState.h
+    src/models/TailDnsStatus.h
+    src/models/CurrentTailPrefs.h
+    src/models/JsonHelpers.h
+    src/models/Models.h
+    src/models/IpnEvents.h 
+    src/TrayMenuManager.cpp
+    src/TrayMenuManager.h
+    src/TailSettings.cpp
+    src/TailSettings.h
+    src/AccountsTabUiManager.cpp
+    src/AccountsTabUiManager.h
+    src/SysCommand.cpp
+    src/SysCommand.h
+    src/KnownValues.h
+    src/TailFileReceiver.cpp
+    src/TailFileReceiver.h
+    src/TailRunner.h
+    src/TailRunner.cpp
+    src/TailDriveUiManager.h
+    src/TailDriveUiManager.cpp
+    src/ManageDriveWindow.h
+    src/ManageDriveWindow.cpp
+    src/ManageDriveWindow.ui
+    src/NetworkStateMonitor.cpp
+    src/NetworkStateMonitor.h
+    src/AdvertiseRoutesDlg.h
+    src/AdvertiseRoutesDlg.cpp
+    src/AdvertiseRoutesDlg.ui
+    src/DnsSettingsDlg.h
+    src/DnsSettingsDlg.cpp
+    src/DnsSettingsDlg.ui
+    src/IpnWatcher.cpp
+    src/IpnWatcher.h
+    src/SingleApplicationImpl.h
+    src/PleaseWaitDlg.h
+    src/PleaseWaitDlg.cpp
+    src/PleaseWaitDlg.ui
+    src/NotificationsManager.h
+    src/NotificationsManager.cpp
 )
 
 if (APPLE)
@@ -128,7 +146,18 @@ qt_add_translations(tail-tray TS_FILES
 )
 qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
-target_link_libraries(tail-tray PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
+target_link_libraries(
+    tail-tray PRIVATE 
+    Qt${QT_VERSION_MAJOR}::Widgets 
+    Qt${QT_VERSION_MAJOR}::Network 
+)
+
+if (KNOTIFICATIONS_ENABLED)
+    target_link_libraries(
+        tail-tray PRIVATE 
+        KF6::Notifications
+    )
+endif (KNOTIFICATIONS_ENABLED)
 
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
 
@@ -151,6 +180,10 @@ if (UNIX AND NOT APPLE)
     install(FILES tail-tray.desktop
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
     )
+
+if (KNOTIFICATIONS_ENABLED)
+    install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
+endif (KNOTIFICATIONS_ENABLED)
 
     install(FILES "${CMAKE_BINARY_DIR}/tail_tray_en_US.qm"
             "${CMAKE_BINARY_DIR}/tail_tray_sv_SE.qm"

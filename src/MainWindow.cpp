@@ -32,6 +32,9 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
+    accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
+    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
+    pNotificationsManager = std::make_unique<NotificationsManager>(pTrayManager.get(), this);
 
     // Remove the tail drive tab by default
     ui->tabWidget->removeTab(2);
@@ -73,9 +76,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnAdvertiseRoutes, &QPushButton::clicked, this, &MainWindow::showAdvertiseRoutesDialog);
     connect(ui->btnTailscaleDnsSettings, &QPushButton::clicked, this, &MainWindow::showDnsSettingsDialog);
 
-    accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
-    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
-    pNotificationsManager = std::make_unique<NotificationsManager>(pTrayManager.get(), this);
+    connect(pTrayManager.get(), &TrayMenuManager::ipAddressCopiedToClipboard, this, &MainWindow::ipAddressCopiedToClipboard);
 
     changeToState(TailState::NotLoggedIn);
 
@@ -360,6 +361,11 @@ void MainWindow::onIpnEvent(const IpnEventData& eventData) {
     pCurrentExecution->bootstrap();
 }
 
+void MainWindow::ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname) {
+        pNotificationsManager->showNotification(tr("IP address copied"),
+            "IP Address " + ipAddress + " for " + hostname + " have been copied to clipboard!");
+}
+
 #if defined(DAVFS_ENABLED)
 void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) {
     if (error) {
@@ -398,8 +404,9 @@ void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* u
     }
 
     auto userDataStr = static_cast<QString*>(userData);
-    pNotificationsManager->showNotification(tr("File sent"),
-        tr("The file %1 has been sent!").arg(*userDataStr));
+    QFileInfo fileInfo(*userDataStr);
+    pNotificationsManager->showFileNotification(tr("File sent"),
+        tr("The file %1 has been sent!").arg(*userDataStr), fileInfo);
 
     delete userDataStr;
 }

@@ -20,8 +20,8 @@ public:
     void showFileNotification(const QString& title, const QString& message, const QFileInfo& fileInfo,
         const QString& iconName = QString());
 
-    void showWarningNotification(const QString& title, const QString& message, const QString& iconName = QString());
-    void showErrorNotification(const QString& title, const QString& message, const QString& iconName = QString());
+    void showWarningNotification(const QString& title, const QString& message, const QString& iconName = QString("dialog-warning"));
+    void showErrorNotification(const QString& title, const QString& message, const QString& iconName = QString("dialog-error"));
 
 private:
     TrayMenuManager const* m_pTrayMgr;

@@ -75,6 +75,7 @@ private slots:
     void loginFlowStarting(const QString& loginUrl);
     void loginFlowCompleted(bool success = true);
     void onIpnEvent(const IpnEventData& eventData);
+    void ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname);
 
 #if defined(DAVFS_ENABLED)
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);

@@ -74,26 +74,26 @@ jobs:
         DEB_BUILD_OPTIONS: noautodbgsym
       with:
         artifacts-dir: build
-        docker-image: ubuntu:24.04
+        docker-image: kdeneon/plasma:user
         extra-build-deps: devscripts git
         before-build-hook: |
           git checkout debian/changelog
-          debchange --controlmaint --local="ubuntu-24.04-noble~git$(git rev-parse --short HEAD)" "CI build"
+          debchange --controlmaint --local="kdeneon-24.04-noble~git$(git rev-parse --short HEAD)" "CI build"
         buildpackage-opts: --build=binary --no-sign
 
-    - name: Package DEB file for Debian
-      if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
-      uses: jtdor/build-deb-action@v1
-      env:
-        DEB_BUILD_OPTIONS: noautodbgsym
-      with:
-        artifacts-dir: build
-        docker-image: debian:trixie
-        extra-build-deps: devscripts git
-        before-build-hook: |
-          git checkout debian/changelog
-          debchange --controlmaint --local="debian-trixie~git$(git rev-parse --short HEAD)" "CI build"
-        buildpackage-opts: --build=binary --no-sign
+    #- name: Package DEB file for Debian
+    #  if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
+    #  uses: jtdor/build-deb-action@v1
+    #  env:
+    #    DEB_BUILD_OPTIONS: noautodbgsym
+    #  with:
+    #    artifacts-dir: build
+    #    docker-image: debian:trixie
+    #    extra-build-deps: devscripts git
+    #    before-build-hook: |
+    #      git checkout debian/changelog
+    #      debchange --controlmaint --local="debian-trixie~git$(git rev-parse --short HEAD)" "CI build"
+    #    buildpackage-opts: --build=binary --no-sign
 
     - name: Upload DEB files
       if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
@@ -101,8 +101,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
-        mv ${{ steps.strings.outputs.build-output-dir }}/*ubuntu-24.04*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-ubuntu-24.04.deb
-        mv ${{ steps.strings.outputs.build-output-dir }}/*debian*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-debian-trixie.deb
+        mv ${{ steps.strings.outputs.build-output-dir }}/*kdeneon-24.04*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-ubuntu-24.04.deb
+        # mv ${{ steps.strings.outputs.build-output-dir }}/*debian*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-debian-trixie.deb
         gh release upload latest ${{ steps.strings.outputs.build-output-dir }}/*.deb --clobber
 
     - name: Build on Windows

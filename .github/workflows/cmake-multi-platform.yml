@@ -64,7 +64,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         echo "Building on Linux"
-        cmake --build ${{ steps.strings.outputs.build-output-dir }} -DKNOTIFICATIONS_ENABLED=OFF --config ${{ matrix.build_type }}
+        cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
       shell: bash
 
     - name: Package DEB file for Ubuntu 24.04

@@ -441,8 +441,6 @@ void TailRunner::onProcessErrorOccurred(const BufferedProcessWrapper* wrapper, Q
     if (commandInfo == Command::CheckIfInstalled) {
         emit tailscaleIsInstalled(false);
     }
-
-    runCompletedCleanup();
 }
 
 void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
@@ -528,11 +526,13 @@ bool TailRunner::hasPendingCommandOfType(const Command cmdType) const {
 
 void TailRunner::runCompletedCleanup() {
     for (auto it = processes.begin(); it != processes.end();) {
-        if (!(*it)->isRunning()) {
-            const auto cmd = commandToString((*it)->command());
+        BufferedProcessWrapper* p = (*it);
+        if (p && !p->isRunning()) {
+            const auto cmd = commandToString(p->command());
             qDebug() << "Cleaning up process " << cmd;
 
-            delete (*it);
+            delete p;
+
             it = processes.erase(it);
             qDebug() << "Processes active: " << processes.size();
         }

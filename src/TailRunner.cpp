@@ -39,37 +39,24 @@ namespace
         return "Unknown (Not mapped) command (" + QString::number(static_cast<int>(cmd)) + ")";
     }
 
+    static BufferedProcessWrapper* pActiveLoginFlow = nullptr;
 }
 
 TailRunner::TailRunner(const TailSettings& s, QObject* parent)
     : QObject(parent)
     , settings(s)
-    , processes()
     , currentPrefs()
 {
 }
 
 TailRunner::~TailRunner()
 {
-    runCompletedCleanup();
 }
 
 void TailRunner::shutdown() {
     // Kill off any pending process calls, this is needed in cases such as:
     // - When the user is in a pending login state, then the process is waiting for user to complete web auth flows
-    
-    for (const auto& proc : processes) {
-        auto* p = proc->process();
-        if (!p)
-            continue;
-
-        if (p->state() == QProcess::Running) {
-            p->terminate();
-            p->close();
-        }
-    }
-
-    runCompletedCleanup();
+    cancelLoginFlow();
 }
 
 void TailRunner::checkIfInstalled() {
@@ -199,11 +186,11 @@ void TailRunner::logout() {
 }
 
 void TailRunner::cancelLoginFlow() {
-    for (const auto& proc : processes) {
-        if (proc->command() == Command::Login) {
-            proc->cancel();
-        }
+    if (pActiveLoginFlow == nullptr) {
+        return;
     }
+
+    pActiveLoginFlow->cancel();
 }
 
 void TailRunner::start(const bool usePkExec) {
@@ -262,11 +249,16 @@ void TailRunner::sendFile(const QString& targetDevice, const QString& localFileP
 }
 
 void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QStringList& args, const bool jsonResult, const bool usePkExec, void* userData) {
-    if (hasPendingCommandOfType(cmdType))
+    auto isLoginCmd = cmdType == Command::Login;
+    if (isLoginCmd && pActiveLoginFlow != nullptr) {
+        // Already in a login flow...
         return;
+    }
 
-    auto wrapper = new BufferedProcessWrapper(cmdType, cmdType == Command::Login, this);
-    processes.emplace_back(wrapper);
+    auto wrapper = new BufferedProcessWrapper(cmdType, isLoginCmd, this);
+    if (isLoginCmd) {
+        pActiveLoginFlow = wrapper;
+    }
 
     connect(wrapper, &BufferedProcessWrapper::processErrorOccurred,
         this, &TailRunner::onProcessErrorOccurred);
@@ -283,7 +275,7 @@ void TailRunner::runCommand(const Command cmdType, const QString& cmd, const QSt
     wrapper->start(cmd, args, jsonResult, usePkExec, userData);
 }
 
-void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
+void TailRunner::onProcessCanReadStdOut(BufferedProcessWrapper* wrapper) {
     const auto data = wrapper->process()->readAllStandardOutput();
 
     // Parse the status object
@@ -372,7 +364,7 @@ void TailRunner::onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper) {
     }
 }
 
-void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wrapper) {
+void TailRunner::onProcessCanReadStandardError(BufferedProcessWrapper* wrapper) {
     const auto commandInfo = wrapper->command();
 
     // NOTE! For whatever reason, the login command output is not captured by the readyReadStandardOutput signal
@@ -433,7 +425,7 @@ void TailRunner::onProcessCanReadStandardError(const BufferedProcessWrapper* wra
     }
 }
 
-void TailRunner::onProcessErrorOccurred(const BufferedProcessWrapper* wrapper, QProcess::ProcessError error) {
+void TailRunner::onProcessErrorOccurred(BufferedProcessWrapper* wrapper, QProcess::ProcessError error) {
     const auto commandInfo = wrapper->command();
     qDebug() << "Command" << commandToString(commandInfo) << "failed to execute!";
     qDebug() << "Command error" << error;
@@ -443,10 +435,19 @@ void TailRunner::onProcessErrorOccurred(const BufferedProcessWrapper* wrapper, Q
     }
 }
 
-void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
-    //qDebug() << "Process exit code " << exitCode << " - " << exitStatus;
+void TailRunner::onProcessFinished(BufferedProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
+    qDebug() << "Process exit code " << exitCode << " - " << exitStatus;
+
+    //runCompletedCleanup();
+    process->deleteLater();
 
     const auto commandInfo = process->command();
+
+    // Reset login flow tracking ptr
+    if (commandInfo == Command::Login) {
+        pActiveLoginFlow = nullptr;
+    }
+
     if (exitCode != 0) {
         if (commandInfo == Command::Connect || commandInfo == Command::Disconnect) {
             // If we failed to connect or disconnect we probably need to invoke pkexec
@@ -503,8 +504,6 @@ void TailRunner::onProcessFinished(const BufferedProcessWrapper* process, int ex
             emit fileSent(true, QString{}, process->userData());
         }
     }
-
-    runCompletedCleanup();
 }
 
 void TailRunner::parseStatusResponse(const QJsonObject& obj) {
@@ -513,33 +512,6 @@ void TailRunner::parseStatusResponse(const QJsonObject& obj) {
 
 void TailRunner::parseSettingsResponse(const QJsonObject& obj) {
     currentPrefs = CurrentTailPrefs::parse(obj);
-}
-
-bool TailRunner::hasPendingCommandOfType(const Command cmdType) const {
-    for (const auto* process : processes) {
-        if (process->command() == cmdType && process->isRunning())
-            return true;
-    }
-
-    return false;
-}
-
-void TailRunner::runCompletedCleanup() {
-    for (auto it = processes.begin(); it != processes.end();) {
-        BufferedProcessWrapper* p = (*it);
-        if (p && !p->isRunning()) {
-            const auto cmd = commandToString(p->command());
-            qDebug() << "Cleaning up process " << cmd;
-
-            delete p;
-
-            it = processes.erase(it);
-            qDebug() << "Processes active: " << processes.size();
-        }
-        else {
-            ++it;
-        }
-    }
 }
 
 

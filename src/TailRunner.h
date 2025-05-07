@@ -39,6 +39,7 @@ class BufferedProcessWrapper : public QObject
     Q_OBJECT
 public:
     explicit BufferedProcessWrapper(Command cmd, bool emitOnActualSignals = false, QObject* parent = nullptr);
+    ~BufferedProcessWrapper() = default;
 
     /// Start the process with the given command and arguments
     void start(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec, void* userData);
@@ -46,7 +47,7 @@ public:
     [[nodiscard]] QProcess* process() const { return proc.get();}
     [[nodiscard]] Command command() const { return eCommand; }
     [[nodiscard]] void* userData() const { return pUserData; }
-    [[nodiscard]] bool isRunning() const { return proc != nullptr && proc->state() != QProcess::NotRunning; }
+    [[nodiscard]] bool isRunning() const { return proc != nullptr && proc->state() == QProcess::Running; }
     void cancel(bool raiseEvents = true) {
         if (proc != nullptr) {
             proc->terminate();
@@ -58,7 +59,7 @@ public:
     }
 
 signals:
-    void processErrorOccurred(const BufferedProcessWrapper* wrapper, QProcess::ProcessError error);
+    void processErrorOccurred(BufferedProcessWrapper* wrapper, QProcess::ProcessError error);
     void processCanReadStdOut(BufferedProcessWrapper* process);
     void processCanReadStandardError(BufferedProcessWrapper* process);
     void processFinished(BufferedProcessWrapper* process, int exitCode, QProcess::ExitStatus exitStatus);
@@ -120,7 +121,6 @@ public:
 private:
     const TailSettings& settings;
     CurrentTailPrefs currentPrefs;
-    std::vector<BufferedProcessWrapper*> processes;
 
 signals:
     void tailscaleIsInstalled(bool installed);
@@ -140,14 +140,11 @@ private:
     void parseStatusResponse(const QJsonObject& obj);
     void parseSettingsResponse(const QJsonObject& obj);
 
-    [[nodiscard]] bool hasPendingCommandOfType(Command cmdType) const;
-    void runCompletedCleanup();
-
 private slots:
-    void onProcessErrorOccurred(const BufferedProcessWrapper* wrapper, QProcess::ProcessError error);
-    void onProcessCanReadStdOut(const BufferedProcessWrapper* wrapper);
-    void onProcessCanReadStandardError(const BufferedProcessWrapper* wrapper);
-    void onProcessFinished(const BufferedProcessWrapper* wrapper, int exitCode, QProcess::ExitStatus exitStatus);
+    void onProcessErrorOccurred(BufferedProcessWrapper* wrapper, QProcess::ProcessError error);
+    void onProcessCanReadStdOut(BufferedProcessWrapper* wrapper);
+    void onProcessCanReadStandardError(BufferedProcessWrapper* wrapper);
+    void onProcessFinished(BufferedProcessWrapper* wrapper, int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 #endif // TAILRUNNER_H

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
@@ -158,6 +159,13 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
     auto* netDevs = pTrayMenu->addMenu(tr("Network devices"));
     disposableMenus.push_back(netDevs);
     for (const auto& dev : pTailStatus.peers) {
+
+        // We do not want to show mullvad nodes in the network devices list at all.
+        // TODO: Do we want a setting for showing them in a separate menu or something?
+        if (dev.isMullvadExitNode()) {
+            continue;
+        }
+
         if (dev.id != pTailStatus.self.id) {
             auto name = dev.getShortDnsName();
             QAction* action;
@@ -314,16 +322,36 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
         pTrayMenu->addSeparator()
     );
 
+    // See if we have any Mullvad devices
+    QMenu* mullvadDevices = nullptr;
+    auto hasMullvadDevices = std::find_if(pTailStatus.peers.begin(), pTailStatus.peers.end(), [](const TailDeviceInfo& dev) {
+        return dev.isMullvadExitNode();
+    });
+
     auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
     disposableMenus.push_back(exitNodes);
+
+    if (hasMullvadDevices) {
+        mullvadDevices = exitNodes->addMenu(tr("Mullvad devices"));
+    }
+
     exitNodes->addAction(pExitNodeNone.get());
     for (int i = 0; i < pTailStatus.peers.size(); i++) {
         const auto& dev = pTailStatus.peers[i];
         if (dev.id != pTailStatus.self.id && dev.exitNodeOption) {
             auto name = dev.getShortDnsName();
-            if (!dev.online)
+            if (!dev.online) {
                 name += tr(" (offline)");
-            auto* action = exitNodes->addAction(name);
+            }
+
+            QAction* action;
+            if (mullvadDevices != nullptr) {
+                action = mullvadDevices->addAction(name);
+            }
+            else {
+                action = exitNodes->addAction(name);
+            }
+
             disposableConnectedMenuActions.push_back(action);
 
             action->setCheckable(true);

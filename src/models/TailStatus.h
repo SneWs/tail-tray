@@ -35,7 +35,7 @@ public:
     QList<QString> health{};
     QList<QString> certDomains{};
     QList<TailDriveInfo> drives{};
-    std::vector<TailDeviceInfo> peers{};
+    QList<TailDeviceInfo> peers{};
     bool tun{};
     bool haveNodeKey{};
     bool drivesConfigured = true;

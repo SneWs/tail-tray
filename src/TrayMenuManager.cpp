@@ -339,16 +339,17 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
     for (int i = 0; i < pTailStatus.peers.size(); i++) {
         const auto& dev = pTailStatus.peers[i];
         if (dev.id != pTailStatus.self.id && dev.exitNodeOption) {
-            auto name = dev.getShortDnsName();
-            if (!dev.online) {
-                name += tr(" (offline)");
-            }
-
             QAction* action;
             if (mullvadDevices != nullptr) {
+                auto name = dev.location.country + " " + dev.location.city;
                 action = mullvadDevices->addAction(name);
             }
             else {
+                auto name = dev.getShortDnsName();
+                if (!dev.online) {
+                    name += tr(" (offline)");
+                }
+
                 action = exitNodes->addAction(name);
             }
 

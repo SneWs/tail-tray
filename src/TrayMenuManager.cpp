@@ -331,7 +331,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
     auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
     disposableMenus.push_back(exitNodes);
 
-    if (hasMullvadDevices) {
+    if (hasMullvadDevices != pTailStatus.peers.end()) {
         mullvadDevices = exitNodes->addMenu(tr("Mullvad devices"));
     }
 
@@ -340,12 +340,11 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
         const auto& dev = pTailStatus.peers[i];
         if (dev.id != pTailStatus.self.id && dev.exitNodeOption) {
             QAction* action;
+            auto name = dev.getShortDnsName();
             if (mullvadDevices != nullptr) {
-                auto name = dev.location.country + " " + dev.location.city;
-                action = mullvadDevices->addAction(name);
+                action = mullvadDevices->addAction(dev.location.country + " " + dev.location.city);
             }
             else {
-                auto name = dev.getShortDnsName();
                 if (!dev.online) {
                     name += tr(" (offline)");
                 }

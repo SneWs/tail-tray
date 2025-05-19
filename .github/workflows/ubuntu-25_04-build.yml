@@ -44,8 +44,8 @@ jobs:
             cmake -B ${{ steps.strings.outputs.build-output-dir }} \
               -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
               -DKNOTIFICATIONS_ENABLED=ON \
-              -S ${{ github.workspace }} \
-              -G "Unix Makefiles" # Use Unix Makefiles for Ubuntu
+              -S /__w/tail-tray/tail-tray \
+              -G "Unix Makefiles"
             
             debchange --controlmaint --local="ubuntu-25.04-plucky~git$(git rev-parse --short HEAD)" "CI build"
             buildpackage-opts: --build=binary --no-sign

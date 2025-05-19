@@ -34,7 +34,7 @@ jobs:
         with:
           artifacts-dir: build
           docker-image: debian:trixie
-          extra-build-deps: devscripts git
+          extra-build-deps: devscripts git extra-cmake-modules qt6-tools-dev qt6-tools-dev-tools davfs2
           buildpackage-opts: --build=binary --no-sign
           before-build-hook: |
             git checkout debian/changelog

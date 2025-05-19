@@ -45,6 +45,12 @@ jobs:
               -G "Unix Makefiles"
             debchange --controlmaint --local="debian-trixie~git$(git rev-parse --short HEAD)" "CI build"
 
+      - name: Fix permissions on build output
+        if: github.ref == 'refs/heads/master'
+        shell: bash
+        run: |
+          sudo chown -R $USER:$USER ${{ steps.strings.outputs.build-output-dir }}
+
       - name: Upload DEB files
         if: github.ref == 'refs/heads/master'
         env:

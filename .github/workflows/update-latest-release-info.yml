@@ -1,0 +1,47 @@
+name: CMake on Ubuntu and Windows
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        build_type: [Release]
+
+    steps:
+    - name: Get Latest Commit Messages
+      if: github.ref == 'refs/heads/master'
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "🚀 Configuring Git user for pushing tags"
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+        echo "✅ Generating changelog..."
+        echo "This is the latest known good build from master, use at your own discression!" > changelog.txt
+        echo "### Latest Changes" >> changelog.txt
+
+        git fetch --tags --force
+
+        # Generate the changelog from the previous tag to HEAD
+        git log latest..HEAD --pretty=format:"* %h - %s" >> changelog.txt
+        echo "" >> changelog.txt
+        echo "✅ Changelog generated:"
+        cat changelog.txt
+
+        # Force-update `latest` as an annotated tag
+        git tag -fa latest -m "GitHub Actions - Latest"
+        git push origin latest --force
+
+        # Update the GitHub release
+        echo "Updating latest release"
+        gh release edit latest --notes-file changelog.txt --repo ${{ github.repository }}
+        
+        echo "🚀 Changelog updated in the latest release"

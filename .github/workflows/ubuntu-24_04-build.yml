@@ -1,4 +1,4 @@
-name: Build Deb for Ubuntu 25.04
+name: Build Deb for Ubuntu 24.04
 
 on:
   push:

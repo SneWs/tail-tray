@@ -1,4 +1,4 @@
-name: CMake on Ubuntu and Windows
+name: Update Release notes for latest Development Build
 
 on:
   push:

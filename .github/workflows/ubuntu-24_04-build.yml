@@ -1,0 +1,61 @@
+name: Build Deb for Ubuntu 24.04
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        build_type: [Release]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+      - name: Package DEB file for Ubuntu 24.04
+        uses: jtdor/build-deb-action@v1
+        env:
+          DEB_BUILD_OPTIONS: noautodbgsym
+        with:
+          artifacts-dir: build
+          docker-image: ubuntu:24.04
+          extra-build-deps: devscripts git
+          buildpackage-opts: --build=binary --no-sign
+          before-build-hook: |
+            git checkout debian/changelog
+            cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+              -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+              -DKNOTIFICATIONS_ENABLED=OFF \
+              -S /github/workspace \
+              -G "Unix Makefiles"
+            
+            debchange --controlmaint --local="ubuntu-24.04-noble~git$(git rev-parse --short HEAD)" "CI build"
+            
+      - name: Fix permissions on build output
+        if: github.ref == 'refs/heads/master'
+        shell: bash
+        run: |
+          sudo chown -R $USER:$USER ${{ steps.strings.outputs.build-output-dir }}
+      
+      - name: Upload DEB files
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          mv ${{ steps.strings.outputs.build-output-dir }}/*ubuntu-24.04*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-ubuntu-24.04.deb
+          gh release upload latest ${{ steps.strings.outputs.build-output-dir }}/*.deb --clobber

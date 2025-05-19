@@ -1,0 +1,98 @@
+name: Build Windows - Latest
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        build_type: [Release]
+
+    steps:
+    - name: Install Qt - Windows
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.2'
+        target: 'desktop'
+        set-env: 'true'
+
+    - uses: actions/checkout@v4
+
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: Configure CMake Windows
+      run: |
+        echo "Running Windows build"
+        echo "Build output directory: ${{ steps.strings.outputs.build-output-dir }}" 
+        cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DKNOTIFICATIONS_ENABLED=OFF -S ${{ github.workspace }} -G "Visual Studio 17 2022"
+      shell: pwsh
+
+    - name: Build on Windows
+      run: |
+        echo "Building with Visual Studio"
+        cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+      shell: pwsh
+
+    - name: Package Windows Build
+      if: github.ref == 'refs/heads/master'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: pwsh
+      run: |
+        # Define paths
+        $BUILD_DIR = "${{ steps.strings.outputs.build-output-dir }}"
+        $INSTALLER_DIR = "$BUILD_DIR/installer"
+        $EXECUTABLE_PATH = "$BUILD_DIR/${{matrix.build_type}}/tail-tray.exe"
+
+        # Create installer directory if it doesn't exist
+        mkdir -p $INSTALLER_DIR
+
+        # Copy the executable to the installer directory
+        if (Test-Path $EXECUTABLE_PATH) {
+            Copy-Item -Path $EXECUTABLE_PATH -Destination $INSTALLER_DIR
+        } else {
+            Write-Host "ERROR: tail-tray.exe not found in $EXECUTABLE_PATH!"
+            exit 1
+        }
+
+        # Run windeployqt to copy necessary Qt DLLs
+        windeployqt --release --dir $INSTALLER_DIR $INSTALLER_DIR/tail-tray.exe
+
+        # Verify that tail-tray.exe exists in the installer folder
+        if (!(Test-Path "$INSTALLER_DIR/tail-tray.exe")) {
+            Write-Host "ERROR: tail-tray.exe is missing from the installer folder!"
+            exit 1
+        }
+
+        # Use 7z to create a proper ZIP file including all subdirectories
+        choco install -y 7zip
+
+        7z a -r "$BUILD_DIR/Tail-Tray-Windows.zip" "$INSTALLER_DIR/*"
+
+        # Verify that the zip file was created
+        if (!(Test-Path "$BUILD_DIR/Tail-Tray-Windows.zip")) {
+            Write-Host "ERROR: Tail-Tray-Windows.zip was not created!"
+            exit 1
+        }
+        
+        # And attach the file
+        gh release upload latest "$BUILD_DIR/Tail-Tray-Windows.zip" --clobber
+
+    - name: Upload Windows Build Artifact
+      if: github.ref == 'refs/heads/master'
+      uses: actions/upload-artifact@v4
+      with:
+        name: Tail-Tray-Windows
+        path: "${{ steps.strings.outputs.build-output-dir }}/installer"

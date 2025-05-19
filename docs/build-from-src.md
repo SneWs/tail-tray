@@ -3,17 +3,19 @@
    * Git, QT 6, cmake and a c++ compiler, for example:
       * On Ubuntu and Ubuntu based distros
          ```bash
-         sudo apt install git qt6-tools-dev qt6-tools-dev-tools g++ clang cmake davfs2 extra-cmake-modules
+         sudo apt install git qt6-tools-dev qt6-tools-dev-tools g++ clang cmake davfs2 extra-cmake-modules 
          ```
+         **NOTE**:
+         If you want to enable rich notifications, you also need to install `libkf6notifications-dev` and be on Ubuntu 25.04 or newer
      * On Fedora
         ```bash
-        sudo dnf install -y git g++ clang cmake qt6-qtbase-devel qt6-qttools-devel qt6-qtbase-private-devel davfs2 extra-cmake-modules
+        sudo dnf install -y git g++ clang cmake qt6-qtbase-devel qt6-qttools-devel qt6-qtbase-private-devel davfs2 extra-cmake-modules kf6-knotifications-devel
         ```
       * On Arch Linux
         * You can use the AUR package from here https://aur.archlinux.org/packages/tail-tray-git provided by @HeavenVolkoff
         * or, build it from source yourself:
          ```bash
-         sudo pacman -S git clang cmake qt6-base qt6-tools extra-cmake-modules
+         sudo pacman -S git clang cmake qt6-base qt6-tools extra-cmake-modules knotifications 
          ```
         ```bash 
         # For davfs2 we need to use the AUR

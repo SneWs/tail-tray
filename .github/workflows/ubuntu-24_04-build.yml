@@ -17,12 +17,14 @@ jobs:
         build_type: [Release]
 
     steps:
+      - uses: actions/checkout@v4
+      
       - name: Set reusable strings
         id: strings
         shell: bash
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-      
+
       - name: Run CMake
         if: runner.os == 'Linux'
         run: |
@@ -33,7 +35,7 @@ jobs:
             -S ${{ github.workspace }} \
             -G "Unix Makefiles" # Use Unix Makefiles for Ubuntu
         shell: bash
-        
+
       - name: Package DEB file for Ubuntu 24.04
         uses: jtdor/build-deb-action@v1
         env:

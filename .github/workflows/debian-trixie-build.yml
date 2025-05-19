@@ -17,6 +17,8 @@ jobs:
         build_type: [Release]
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set reusable strings
         id: strings
         shell: bash

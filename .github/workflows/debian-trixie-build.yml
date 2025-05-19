@@ -23,6 +23,17 @@ jobs:
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+      - name: Run CMake
+        if: runner.os == 'Linux'
+        run: |
+          echo "Running Linux build"
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DKNOTIFICATIONS_ENABLED=OFF \
+            -S ${{ github.workspace }} \
+            -G "Unix Makefiles" # Use Unix Makefiles for Ubuntu
+        shell: bash
+
       - name: Package DEB file for Debian
         if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
         uses: jtdor/build-deb-action@v1

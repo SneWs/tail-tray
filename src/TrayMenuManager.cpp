@@ -322,36 +322,26 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
         pTrayMenu->addSeparator()
     );
 
-    // See if we have any Mullvad devices
-    QMenu* mullvadDevices = nullptr;
-    auto hasMullvadDevices = std::find_if(pTailStatus.peers.begin(), pTailStatus.peers.end(), [](const TailDeviceInfo& dev) {
-        return dev.isMullvadExitNode();
-    });
-
     auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
     disposableMenus.push_back(exitNodes);
 
-    if (hasMullvadDevices != pTailStatus.peers.end()) {
-        mullvadDevices = exitNodes->addMenu(tr("Mullvad devices"));
-    }
-
     exitNodes->addAction(pExitNodeNone.get());
+
+    bool hasMullvadNodes = false;
     for (int i = 0; i < pTailStatus.peers.size(); i++) {
         const auto& dev = pTailStatus.peers[i];
         if (dev.id != pTailStatus.self.id && dev.exitNodeOption) {
-            QAction* action;
+            if (!hasMullvadNodes && dev.isMullvadExitNode()) {
+                hasMullvadNodes = true;
+                continue;
+            }
+            
             auto name = dev.getShortDnsName();
-            if (mullvadDevices != nullptr) {
-                action = mullvadDevices->addAction(dev.location.country + " " + dev.location.city);
+            if (!dev.online) {
+                name += tr(" (offline)");
             }
-            else {
-                if (!dev.online) {
-                    name += tr(" (offline)");
-                }
-
-                action = exitNodes->addAction(name);
-            }
-
+            
+            auto* action = exitNodes->addAction(name);
             disposableConnectedMenuActions.push_back(action);
 
             action->setCheckable(true);
@@ -381,6 +371,75 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
             });
         }
     }
+
+    if (hasMullvadNodes) {
+        disposableConnectedMenuActions.push_back(
+            exitNodes->addSeparator()
+        );
+
+        QMap<QString, QMenu*> exitNodesByCountry{};
+
+        auto* action = exitNodes->addMenu(tr("Mullvad Exit Nodes"));
+        disposableMenus.push_back(action);
+
+        for (int i = 0; i < pTailStatus.peers.size(); i++) {
+            const auto& dev = pTailStatus.peers[i];
+            if (!dev.isMullvadExitNode()) {
+                continue;
+            }
+
+            auto country = dev.location.country;
+            if (country.isEmpty()) {
+                country = tr("Unknown");
+            }
+
+            QMenu* countryMenu;
+            if (!exitNodesByCountry.contains(country)) {
+                countryMenu = action->addMenu(country);
+                disposableMenus.push_back(countryMenu);
+
+                exitNodesByCountry.insert(country, countryMenu);
+            }
+            else {
+                countryMenu = exitNodesByCountry[country];
+            }
+
+            auto city = dev.location.city;
+            if (city.isEmpty()) {
+                city = tr("Unknown");
+            }
+            
+            auto* action = countryMenu->addAction(city + " (" + dev.getShortDnsName() + ")");
+            disposableConnectedMenuActions.push_back(action);
+
+            action->setCheckable(true);
+            action->setChecked(dev.exitNode);
+            action->setData(dev.getShortDnsName());
+
+            if (dev.exitNode) {
+                pExitNodeNone->setChecked(false);
+                pExitNodeNone->setEnabled(true);
+            }
+
+            // Only enable if online
+            action->setEnabled(dev.online);
+
+            connect(action, &QAction::triggered, this, [this, action](bool) {
+                auto devName = QString{};
+
+                bool isChecked = action->isChecked();
+                pExitNodeNone->setChecked(!isChecked);
+
+                if (isChecked) {
+                    devName = action->data().toString();
+                }
+
+                pExitNodeNone->setChecked(devName.isEmpty());
+                pTailRunner->setExitNode(devName);
+            });
+        }
+    }
+
     disposableConnectedMenuActions.push_back(
         exitNodes->addSeparator()
     );

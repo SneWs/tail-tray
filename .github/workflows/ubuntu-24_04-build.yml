@@ -33,15 +33,17 @@ jobs:
           artifacts-dir: build
           docker-image: ubuntu:24.04
           extra-build-deps: devscripts git
+          buildpackage-opts: --build=binary --no-sign
           before-build-hook: |
             git checkout debian/changelog
             cmake -B ${{ steps.strings.outputs.build-output-dir }} \
               -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
               -DKNOTIFICATIONS_ENABLED=OFF \
-              -S ${{ github.workspace }} \
-              -G "Unix Makefiles" # Use Unix Makefiles for Ubuntu
+              -S /github/workspace \
+              -G "Unix Makefiles"
+            
             debchange --controlmaint --local="ubuntu-24.04-noble~git$(git rev-parse --short HEAD)" "CI build"
-            buildpackage-opts: --build=binary --no-sign
+            
 
       - name: Upload DEB files
         if: github.ref == 'refs/heads/master'

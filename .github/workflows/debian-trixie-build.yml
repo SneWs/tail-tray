@@ -1,4 +1,4 @@
-name: Build Deb Debian Trixie
+name: Build Debian Trixie - Deb
 
 on:
   push:
@@ -27,7 +27,6 @@ jobs:
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
       - name: Package DEB file for Debian
-        if: runner.os == 'Linux' && (github.ref == 'refs/heads/master')
         uses: jtdor/build-deb-action@v1
         env:
           DEB_BUILD_OPTIONS: noautodbgsym

@@ -32,7 +32,7 @@ jobs:
         with:
           artifacts-dir: build
           docker-image: ubuntu:25.04
-          extra-build-deps: devscripts git ibkf6notifications-dev
+          extra-build-deps: devscripts git libkf6notifications-dev
           before-build-hook: |
             git checkout debian/changelog
             cmake -B ${{ steps.strings.outputs.build-output-dir }} \

@@ -25,6 +25,14 @@ jobs:
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+      - name: Install Qt - Linux
+        if: runner.os == 'Linux'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.4.2'
+          target: 'desktop'
+          set-env: 'true'
+
       - name: Run CMake
         if: runner.os == 'Linux'
         run: |

@@ -25,25 +25,6 @@ jobs:
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-      - name: Install Qt - Linux
-        if: runner.os == 'Linux'
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.4.2'
-          target: 'desktop'
-          set-env: 'true'
-
-      - name: Run CMake
-        if: runner.os == 'Linux'
-        run: |
-          echo "Running Linux build"
-          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DKNOTIFICATIONS_ENABLED=OFF \
-            -S ${{ github.workspace }} \
-            -G "Unix Makefiles" # Use Unix Makefiles for Ubuntu
-        shell: bash
-
       - name: Package DEB file for Ubuntu 24.04
         uses: jtdor/build-deb-action@v1
         env:
@@ -54,6 +35,11 @@ jobs:
           extra-build-deps: devscripts git
           before-build-hook: |
             git checkout debian/changelog
+            cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+              -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+              -DKNOTIFICATIONS_ENABLED=OFF \
+              -S ${{ github.workspace }} \
+              -G "Unix Makefiles" # Use Unix Makefiles for Ubuntu
             debchange --controlmaint --local="ubuntu-24.04-noble~git$(git rev-parse --short HEAD)" "CI build"
             buildpackage-opts: --build=binary --no-sign
 

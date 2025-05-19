@@ -39,16 +39,16 @@ jobs:
           artifacts-dir: build
           docker-image: ubuntu:25.04
           extra-build-deps: devscripts git libkf6notifications-dev
+          buildpackage-opts: --build=binary --no-sign
           before-build-hook: |
             git checkout debian/changelog
             cmake -B ${{ steps.strings.outputs.build-output-dir }} \
               -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
               -DKNOTIFICATIONS_ENABLED=ON \
-              -S /__w/tail-tray/tail-tray \
+              -S /github/workspace \
               -G "Unix Makefiles"
             
             debchange --controlmaint --local="ubuntu-25.04-plucky~git$(git rev-parse --short HEAD)" "CI build"
-            buildpackage-opts: --build=binary --no-sign
 
       - name: Upload DEB files
         if: github.ref == 'refs/heads/master'

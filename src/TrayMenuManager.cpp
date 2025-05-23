@@ -1,11 +1,9 @@
-#include <algorithm>
+#include "TrayMenuManager.h"
+
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QFileDialog>
-
-#include "TrayMenuManager.h"
-
 #include <QDir>
 
 #include "MainWindow.h"

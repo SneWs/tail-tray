@@ -46,9 +46,6 @@ jobs:
       shell: pwsh
 
     - name: Package Windows Build
-      if: github.ref == 'refs/heads/master'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: pwsh
       run: |
         # Define paths
@@ -86,8 +83,13 @@ jobs:
             Write-Host "ERROR: Tail-Tray-Windows.zip was not created!"
             exit 1
         }
-        
-        # And attach the file
+
+    - name: Upload build to GitHub Latest
+      if: github.ref == 'refs/heads/master'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: pwsh
+      run: |
         gh release upload latest "$BUILD_DIR/Tail-Tray-Windows.zip" --clobber
 
     - name: Upload Windows Build Artifact
@@ -96,5 +98,4 @@ jobs:
         name: Tail-Tray-Windows.zip
         path: "${{ steps.strings.outputs.build-output-dir }}/*.zip"
         overwrite: true
-
 

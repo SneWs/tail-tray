@@ -58,6 +58,7 @@ jobs:
           name: Ubuntu-24.04.deb
           path: ${{ steps.strings.outputs.build-output-dir }}/*.deb
           overwrite: true
+          
       
       - name: Upload DEB files for latest Release
         if: github.ref == 'refs/heads/master'

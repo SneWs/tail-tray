@@ -94,5 +94,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Tail-Tray-Windows.zip
-        path: "${{ steps.strings.outputs.build-output-dir }}/installer"
+        path: "${{ steps.strings.outputs.build-output-dir }}/*.zip"
         overwrite: true
+
+

@@ -417,7 +417,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
             action->setCheckable(true);
             action->setChecked(dev.exitNode);
-            action->setData(dev.getShortDnsName());
+            action->setData(dev.dnsName);
 
             if (dev.exitNode) {
                 pExitNodeNone->setChecked(false);

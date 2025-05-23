@@ -55,7 +55,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: Ubuntu-24.04.deb
+          name: Ubuntu-25.04.deb
           path: ${{ steps.strings.outputs.build-output-dir }}/*.deb
           overwrite: true
       

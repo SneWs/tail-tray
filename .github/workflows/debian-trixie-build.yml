@@ -54,7 +54,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: Ubuntu-24.04.deb
+          name: Debian-Trixie.deb
           path: ${{ steps.strings.outputs.build-output-dir }}/*.deb
           overwrite: true
       

@@ -186,12 +186,19 @@ public:
 
         if (obj.contains("Tags") && !obj["Tags"].isNull()) {
             for (const auto& ab : obj["Tags"].toArray()) {
-                if (ab.isNull())
+                if (ab.isNull()) {
+                    qDebug() << "Null device tag found, skipping...";
                     continue;
+                }
 
-                self.tags.emplace_back(ab.toString(""));
+                self.tags.emplace_back(ab.toString());
             }
         }
+        else {
+            qDebug() << "No tags found for device";
+        }
+
+        qDebug() << "Tags for device: " << self.tags;
 
         if (obj.contains("Location") && !obj["Location"].isNull()) {
             const auto& locationObj = obj["Location"].toObject();
@@ -202,6 +209,15 @@ public:
             self.location.latitude = jsonReadFloat(locationObj, "Latitude");
             self.location.longitude = jsonReadFloat(locationObj, "Longitude");
             self.location.priority = jsonReadInt(locationObj, "Priority");
+
+            qDebug() << "Added location info for device: " 
+                     << self.location.country
+                     << self.location.city
+                     << self.location.latitude
+                     << self.location.longitude;
+        }
+        else {
+            qDebug() << "No location data found for device";
         }
 
         return self;

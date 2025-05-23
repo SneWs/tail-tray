@@ -65,6 +65,7 @@ set(PROJECT_SOURCES
     src/models/JsonHelpers.h
     src/models/Models.h
     src/models/IpnEvents.h 
+    src/models/TailPrefsConfig.h 
     src/TrayMenuManager.cpp
     src/TrayMenuManager.h
     src/TailSettings.cpp

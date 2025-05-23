@@ -8,8 +8,6 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include <memory>
-
 #include "JsonHelpers.h"
 
 using namespace JsonHelpers;

@@ -7,9 +7,6 @@
 #include <QJsonArray>
 #include <QList>
 
-#include <memory>
-#include <vector>
-
 #include "TailDeviceInfo.h"
 #include "TailNetInfo.h"
 #include "TailUser.h"
@@ -148,46 +145,5 @@ public:
     }
 };
 
-class TailPrefsConfig final : QObject {
-    Q_OBJECT
-public:
-    QString privateNodeKey{};
-    QString oldPrivateNodeKey{};
-    TailUser user{};
-    QString networkLockKey{};
-    QString nodeID{};
-
-    TailPrefsConfig() {
-    }
-
-    TailPrefsConfig(const TailPrefsConfig& other) {
-        privateNodeKey = other.privateNodeKey;
-        oldPrivateNodeKey = other.oldPrivateNodeKey;
-        user = other.user;
-        networkLockKey = other.networkLockKey;
-        nodeID = other.nodeID;
-    }
-
-    TailPrefsConfig& operator = (const TailPrefsConfig& other) {
-        privateNodeKey = other.privateNodeKey;
-        oldPrivateNodeKey = other.oldPrivateNodeKey;
-        user = other.user;
-        networkLockKey = other.networkLockKey;
-        nodeID = other.nodeID;
-
-        return *this;
-    }
-
-    static TailPrefsConfig parse(const QJsonObject& obj) {
-        TailPrefsConfig config{};
-        config.privateNodeKey = jsonReadString(obj, "PrivateNodeKey");
-        config.oldPrivateNodeKey = jsonReadString(obj, "OldPrivateNodeKey");
-        config.networkLockKey = jsonReadString(obj, "NetworkLockKey");
-        config.nodeID = jsonReadString(obj, "NodeID");
-        config.user = TailUser::parse(obj["UserProfile"].toObject());
-        return config;
-    }
-};
-
-
 #endif // TAILSTATUS_H
+

@@ -6,8 +6,6 @@
 #include <QRegularExpression>
 #include <QString>
 
-#include <memory>
-
 
 class TailDnsStatus final : public QObject
 {

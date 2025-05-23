@@ -7,9 +7,8 @@
 #include <QJsonArray>
 #include <QList>
 
-#include <memory>
-
 #include "JsonHelpers.h"
+#include "TailPrefsConfig.h"
 
 using namespace JsonHelpers;
 

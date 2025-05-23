@@ -330,8 +330,13 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
     bool hasMullvadNodes = false;
     for (int i = 0; i < pTailStatus.peers.size(); i++) {
         const auto& dev = pTailStatus.peers[i];
-        if (dev.id != pTailStatus.self.id && dev.exitNodeOption) {
-            if (!hasMullvadNodes && dev.isMullvadExitNode()) {
+        if (dev.id == pTailStatus.self.id) {
+            // Ignore self
+            continue;
+        }
+
+        if (dev.exitNodeOption) {
+            if (dev.isMullvadExitNode()) {
                 hasMullvadNodes = true;
                 continue;
             }

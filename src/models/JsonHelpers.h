@@ -35,6 +35,16 @@ namespace JsonHelpers {
         return obj[key].toInteger();
     }
 
+    static float jsonReadFloat(const QJsonObject& obj, const QString& key) {
+        if (!obj.contains(key))
+            return 0;
+
+        if (obj[key].isNull())
+            return 0;
+
+        return static_cast<float>(obj[key].toDouble());
+    }
+
     static bool jsonReadBool(const QJsonObject& obj, const QString& key) {
         if (!obj.contains(key))
             return false;

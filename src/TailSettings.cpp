@@ -1,7 +1,3 @@
-//
-// Created by marcus on 2024-07-10.
-//
-
 #include "TailSettings.h"
 
 #include <QDir>

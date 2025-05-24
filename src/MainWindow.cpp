@@ -1,7 +1,8 @@
+#include "MainWindow.h"
+
 #include <QDir>
 #include <QFile>
 
-#include "MainWindow.h"
 #include "Paths.h"
 
 #include <QList>
@@ -11,7 +12,6 @@
 #include <memory>
 #include <QDesktopServices>
 
-#include "ManageDriveWindow.h"
 #include "KnownValues.h"
 #include "AdvertiseRoutesDlg.h"
 #include "DnsSettingsDlg.h"

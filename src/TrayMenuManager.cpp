@@ -1,6 +1,5 @@
 #include "TrayMenuManager.h"
 
-#include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -10,6 +9,8 @@
 #include "ManageDriveWindow.h"
 #include "KnownValues.h"
 
+#include <functional>
+#include <algorithm>
 
 namespace {
     static QList<QAction*> disposableConnectedMenuActions = {};
@@ -385,8 +386,15 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
         auto* action = exitNodes->addMenu(tr("Mullvad Exit Nodes"));
         disposableMenus.push_back(action);
 
-        for (int i = 0; i < pTailStatus.peers.size(); i++) {
-            const auto& dev = pTailStatus.peers[i];
+        // Sort the Mullvad exit nodes by country and city
+        auto sortedPeers = pTailStatus.peers;
+        std::sort(sortedPeers.begin(), sortedPeers.end(), [](const TailDeviceInfo& a, const TailDeviceInfo& b) {
+            return a.location.country.compare(b.location.country, Qt::CaseInsensitive) < 0 &&
+                   a.location.city.compare(b.location.city, Qt::CaseInsensitive) < 0;
+        });
+
+        for (int i = 0; i < sortedPeers.size(); i++) {
+            const auto& dev = sortedPeers[i];
             if (!dev.isMullvadExitNode()) {
                 continue;
             }

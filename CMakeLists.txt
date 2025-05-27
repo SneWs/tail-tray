@@ -198,4 +198,3 @@ endif (KNOTIFICATIONS_ENABLED)
 endif ()
 
 qt_finalize_executable(tail-tray)
-

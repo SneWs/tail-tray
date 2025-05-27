@@ -143,6 +143,31 @@ public:
 
         return newStatus;
     }
+
+    QMap<QString, QMap<QString, QList<TailDeviceInfo>>> getMullvadExitNodesByCountry() const {
+        QMap<QString, QMap<QString, QList<TailDeviceInfo>>> countryMap;
+
+        for (const auto& peer : peers) {
+            if (!peer.isMullvadExitNode()) {
+                continue;
+            }
+
+            if (!peer.hasLocationInfo()) {
+                continue; // Skip peers without location info
+            }
+
+            QString country = peer.location.country;
+            QString city = peer.location.city.isEmpty() ? "Unknown" : peer.location.city;
+
+            if (!countryMap.contains(country)) {
+                countryMap[country] = QMap<QString, QList<TailDeviceInfo>>();
+            }
+
+            countryMap[country][city].push_back(peer);
+        }
+
+        return countryMap;
+    }
 };
 
 #endif // TAILSTATUS_H

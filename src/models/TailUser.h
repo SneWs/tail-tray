@@ -8,6 +8,8 @@
 
 #include "JsonHelpers.h"
 
+using namespace JsonHelpers;
+
 class TailUser final : public QObject
 {
     Q_OBJECT

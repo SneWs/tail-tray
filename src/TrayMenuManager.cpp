@@ -381,73 +381,52 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
             exitNodes->addSeparator()
         );
 
-        QMap<QString, QMenu*> exitNodesByCountry{};
+        auto* mullvadExitNodes = exitNodes->addMenu(tr("Mullvad Exit Nodes"));
+        disposableMenus.push_back(mullvadExitNodes);
 
-        auto* action = exitNodes->addMenu(tr("Mullvad Exit Nodes"));
-        disposableMenus.push_back(action);
+        auto mapByCountryAndCity = pTailStatus.getMullvadExitNodesByCountry();
 
-        // Sort the Mullvad exit nodes by country and city
-        auto sortedPeers = pTailStatus.peers;
-        std::sort(sortedPeers.begin(), sortedPeers.end(), [](const TailDeviceInfo& a, const TailDeviceInfo& b) {
-            return a.location.country.compare(b.location.country, Qt::CaseInsensitive) < 0 &&
-                   a.location.city.compare(b.location.city, Qt::CaseInsensitive) < 0;
-        });
+        for (const auto& country : mapByCountryAndCity.keys()) {
+            const auto& countryMap = mapByCountryAndCity[country];
+            auto* countryMenu = mullvadExitNodes->addMenu(country);
+            disposableMenus.push_back(countryMenu);
 
-        for (int i = 0; i < sortedPeers.size(); i++) {
-            const auto& dev = sortedPeers[i];
-            if (!dev.isMullvadExitNode()) {
-                continue;
-            }
+            for (const auto& city : countryMap.keys()) {
+                auto cityAction = countryMenu->addAction(city);
+                disposableConnectedMenuActions.push_back(cityAction);
 
-            auto country = dev.location.country;
-            if (country.isEmpty()) {
-                country = tr("Unknown");
-            }
+                const auto& peers = countryMap[city];
+                for (const auto& peer : peers) {
+                    auto* action = countryMenu->addAction(peer.getShortDnsName());
+                    disposableConnectedMenuActions.push_back(action);
 
-            QMenu* countryMenu;
-            if (!exitNodesByCountry.contains(country)) {
-                countryMenu = action->addMenu(country);
-                disposableMenus.push_back(countryMenu);
+                    action->setCheckable(true);
+                    action->setChecked(peer.exitNode);
+                    action->setData(peer.dnsName);
 
-                exitNodesByCountry.insert(country, countryMenu);
-            }
-            else {
-                countryMenu = exitNodesByCountry[country];
-            }
+                    if (peer.exitNode) {
+                        pExitNodeNone->setChecked(false);
+                        pExitNodeNone->setEnabled(true);
+                    }
 
-            auto city = dev.location.city;
-            if (city.isEmpty()) {
-                city = tr("Unknown");
-            }
-            
-            auto* action = countryMenu->addAction(city + " (" + dev.getShortDnsName() + ")");
-            disposableConnectedMenuActions.push_back(action);
+                    // Only enable if online
+                    action->setEnabled(peer.online);
 
-            action->setCheckable(true);
-            action->setChecked(dev.exitNode);
-            action->setData(dev.dnsName);
+                    connect(action, &QAction::triggered, this, [this, action](bool) {
+                        auto devName = QString{};
 
-            if (dev.exitNode) {
-                pExitNodeNone->setChecked(false);
-                pExitNodeNone->setEnabled(true);
-            }
+                        bool isChecked = action->isChecked();
+                        pExitNodeNone->setChecked(!isChecked);
 
-            // Only enable if online
-            action->setEnabled(dev.online);
+                        if (isChecked) {
+                            devName = action->data().toString();
+                        }
 
-            connect(action, &QAction::triggered, this, [this, action](bool) {
-                auto devName = QString{};
-
-                bool isChecked = action->isChecked();
-                pExitNodeNone->setChecked(!isChecked);
-
-                if (isChecked) {
-                    devName = action->data().toString();
+                        pExitNodeNone->setChecked(devName.isEmpty());
+                        pTailRunner->setExitNode(devName);
+                    });
                 }
-
-                pExitNodeNone->setChecked(devName.isEmpty());
-                pTailRunner->setExitNode(devName);
-            });
+            }
         }
     }
 

@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#include "../src/models/Models.h"
+#include "../../src/models/Models.h"
 
 class TestTailStatus : public QObject
 {

@@ -1,7 +1,7 @@
 #include <QObject>
 #include <QTest>
 
-#include "../src/models/Models.h"
+#include "../../src/models/Models.h"
 
 class TestTailDeviceInfo : public QObject
 {

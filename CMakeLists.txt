@@ -31,6 +31,8 @@ message(STATUS "Full path of translations install path: ${FULL_LIBDIR_PATH}")
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
 
+option(BUILD_TESTS "Build tests" ON)
+
 # Use KNotifications
 option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
 if (KNOTIFICATIONS_ENABLED)
@@ -198,3 +200,8 @@ endif (KNOTIFICATIONS_ENABLED)
 endif ()
 
 qt_finalize_executable(tail-tray)
+
+if (BUILD_TESTS)
+    # Add the tests subdirectory so it is built with the main project
+    add_subdirectory(tests)
+endif ()

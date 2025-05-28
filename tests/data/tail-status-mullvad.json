@@ -262,7 +262,7 @@
       "ID": "nNrtc96HsV11CNTRL",
       "PublicKey": "nodekey:016d583bfbd8b57262a01983f018521a9cf50d034841e53e8cebbedc5eca0436",
       "HostName": "us-lax-wg-606",
-      "DNSName": "us-lax-wg-606.mullvad.ts.net.",
+      "DNSName": "",
       "OS": "",
       "UserID": 3889212927633191,
       "TailscaleIPs": [
@@ -313,8 +313,8 @@
     "nodekey:01b33c7e74169a65fa36fd13cfaf0b8a03db1a46a6260363c60ccf7c434e7575": {
       "ID": "nMbqugCry111CNTRL",
       "PublicKey": "nodekey:01b33c7e74169a65fa36fd13cfaf0b8a03db1a46a6260363c60ccf7c434e7575",
-      "HostName": "de-fra-wg-401",
-      "DNSName": "de-fra-wg-401.mullvad.ts.net.",
+      "HostName": "",
+      "DNSName": "",
       "OS": "",
       "UserID": 3889212927633191,
       "TailscaleIPs": [

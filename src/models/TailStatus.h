@@ -156,6 +156,10 @@ public:
                 continue; // Skip peers without location info
             }
 
+            if (peer.hostName.isEmpty() || peer.dnsName.isEmpty()) {
+                continue; // Skip peers without DNS names
+            }
+
             QString country = peer.location.country;
             QString city = peer.location.city.isEmpty() ? "Unknown" : peer.location.city;
 

@@ -37,7 +37,8 @@ private slots:
         for (const auto& peer : status.peers) {
             if (peer.exitNodeOption && peer.isMullvadExitNode()) {
                 QVERIFY(peer.hasLocationInfo());
-                QVERIFY(!peer.getShortDnsName().isEmpty());
+                QVERIFY(!peer.location.country.isEmpty());
+                QVERIFY(!peer.location.city.isEmpty());
             }
         }
     }
@@ -51,7 +52,6 @@ private slots:
         auto status = TailStatus::parse(json.object());
         QVERIFY(!status.peers.isEmpty());
 
-        QString output{};
         auto mapByCountryAndCity = status.getMullvadExitNodesByCountry();
 
         QVERIFY(!mapByCountryAndCity.isEmpty());
@@ -61,18 +61,18 @@ private slots:
 
         for (const auto& country : mapByCountryAndCity.keys()) {
             const auto& countryMap = mapByCountryAndCity[country];
-            output += QString("Country: %1\n").arg(country);
             for (const auto& city : countryMap.keys()) {
-                output += QString("  City: %1\n").arg(city);
                 const auto& peers = countryMap[city];
+                QVERIFY(!peers.isEmpty());
+
                 for (const auto& peer : peers) {
-                    output += QString("    Peer ID: %1, DNS: %2\n")
-                                  .arg(peer.id, peer.dnsName);
+                    QVERIFY(peer.isMullvadExitNode());
+                    QVERIFY(peer.hasLocationInfo());
+                    QVERIFY(!peer.hostName.isEmpty());
+                    QVERIFY(!peer.dnsName.isEmpty());
                 }
             }
         }
-
-        std::cout << output.toStdString() << std::endl;
     }
 };
 

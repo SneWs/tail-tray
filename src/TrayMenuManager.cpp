@@ -392,12 +392,20 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
             disposableMenus.push_back(countryMenu);
 
             for (const auto& city : countryMap.keys()) {
-                auto cityAction = countryMenu->addAction(city);
-                disposableConnectedMenuActions.push_back(cityAction);
+                auto cityMenu = countryMenu->addMenu(city);
+                disposableMenus.push_back(cityMenu);
 
                 const auto& peers = countryMap[city];
                 for (const auto& peer : peers) {
-                    auto* action = countryMenu->addAction(peer.getShortDnsName());
+                    auto dnsName = peer.getShortDnsName();
+                    if (dnsName.isEmpty()) {
+                        continue; // Skip if no DNS name
+                    }
+                    if (!peer.online) {
+                        dnsName += tr(" (offline)");
+                    }
+                    
+                    auto* action = cityMenu->addAction(dnsName);
                     disposableConnectedMenuActions.push_back(action);
 
                     action->setCheckable(true);

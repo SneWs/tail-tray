@@ -51,6 +51,14 @@ jobs:
             
             debchange --controlmaint --local="ubuntu-25.04-plucky~git$(git rev-parse --short HEAD)" "CI build"
 
+      - name: Upload DEB for PR builds
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ubuntu-25.04.deb
+          path: ${{ steps.strings.outputs.build-output-dir }}/*.deb
+          overwrite: true
+      
       - name: Upload DEB files
         if: github.ref == 'refs/heads/master'
         env:

@@ -6,10 +6,9 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include <memory>
-#include <utility>
-
 #include "JsonHelpers.h"
+
+using namespace JsonHelpers;
 
 class TailUser final : public QObject
 {

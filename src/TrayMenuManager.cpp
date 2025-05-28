@@ -1,16 +1,16 @@
-#include <QApplication>
+#include "TrayMenuManager.h"
+
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QFileDialog>
-
-#include "TrayMenuManager.h"
-
 #include <QDir>
 
 #include "MainWindow.h"
 #include "ManageDriveWindow.h"
 #include "KnownValues.h"
 
+#include <functional>
+#include <algorithm>
 
 namespace {
     static QList<QAction*> disposableConnectedMenuActions = {};
@@ -158,6 +158,13 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
     auto* netDevs = pTrayMenu->addMenu(tr("Network devices"));
     disposableMenus.push_back(netDevs);
     for (const auto& dev : pTailStatus.peers) {
+
+        // We do not want to show mullvad nodes in the network devices list at all.
+        // TODO: Do we want a setting for showing them in a separate menu or something?
+        if (dev.isMullvadExitNode()) {
+            continue;
+        }
+
         if (dev.id != pTailStatus.self.id) {
             auto name = dev.getShortDnsName();
             QAction* action;
@@ -316,13 +323,28 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
     auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
     disposableMenus.push_back(exitNodes);
+
     exitNodes->addAction(pExitNodeNone.get());
+
+    bool hasMullvadNodes = false;
     for (int i = 0; i < pTailStatus.peers.size(); i++) {
         const auto& dev = pTailStatus.peers[i];
-        if (dev.id != pTailStatus.self.id && dev.exitNodeOption) {
+        if (dev.id == pTailStatus.self.id) {
+            // Ignore self
+            continue;
+        }
+
+        if (dev.exitNodeOption) {
+            if (dev.isMullvadExitNode()) {
+                hasMullvadNodes = true;
+                continue;
+            }
+            
             auto name = dev.getShortDnsName();
-            if (!dev.online)
+            if (!dev.online) {
                 name += tr(" (offline)");
+            }
+            
             auto* action = exitNodes->addAction(name);
             disposableConnectedMenuActions.push_back(action);
 
@@ -353,6 +375,69 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
             });
         }
     }
+
+    if (hasMullvadNodes) {
+        disposableConnectedMenuActions.push_back(
+            exitNodes->addSeparator()
+        );
+
+        auto* mullvadExitNodes = exitNodes->addMenu(tr("Mullvad Exit Nodes"));
+        disposableMenus.push_back(mullvadExitNodes);
+
+        auto mapByCountryAndCity = pTailStatus.getMullvadExitNodesByCountry();
+
+        for (const auto& country : mapByCountryAndCity.keys()) {
+            const auto& countryMap = mapByCountryAndCity[country];
+            auto* countryMenu = mullvadExitNodes->addMenu(country);
+            disposableMenus.push_back(countryMenu);
+
+            for (const auto& city : countryMap.keys()) {
+                auto cityMenu = countryMenu->addMenu(city);
+                disposableMenus.push_back(cityMenu);
+
+                const auto& peers = countryMap[city];
+                for (const auto& peer : peers) {
+                    auto dnsName = peer.getShortDnsName();
+                    if (dnsName.isEmpty()) {
+                        continue; // Skip if no DNS name
+                    }
+                    if (!peer.online) {
+                        dnsName += tr(" (offline)");
+                    }
+                    
+                    auto* action = cityMenu->addAction(dnsName);
+                    disposableConnectedMenuActions.push_back(action);
+
+                    action->setCheckable(true);
+                    action->setChecked(peer.exitNode);
+                    action->setData(peer.dnsName);
+
+                    if (peer.exitNode) {
+                        pExitNodeNone->setChecked(false);
+                        pExitNodeNone->setEnabled(true);
+                    }
+
+                    // Only enable if online
+                    action->setEnabled(peer.online);
+
+                    connect(action, &QAction::triggered, this, [this, action](bool) {
+                        auto devName = QString{};
+
+                        bool isChecked = action->isChecked();
+                        pExitNodeNone->setChecked(!isChecked);
+
+                        if (isChecked) {
+                            devName = action->data().toString();
+                        }
+
+                        pExitNodeNone->setChecked(devName.isEmpty());
+                        pTailRunner->setExitNode(devName);
+                    });
+                }
+            }
+        }
+    }
+
     disposableConnectedMenuActions.push_back(
         exitNodes->addSeparator()
     );

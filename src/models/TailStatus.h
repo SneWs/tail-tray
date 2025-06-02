@@ -7,9 +7,6 @@
 #include <QJsonArray>
 #include <QList>
 
-#include <memory>
-#include <vector>
-
 #include "TailDeviceInfo.h"
 #include "TailNetInfo.h"
 #include "TailUser.h"
@@ -35,7 +32,7 @@ public:
     QList<QString> health{};
     QList<QString> certDomains{};
     QList<TailDriveInfo> drives{};
-    std::vector<TailDeviceInfo> peers{};
+    QList<TailDeviceInfo> peers{};
     bool tun{};
     bool haveNodeKey{};
     bool drivesConfigured = true;
@@ -146,48 +143,43 @@ public:
 
         return newStatus;
     }
-};
 
-class TailPrefsConfig final : QObject {
-    Q_OBJECT
-public:
-    QString privateNodeKey{};
-    QString oldPrivateNodeKey{};
-    TailUser user{};
-    QString networkLockKey{};
-    QString nodeID{};
+    QMap<QString, QMap<QString, QList<TailDeviceInfo>>> getMullvadExitNodesByCountry() const {
+        QMap<QString, QMap<QString, QList<TailDeviceInfo>>> countryMap;
 
-    TailPrefsConfig() {
-    }
+        for (const auto& peer : peers) {
+            if (!peer.isMullvadExitNode()) {
+                continue;
+            }
 
-    TailPrefsConfig(const TailPrefsConfig& other) {
-        privateNodeKey = other.privateNodeKey;
-        oldPrivateNodeKey = other.oldPrivateNodeKey;
-        user = other.user;
-        networkLockKey = other.networkLockKey;
-        nodeID = other.nodeID;
-    }
+            if (!peer.hasLocationInfo()) {
+                continue; // Skip peers without location info
+            }
 
-    TailPrefsConfig& operator = (const TailPrefsConfig& other) {
-        privateNodeKey = other.privateNodeKey;
-        oldPrivateNodeKey = other.oldPrivateNodeKey;
-        user = other.user;
-        networkLockKey = other.networkLockKey;
-        nodeID = other.nodeID;
+            if (peer.hostName.isEmpty() || peer.dnsName.isEmpty()) {
+                continue; // Skip peers without DNS names
+            }
 
-        return *this;
-    }
+            QString country = peer.location.country;
+            QString city = peer.location.city.isEmpty() ? "Unknown" : peer.location.city;
 
-    static TailPrefsConfig parse(const QJsonObject& obj) {
-        TailPrefsConfig config{};
-        config.privateNodeKey = jsonReadString(obj, "PrivateNodeKey");
-        config.oldPrivateNodeKey = jsonReadString(obj, "OldPrivateNodeKey");
-        config.networkLockKey = jsonReadString(obj, "NetworkLockKey");
-        config.nodeID = jsonReadString(obj, "NodeID");
-        config.user = TailUser::parse(obj["UserProfile"].toObject());
-        return config;
+            if (!countryMap.contains(country)) {
+                countryMap[country] = QMap<QString, QList<TailDeviceInfo>>();
+            }
+
+            countryMap[country][city].push_back(peer);
+            
+            // Ensure that the peers are sorted by dnsName
+            std::sort(countryMap[country][city].begin(), countryMap[country][city].end(),
+                [](const TailDeviceInfo& a, const TailDeviceInfo& b) {
+                    return a.dnsName.compare(b.dnsName, Qt::CaseInsensitive) < 0;
+                }
+            );
+        }
+
+        return countryMap;
     }
 };
-
 
 #endif // TAILSTATUS_H
+

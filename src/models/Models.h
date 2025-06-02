@@ -11,5 +11,6 @@
 #include "CurrentTailPrefs.h"
 #include "TailDnsStatus.h"
 #include "IpnEvents.h"
+#include "TailPrefsConfig.h"
 
 #endif //MODELS_H

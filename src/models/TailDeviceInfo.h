@@ -8,11 +8,46 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include <memory>
-
 #include "JsonHelpers.h"
 
 using namespace JsonHelpers;
+
+class TailDeviceLocationInfo final : public QObject
+{
+    Q_OBJECT
+public:
+    QString country{};
+    QString countryCode{};
+    QString city{};
+    QString cityCode{};
+    float latitude = 0.0f;
+    float longitude = 0.0f;
+    int priority = 100;
+
+    TailDeviceLocationInfo() = default;
+
+    TailDeviceLocationInfo(const TailDeviceLocationInfo& other)
+        : country(other.country)
+        , countryCode(other.countryCode)
+        , city(other.city)
+        , cityCode(other.cityCode)
+        , latitude(other.latitude)
+        , longitude(other.longitude)
+        , priority(other.priority)
+    { }
+
+    TailDeviceLocationInfo& operator = (const TailDeviceLocationInfo& other) {
+        country = other.country;
+        countryCode = other.countryCode;
+        city = other.city;
+        cityCode = other.cityCode;
+        latitude = other.latitude;
+        longitude = other.longitude;
+        priority = other.priority;
+
+        return *this;
+    }
+};
 
 class TailDeviceInfo final : public QObject
 {
@@ -28,6 +63,7 @@ public:
     QString relay{};
     QList<QString> tailscaleIPs{};
     QList<QString> allowedIPs{};
+    QList<QString> tags{};
     QList<QString> addrs{};
     QList<QString> peerApiUrl{};
     QList<QString> capabilities{};
@@ -40,6 +76,7 @@ public:
     bool inNetworkMap = false;
     bool inMagicSock = false;
     bool inEngine = false;
+    TailDeviceLocationInfo location{};
 
     TailDeviceInfo() = default;
 
@@ -52,6 +89,7 @@ public:
         , userId(other.userId)
         , tailscaleIPs(other.tailscaleIPs)
         , allowedIPs(other.allowedIPs)
+        , tags(other.tags)
         , addrs(other.addrs)
         , curAddr(other.curAddr)
         , relay(other.relay)
@@ -66,6 +104,7 @@ public:
         , inMagicSock(other.inMagicSock)
         , inEngine(other.inEngine)
         , keyExpiry(other.keyExpiry)
+        , location(other.location)
     { }
 
     TailDeviceInfo& operator = (const TailDeviceInfo& other) {
@@ -77,6 +116,7 @@ public:
         userId = other.userId;
         tailscaleIPs = other.tailscaleIPs;
         allowedIPs = other.allowedIPs;
+        tags = other.tags;
         addrs = other.addrs;
         curAddr = other.curAddr;
         relay = other.relay;
@@ -91,8 +131,17 @@ public:
         inMagicSock = other.inMagicSock;
         inEngine = other.inEngine;
         keyExpiry = other.keyExpiry;
+        location = other.location;
 
         return *this;
+    }
+
+    [[nodiscard]] bool isMullvadExitNode() const {
+        return exitNodeOption && tags.contains("tag:mullvad-exit-node", Qt::CaseInsensitive);
+    }
+
+    [[nodiscard]] bool hasLocationInfo() const {
+        return !location.country.isEmpty();
     }
 
     [[nodiscard]] QString getShortDnsName() const {
@@ -131,6 +180,33 @@ public:
 
                 self.tailscaleIPs.emplace_back(ab.toString(""));
             }
+        }
+
+        if (obj.contains("Tags") && !obj["Tags"].isNull()) {
+            for (const auto& ab : obj["Tags"].toArray()) {
+                if (ab.isNull()) {
+                    continue;
+                }
+
+                self.tags.emplace_back(ab.toString());
+            }
+        }
+        else {
+            //qDebug() << "No tags found for device";
+        }
+
+        if (obj.contains("Location") && !obj["Location"].isNull()) {
+            const auto& locationObj = obj["Location"].toObject();
+            self.location.country = jsonReadString(locationObj, "Country");
+            self.location.countryCode = jsonReadString(locationObj, "CountryCode");
+            self.location.city = jsonReadString(locationObj, "City");
+            self.location.cityCode = jsonReadString(locationObj, "CityCode");
+            self.location.latitude = jsonReadFloat(locationObj, "Latitude");
+            self.location.longitude = jsonReadFloat(locationObj, "Longitude");
+            self.location.priority = jsonReadInt(locationObj, "Priority");
+        }
+        else {
+            //qDebug() << "No location data found for device";
         }
 
         return self;

@@ -12,6 +12,7 @@ This is a personal project and is not endorsed by Tailscale Inc. in any shape or
 - [X] Overview of your network and network status
 - [X] Set and change your Tailscale exit node
 - [X] Proper multi account handling 
+- [X] Mullvad Exit nodes
 - [X] Tail drive support - Working with davfs2 support + additional help setting up davfs2 and mounting etc
 - [X] Send files to any device on your Tailnet directly from the tray menu
 - [X] Get notified and receive files from any device on your Tailnet to a pre-defined location on disk

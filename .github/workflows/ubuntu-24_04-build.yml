@@ -50,8 +50,17 @@ jobs:
         shell: bash
         run: |
           sudo chown -R $USER:$USER ${{ steps.strings.outputs.build-output-dir }}
+
+      - name: Upload DEB for PR builds
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ubuntu-24.04.deb
+          path: ${{ steps.strings.outputs.build-output-dir }}/*.deb
+          overwrite: true
+          
       
-      - name: Upload DEB files
+      - name: Upload DEB files for latest Release
         if: github.ref == 'refs/heads/master'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

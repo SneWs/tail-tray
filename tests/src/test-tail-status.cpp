@@ -74,6 +74,34 @@ private slots:
             }
         }
     }
+
+    void testSortingMullvadPeersByDnsName() {
+        QFile file("./data/tail-status-mullvad.json");
+        file.open(QIODevice::ReadOnly);
+        auto json = QJsonDocument::fromJson(file.readAll());
+        file.close();
+
+        auto status = TailStatus::parse(json.object());
+        QVERIFY(!status.peers.isEmpty());
+
+        auto mapByCountryAndCity = status.getMullvadExitNodesByCountry();
+
+        QVERIFY(!mapByCountryAndCity.isEmpty());
+        QVERIFY(mapByCountryAndCity.contains("Sweden"));
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"].count() == 9);
+
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"][0].dnsName == "se-got-wg-001.mullvad.ts.net.");
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"][1].dnsName == "se-got-wg-002.mullvad.ts.net.");
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"][2].dnsName == "se-got-wg-003.mullvad.ts.net.");
+
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"][3].dnsName == "se-got-wg-004.mullvad.ts.net.");
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"][4].dnsName == "se-got-wg-005.mullvad.ts.net.");
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"][5].dnsName == "se-got-wg-006.mullvad.ts.net.");
+
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"][6].dnsName == "se-got-wg-007.mullvad.ts.net.");
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"][7].dnsName == "se-got-wg-008.mullvad.ts.net.");
+        QVERIFY(mapByCountryAndCity["Sweden"]["Gothenburg"][8].dnsName == "se-got-wg-101.mullvad.ts.net.");
+    }
 };
 
 QTEST_MAIN(TestTailStatus)

@@ -168,6 +168,13 @@ public:
             }
 
             countryMap[country][city].push_back(peer);
+            
+            // Ensure that the peers are sorted by dnsName
+            std::sort(countryMap[country][city].begin(), countryMap[country][city].end(),
+                [](const TailDeviceInfo& a, const TailDeviceInfo& b) {
+                    return a.dnsName.compare(b.dnsName, Qt::CaseInsensitive) < 0;
+                }
+            );
         }
 
         return countryMap;

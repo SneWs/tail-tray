@@ -216,6 +216,18 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                     pTailRunner->sendFile(name, file,
                         new QString(file));
                 });
+
+                auto* test = netDevs->addMenu(name + ipStr);
+                disposableMenus.push_back(test);
+                action = test->addAction(tr("TEST"));
+                connect(action, &QAction::triggered, this, [this, dev, name](bool) {
+                    QClipboard* clipboard = QApplication::clipboard();
+                    const auto& str = dev.tailscaleIPs.first();
+                    qDebug() << str;
+                    clipboard->setText(str, QClipboard::Clipboard);
+
+                    emit ipAddressCopiedToClipboard(str, name);
+                });
             }
             disposableConnectedMenuActions.push_back(action);
         }
@@ -321,7 +333,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
         pTrayMenu->addSeparator()
     );
 
-    auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
+    auto* exitNodes = pTrayMenu->addMenu(tr("Txit nodes"));
     disposableMenus.push_back(exitNodes);
 
     exitNodes->addAction(pExitNodeNone.get());

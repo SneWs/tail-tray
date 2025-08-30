@@ -39,7 +39,7 @@ jobs:
             git checkout debian/changelog
             cmake -B ${{ steps.strings.outputs.build-output-dir }} \
               -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-              -DKNOTIFICATIONS_ENABLED=OFF \
+              -DKNOTIFICATIONS_ENABLED=ON \
               -S /github/workspace \
               -G "Unix Makefiles"
             debchange --controlmaint --local="debian-trixie~git$(git rev-parse --short HEAD)" "CI build"

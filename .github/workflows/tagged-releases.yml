@@ -87,13 +87,13 @@ jobs:
         buildpackage-opts: --build=binary --no-sign
         before-build-hook: |
           git checkout debian/changelog
+          debchange --controlmaint --local="ubuntu-25.04-plucky" "New upstream release"
+
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DKNOTIFICATIONS_ENABLED=ON \
             -S /github/workspace \
             -G "Unix Makefiles"
-          
-          debchange --controlmaint --local="ubuntu-25.04-plucky" "New upstream release"
 
     - name: Package DEB file for Debian
       uses: jtdor/build-deb-action@v1
@@ -106,6 +106,12 @@ jobs:
         before-build-hook: |
           git checkout debian/changelog
           debchange --controlmaint --local="debian-trixie" "New upstream release"
+          
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+              -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+              -DKNOTIFICATIONS_ENABLED=ON \
+              -S /github/workspace \
+              -G "Unix Makefiles"
         buildpackage-opts: --build=binary --no-sign
 
     - uses: "marvinpinto/action-automatic-releases@latest"

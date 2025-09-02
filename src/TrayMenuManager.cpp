@@ -217,16 +217,24 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                         new QString(file));
                 });
 
-                auto* test = netDevs->addMenu(name + ipStr);
-                disposableMenus.push_back(test);
-                action = test->addAction(tr("TEST"));
-                connect(action, &QAction::triggered, this, [this, dev, name](bool) {
-                    QClipboard* clipboard = QApplication::clipboard();
-                    const auto& str = dev.tailscaleIPs.first();
-                    qDebug() << str;
-                    clipboard->setText(str, QClipboard::Clipboard);
+                auto* runScriptAction = deviceMenu->addAction(tr("Script"));
+                disposableConnectedMenuActions.push_back(runScriptAction);
+                connect(runScriptAction, &QAction::triggered, this, [this, dev, name](bool) {
+                    QFileDialog dialog(nullptr, "Open script" + name, QDir::homePath(), "All files (*)");
+                    dialog.setFileMode(QFileDialog::ExistingFiles);
+                    dialog.setViewMode(QFileDialog::Detail);
+                    auto result = dialog.exec();
+                    if (result != QDialog::Accepted)
+                        return;
+                    if (dialog.selectedFiles().count() < 1)
+                        return;
 
-                    emit ipAddressCopiedToClipboard(str, name);
+                    const QString file = dialog.selectedFiles().first();
+                    qDebug() << "Starting script";
+
+                    const auto& ip = dev.tailscaleIPs.first();
+
+                    QProcess::startDetached(file, { ip, name });
                 });
             }
             disposableConnectedMenuActions.push_back(action);

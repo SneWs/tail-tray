@@ -40,7 +40,7 @@ jobs:
             debchange --controlmaint --local="debian-trixie~git$(git rev-parse --short HEAD)" "CI build"
             cmake -B ${{ steps.strings.outputs.build-output-dir }} \
               -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-              -DKNOTIFICATIONS_ENABLED=ON \
+              -DKNOTIFICATIONS_ENABLED=OFF \
               -S /github/workspace \
               -G "Unix Makefiles"
 

@@ -109,7 +109,7 @@ jobs:
           
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
               -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-              -DKNOTIFICATIONS_ENABLED=ON \
+              -DKNOTIFICATIONS_ENABLED=OFF \
               -S /github/workspace \
               -G "Unix Makefiles"
         buildpackage-opts: --build=binary --no-sign

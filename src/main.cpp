@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "SingleApplicationImpl.h"
+#include "ScriptManager.h"
 
 #include <QApplication>
 #include <QDir>
@@ -18,6 +19,8 @@ int main(int argc, char** argv) {
     }
 
     QApplication::setQuitOnLastWindowClosed(false);
+
+    ScriptManager::ensureScriptsDirExist();
 
     // Locale setup
     QLocale locale = QLocale::C;

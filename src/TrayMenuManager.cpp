@@ -1,4 +1,5 @@
 #include "TrayMenuManager.h"
+#include "ScriptManager.h"
 
 #include <QClipboard>
 #include <QDesktopServices>
@@ -217,25 +218,24 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                         new QString(file));
                 });
 
-                auto* runScriptAction = deviceMenu->addAction(tr("Script"));
-                disposableConnectedMenuActions.push_back(runScriptAction);
-                connect(runScriptAction, &QAction::triggered, this, [this, dev, name](bool) {
-                    QFileDialog dialog(nullptr, "Open script" + name, QDir::homePath(), "All files (*)");
-                    dialog.setFileMode(QFileDialog::ExistingFiles);
-                    dialog.setViewMode(QFileDialog::Detail);
-                    auto result = dialog.exec();
-                    if (result != QDialog::Accepted)
-                        return;
-                    if (dialog.selectedFiles().count() < 1)
-                        return;
+                auto scripts = ScriptManager::listScripts();
 
-                    const QString file = dialog.selectedFiles().first();
-                    qDebug() << "Starting script";
-
+                if (scripts.isEmpty()) {
+                    QAction *openScripts = deviceMenu->addAction(tr("No scripts found - open scripts folder"));
+                    connect(openScripts, &QAction::triggered, this, []() {
+                        QString dir = ScriptManager::userScriptsDir();
+                        QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
+                    });
+                } else {
                     const auto& ip = dev.tailscaleIPs.first();
-
-                    QProcess::startDetached(file, { ip, name });
-                });
+                    for (const auto &script : scripts) {
+                        QAction *action = deviceMenu->addAction(QFileInfo(script).baseName());
+                        connect(action, &QAction::triggered, this, [script, ip, name]() {
+                            qDebug() << "Running script: " << script;
+                            QProcess::startDetached(script, { ip, name });
+                        });
+                    }
+                }
             }
             disposableConnectedMenuActions.push_back(action);
         }

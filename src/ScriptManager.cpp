@@ -12,7 +12,6 @@ QString ScriptManager::userScriptsDir() {
 void ScriptManager::ensureScriptsDirExist() {
     QDir dir(userScriptsDir());
 
-    // hur ska fedback se ut o felhant
     if (!dir.exists()) {
         if(dir.mkpath(".")) {
             qDebug() << "Path created";
@@ -25,7 +24,7 @@ void ScriptManager::ensureScriptsDirExist() {
 QStringList ScriptManager::listScripts() {
     QDir dir(userScriptsDir());
 
-    // vilka olika scripts?
+
     QStringList filters;
     filters << "*.sh";
 

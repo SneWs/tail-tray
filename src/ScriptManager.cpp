@@ -5,24 +5,22 @@
 #include <QDebug>
 
 QString ScriptManager::userScriptsDir() {
-    QString baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    return baseDir + "/scripts";
-}
-
-void ScriptManager::ensureScriptsDirExist() {
-    QDir dir(userScriptsDir());
-
-    if (!dir.exists()) {
-        if(dir.mkpath(".")) {
-            qDebug() << "Path created";
-        } else {
-            qDebug() << "Path could not be created";
-        }
+    QString configuredDir = settings.tailScriptFilesSavePath();
+    if (configuredDir.isEmpty()) {
+        return QString();
+    } else {
+        return configuredDir;
     }
 }
 
 QStringList ScriptManager::listScripts() {
-    QDir dir(userScriptsDir());
+    QString dirPath = userScriptsDir();
+
+    if (dirPath.isEmpty()) {
+        return {};
+    }
+
+    QDir dir(dirPath);
 
 
     QStringList filters;

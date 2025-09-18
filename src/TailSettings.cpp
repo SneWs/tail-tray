@@ -94,3 +94,11 @@ QString TailSettings::tailFilesDefaultSavePath() const {
 void TailSettings::tailFilesDefaultSavePath(const QString& path) {
     settings.setValue("tailFilesDefaultSavePath", path);
 }
+
+QString TailSettings::tailScriptFilesSavePath() const {
+    return settings.value("tailScriptsSavePath", "").toString();
+}
+
+void TailSettings::tailScriptFilesSavePath(const QString& path) {
+    settings.setValue("tailScriptsSavePath", path);
+}

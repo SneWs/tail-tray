@@ -40,6 +40,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     , settings(s)
     , pTailRunner(runner)
     , pSysCommand(std::make_unique<SysCommand>())
+    , scriptManager(s)
 {
     pTrayMenu = std::make_unique<QMenu>("Tail Tray");
 
@@ -218,15 +219,9 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                         new QString(file));
                 });
 
-                auto scripts = ScriptManager::listScripts();
+                auto scripts = scriptManager.listScripts();
 
-                if (scripts.isEmpty()) {
-                    QAction *openScripts = deviceMenu->addAction(tr("No scripts found - open scripts folder"));
-                    connect(openScripts, &QAction::triggered, this, []() {
-                        QString dir = ScriptManager::userScriptsDir();
-                        QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
-                    });
-                } else {
+                if (!scripts.isEmpty()) {
                     const auto& ip = dev.tailscaleIPs.first();
                     for (const auto &script : scripts) {
                         QAction *action = deviceMenu->addAction(QFileInfo(script).baseName());

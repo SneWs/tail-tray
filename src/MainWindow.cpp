@@ -60,6 +60,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnSelectTailFileDefaultSaveLocation, &QPushButton::clicked,
         this, &MainWindow::onShowTailFileSaveLocationPicker);
 
+    connect(ui->btnSelectTailScripFileSaveLocation, &QPushButton::clicked,
+        this, &MainWindow::onShowTailScriptFileSaveLocationPicker);
+
     connect(pCurrentExecution.get(), &TailRunner::tailscaleIsInstalled, this, &MainWindow::tailscaleIsInstalled);
     connect(pCurrentExecution.get(), &TailRunner::settingsRead, this, &MainWindow::settingsReadyToRead);
     connect(pCurrentExecution.get(), &TailRunner::dnsStatusRead, this, &MainWindow::dnsStatusUpdated);
@@ -448,6 +451,22 @@ void MainWindow::onShowTailFileSaveLocationPicker() {
     startListeningForIncomingFiles();
 }
 
+void MainWindow::onShowTailScriptFileSaveLocationPicker() {
+    QFileDialog dlg(this, tr("Select folder"), ui->txtTailScriptFilesSavePath->text());
+    dlg.setFileMode(QFileDialog::FileMode::Directory);
+    dlg.setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
+    dlg.setOption(QFileDialog::Option::ShowDirsOnly, true);
+
+    auto result = dlg.exec();
+    if (result == QFileDialog::Accepted) {
+        const auto& selection = dlg.selectedFiles();
+        ui->txtTailScriptFilesSavePath->setText(selection.first().trimmed());
+        settings.tailScriptFilesSavePath(selection.first().trimmed());
+    }
+
+    startListeningForIncomingFiles();
+}
+
 namespace
 {
     static QList<QTableWidgetItem*> netCheckWidgetItems{};
@@ -731,6 +750,7 @@ void MainWindow::syncSettingsToUi() const {
     ui->chkUseTailDrive->setChecked(settings.tailDriveEnabled());
     ui->txtTailDriveDefaultMountPath->setText(settings.tailDriveMountPath());
     ui->txtTailFilesDefaultSavePath->setText(settings.tailFilesDefaultSavePath());
+    ui->txtTailScriptFilesSavePath->setText(settings.tailScriptFilesSavePath());
 
 #if defined(WINDOWS_BUILD)
     // Windows does support auto update
@@ -787,6 +807,19 @@ void MainWindow::syncSettingsFromUi() {
     if (dir.exists()) {
         settings.tailFilesDefaultSavePath(ui->txtTailFilesDefaultSavePath->text().trimmed());
         startListeningForIncomingFiles();
+    }
+
+    const QString scriptPath = ui->txtTailScriptFilesSavePath->text().trimmed();
+    if (scriptPath.isEmpty()) {
+        settings.tailScriptFilesSavePath("");
+    } else {
+        const QDir dir(scriptPath);
+        if (dir.exists()) {
+            settings.tailScriptFilesSavePath(scriptPath);
+        } else {
+                settings.tailScriptFilesSavePath("");
+                ui->txtTailScriptFilesSavePath->clear();
+            }
     }
 
     auto homeDir = QDir::home();

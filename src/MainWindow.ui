@@ -1206,7 +1206,7 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_36">
               <item>
-               <widget class="QLineEdit" name="txtSkriptFilesDefaultSavePath">
+               <widget class="QLineEdit" name="txtTailScriptFilesSavePath">
                 <property name="maximumSize">
                  <size>
                   <width>16777215</width>
@@ -1216,7 +1216,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="btnSelectDefaultSkriptFolder">
+               <widget class="QPushButton" name="btnSelectTailScripFileSaveLocation">
                 <property name="text">
                  <string>...</string>
                 </property>

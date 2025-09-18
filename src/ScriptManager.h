@@ -1,16 +1,20 @@
 #ifndef SCRIPTMANAGER_H
 #define SCRIPTMANAGER_H
 
+#include "TailSettings.h"
+
 #include <QString>
 #include <QStringList>
 
 class ScriptManager {
 public:
-    static QString userScriptsDir();
+    explicit ScriptManager(TailSettings &s) : settings(s) {}
+    QString userScriptsDir();
 
-    static void ensureScriptsDirExist();
+    QStringList listScripts();
 
-    static QStringList listScripts();
+private:
+    TailSettings& settings;
 };
 
 #endif // SCRIPTMANAGER_H

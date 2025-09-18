@@ -41,6 +41,9 @@ public:
     [[nodiscard]] QString tailFilesDefaultSavePath() const;
     void tailFilesDefaultSavePath(const QString &path);
 
+    [[nodiscard]] QString tailScriptFilesSavePath() const;
+    void tailScriptFilesSavePath(const QString &path);
+
 private:
     QSettings settings;
 };

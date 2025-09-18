@@ -20,8 +20,6 @@ int main(int argc, char** argv) {
 
     QApplication::setQuitOnLastWindowClosed(false);
 
-    ScriptManager::ensureScriptsDirExist();
-
     // Locale setup
     QLocale locale = QLocale::C;
     for (int i = 1; i < argc; i++) {

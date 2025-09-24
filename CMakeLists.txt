@@ -102,6 +102,8 @@ set(PROJECT_SOURCES
     src/PleaseWaitDlg.ui
     src/NotificationsManager.h
     src/NotificationsManager.cpp
+    src/ScriptManager.h
+    src/ScriptManager.cpp
 )
 
 if (APPLE)

@@ -1,4 +1,5 @@
 #include "TrayMenuManager.h"
+#include "ScriptManager.h"
 
 #include <QClipboard>
 #include <QDesktopServices>
@@ -39,6 +40,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* p
     , settings(s)
     , pTailRunner(runner)
     , pSysCommand(std::make_unique<SysCommand>())
+    , scriptManager(s)
 {
     pTrayMenu = std::make_unique<QMenu>("Tail Tray");
 
@@ -216,6 +218,19 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                     pTailRunner->sendFile(name, file,
                         new QString(file));
                 });
+
+                auto scripts = scriptManager.listScripts();
+
+                if (!scripts.isEmpty()) {
+                    const auto& ip = dev.tailscaleIPs.first();
+                    for (const auto &script : scripts) {
+                        QAction *action = deviceMenu->addAction(QFileInfo(script).baseName());
+                        connect(action, &QAction::triggered, this, [script, ip, name]() {
+                            qDebug() << "Running script: " << script;
+                            QProcess::startDetached(script, { ip, name });
+                        });
+                    }
+                }
             }
             disposableConnectedMenuActions.push_back(action);
         }
@@ -321,7 +336,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
         pTrayMenu->addSeparator()
     );
 
-    auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
+    auto* exitNodes = pTrayMenu->addMenu(tr("Txit nodes"));
     disposableMenus.push_back(exitNodes);
 
     exitNodes->addAction(pExitNodeNone.get());

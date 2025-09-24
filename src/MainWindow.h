@@ -86,6 +86,7 @@ private slots:
     void startListeningForIncomingFiles();
     void onTailnetFileReceived(QString filePath) const;
     void onShowTailFileSaveLocationPicker();
+    void onShowTailScriptFileSaveLocationPicker();
 
     // Network reports
     void netCheckCompleted(bool success, const QMap<QString, QString>& results, QList<QPair<QString, float>>& latencies) const;

@@ -10,6 +10,7 @@
 #include "TailRunner.h"
 #include "TailSettings.h"
 #include "SysCommand.h"
+#include "ScriptManager.h"
 
 class TrayMenuManager : public QObject
 {
@@ -44,6 +45,7 @@ private:
     std::unique_ptr<QAction> pRefreshLocalDns;
     std::unique_ptr<QAction> pRestartTailscale;
     std::unique_ptr<SysCommand> pSysCommand;
+    ScriptManager scriptManager;
 
 private:
     void buildNotLoggedInMenu() const;

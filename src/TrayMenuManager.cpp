@@ -227,11 +227,21 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                     disposableMenus.push_back(scriptsMenu);
 
                     const auto& ip = dev.tailscaleIPs.first();
-                    for (const auto &script : scripts) {
-                        QAction *action = scriptsMenu->addAction(QFileInfo(script).baseName());
-                        connect(action, &QAction::triggered, this, [script, ip, name]() {
-                            qDebug() << "Running script: " << script;
-                            QProcess::startDetached(script, { ip, name });
+                    for (const auto& script : scripts) {
+                        QFileInfo fileInfo(script);
+                        QAction* action = scriptsMenu->addAction(fileInfo.baseName());
+                        auto dnsName = dev.dnsName;
+                        connect(action, &QAction::triggered, this, [fileInfo, ip, dnsName]() {
+                            qDebug() << "Running script: " << fileInfo.absoluteFilePath();
+                            qint64 pid = 0;
+                            auto success = QProcess::startDetached(fileInfo.absoluteFilePath(), { ip, dnsName }, fileInfo.absolutePath(), &pid);
+                            if (!success) {
+                                qWarning() << "Failed to start script: " << fileInfo.absoluteFilePath();
+                            }
+
+                            if (pid != 0) {
+                                qDebug() << "Started script with PID: " << pid;
+                            }
                         });
                     }
                 }

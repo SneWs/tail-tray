@@ -47,6 +47,9 @@ To do that, please see the Getting started section below.
  * [On Linux](/docs/build-from-src.md)
  * [On Windows](/docs/build-from-src-windows.md)
 
+### Scriptable actions
+To learn more about how to write and use scriptable actions, please read the [Scriptable actions Guid](docs/scriptable-actions.md)
+
 ### Participating & Filing bugs
 * If you would like to participate in the development of this project, feel free to fork the repo and submit a pull request.
 * Bugs, we all get them... Please file an issue in the issues tab and we'll sort it out together.

@@ -25,6 +25,10 @@ QStringList ScriptManager::getDefinedScripts() {
 
     QFileInfoList files = dir.entryInfoList(QStringList() << "*.sh", QDir::Files);
     for (const QFileInfo& file : files) {
+        if (!file.isExecutable()) {
+            qWarning() << "Script file is not executable: " << file.absoluteFilePath() << ", skipping file.";
+            continue;
+        }
         scripts << file.absoluteFilePath();
     }
 

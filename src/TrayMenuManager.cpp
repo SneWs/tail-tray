@@ -219,12 +219,16 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                         new QString(file));
                 });
 
-                auto scripts = scriptManager.listScripts();
+                auto scripts = scriptManager.getDefinedScripts();
 
                 if (!scripts.isEmpty()) {
+
+                    auto* scriptsMenu = deviceMenu->addMenu(tr("Scriptable Actions"));
+                    disposableMenus.push_back(scriptsMenu);
+
                     const auto& ip = dev.tailscaleIPs.first();
                     for (const auto &script : scripts) {
-                        QAction *action = deviceMenu->addAction(QFileInfo(script).baseName());
+                        QAction *action = scriptsMenu->addAction(QFileInfo(script).baseName());
                         connect(action, &QAction::triggered, this, [script, ip, name]() {
                             qDebug() << "Running script: " << script;
                             QProcess::startDetached(script, { ip, name });
@@ -336,7 +340,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
         pTrayMenu->addSeparator()
     );
 
-    auto* exitNodes = pTrayMenu->addMenu(tr("Txit nodes"));
+    auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
     disposableMenus.push_back(exitNodes);
 
     exitNodes->addAction(pExitNodeNone.get());

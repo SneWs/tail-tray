@@ -11,7 +11,7 @@ public:
     explicit ScriptManager(TailSettings &s) : settings(s) {}
     QString userScriptsDir();
 
-    QStringList listScripts();
+    QStringList getDefinedScripts();
 
 private:
     TailSettings& settings;

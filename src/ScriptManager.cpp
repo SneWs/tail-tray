@@ -15,20 +15,17 @@ QString ScriptManager::userScriptsDir() {
 
 QStringList ScriptManager::listScripts() {
     QString dirPath = userScriptsDir();
-
     if (dirPath.isEmpty()) {
         return {};
     }
 
     QDir dir(dirPath);
-
-
     QStringList filters;
     filters << "*.sh";
 
     QStringList scripts;
     QFileInfoList files = dir.entryInfoList(filters, QDir::Files);
-    for (const QFileInfo &file : files) {
+    for (const QFileInfo& file : files) {
         scripts << file.absoluteFilePath();
     }
 

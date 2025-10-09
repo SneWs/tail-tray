@@ -224,26 +224,12 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                 if (!scripts.isEmpty()) {
 
                     auto* scriptsMenu = deviceMenu->addMenu(tr("Scriptable Actions"));
-                    disposableMenus.push_back(scriptsMenu);
+                    deviceScriptMenus.insert(dev.id, scriptsMenu);
 
-                    const auto& ip = dev.tailscaleIPs.first();
-                    for (const auto& script : scripts) {
-                        QFileInfo fileInfo(script);
-                        QAction* action = scriptsMenu->addAction(fileInfo.baseName());
-                        auto dnsName = dev.dnsName;
-                        connect(action, &QAction::triggered, this, [fileInfo, ip, dnsName]() {
-                            qDebug() << "Running script: " << fileInfo.absoluteFilePath();
-                            qint64 pid = 0;
-                            auto success = QProcess::startDetached(fileInfo.absoluteFilePath(), { ip, dnsName }, fileInfo.absolutePath(), &pid);
-                            if (!success) {
-                                qWarning() << "Failed to start script: " << fileInfo.absoluteFilePath();
-                            }
+                    storedDeviceIps.insert(dev.id, dev.tailscaleIPs.first());
+                    storedDeviceDns.insert(dev.id, dev.dnsName);
 
-                            if (pid != 0) {
-                                qDebug() << "Started script with PID: " << pid;
-                            }
-                        });
-                    }
+                    rebuildScriptsMenu(dev.id, dev.tailscaleIPs.first(), dev.dnsName);
                 }
             }
             disposableConnectedMenuActions.push_back(action);
@@ -526,6 +512,13 @@ void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString&
             qDebug() << "Running script:" << fileInfo.absoluteFilePath();
             QProcess::startDetached(fileInfo.absoluteFilePath(), { ip, dnsName });
         });
+    }
+}
+
+void TrayMenuManager::onScriptsUpdated() {
+    for (auto it = deviceScriptMenus.begin(); it != deviceScriptMenus.end(); ++it) {
+        const QString& deviceId = it.key();
+        rebuildScriptsMenu(deviceId, storedDeviceIps[deviceId], storedDeviceDns[deviceId]);
     }
 }
 

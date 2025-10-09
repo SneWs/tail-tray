@@ -86,6 +86,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(pScriptWatcher.get(), &ScriptFolderWatcher::scriptsChanged,
         pScriptManager.get(), &ScriptManager::reloadScripts);
 
+    connect(pScriptManager.get(), &ScriptManager::scriptsUpdated,
+            pTrayManager.get(), &TrayMenuManager::onScriptsUpdated);
+
     changeToState(TailState::NotLoggedIn);
 
     // NOTE! We first check and validate that the tailscale binary / service / daemon is installed

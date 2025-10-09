@@ -26,6 +26,9 @@ public:
 signals:
     void ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname);
 
+public slots:
+    void onScriptsUpdated();
+
 private:
     QList<TailAccountInfo> accounts;
     TailSettings& settings;

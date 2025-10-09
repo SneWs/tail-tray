@@ -105,6 +105,12 @@ MainWindow::MainWindow(QWidget* parent)
     ui->lblTailnetLockTitle->setEnabled(false);
     ui->btnManageTailnetLocks->setEnabled(false);
 
+    //If script folder is set start watching
+    const QString scriptPath = settings.tailScriptFilesSavePath();
+    if (!scriptPath.isEmpty() && QDir(scriptPath).exists()) {
+        pScriptWatcher->startWatching(scriptPath);
+    }
+
 #if defined(WINDOWS_BUILD)
     // On windows this looks like crap, so don't use it
     ui->twNetworkStatus->setAlternatingRowColors(false);

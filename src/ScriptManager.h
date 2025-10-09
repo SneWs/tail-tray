@@ -20,6 +20,9 @@ public:
 
     void reloadScripts();
 
+signals:
+    void scriptsUpdated();
+
 private:
     TailSettings& settings;
 };

@@ -18,7 +18,7 @@
 #include "models/TailStatus.h"
 #include "PleaseWaitDlg.h"
 #include "NotificationsManager.h"
-#include "scriptfolderwatcher.h"
+#include "Scriptfolderwatcher.h"
 
 #if defined(DAVFS_ENABLED)
 #include "TailDriveUiManager.h"

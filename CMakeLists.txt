@@ -104,6 +104,8 @@ set(PROJECT_SOURCES
     src/NotificationsManager.cpp
     src/ScriptManager.h
     src/ScriptManager.cpp
+    src/Scriptfolderwatcher.h
+    src/Scriptfolderwatcher.cpp
 )
 
 if (APPLE)

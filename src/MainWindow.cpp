@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget* parent)
     , eCurrentState(TailState::NoAccount)
     , settings(this)
     , pScriptWatcher(std::make_unique<ScriptFolderWatcher>(this))
+    , pScriptManager(std::make_unique<ScriptManager>(settings, this))
 {
     ui->setupUi(this);
 

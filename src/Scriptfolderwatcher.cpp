@@ -1,4 +1,4 @@
-#include "scriptfolderwatcher.h"
+#include "Scriptfolderwatcher.h"
 #include <QDebug>
 #include <QDir>
 
@@ -16,16 +16,16 @@ void ScriptFolderWatcher::startWatching(const QString& path) {
     watcher.removePaths(watcher.directories());
 
     if (!watcher.addPath(path)) {
-        qWarning() << "Failed to watch directory: " << path;
+        qWarning() << "Failed to watch directory:" << path;
     } else {
-        qDebug() << "Watching script directory: " << path;
+        qDebug() << "Watching script directory:" << path;
     }
 
     emit scriptsChanged();
 }
 
 void ScriptFolderWatcher::onDirectoryChanged(const QString& path) {
-    qDebug() << "Script folder changed:" << path;
+    qDebug() << "Changes in script folder:" << path;
 
     emit scriptsChanged();
 }

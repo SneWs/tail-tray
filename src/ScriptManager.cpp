@@ -36,6 +36,7 @@ QStringList ScriptManager::getDefinedScripts() {
 }
 
 void ScriptManager::reloadScripts() {
-    qDebug() << "TJKLDFJLÖSJDÖFJÖLJ";
-    return;
+    qDebug() << "Reloading scripts...";
+
+    emit scriptsUpdated();
 }

@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget* parent)
 // Davfs or not
 #if defined(DAVFS_ENABLED)
     pTailDriveUiManager = std::make_unique<TailDriveUiManager>(ui.get(), pCurrentExecution.get(), this);
-    
+
     // Make sure to adjust tail drive based on the check state
     if (settings.tailDriveEnabled()) {
         ui->tabWidget->insertTab(3, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
@@ -152,7 +152,7 @@ void MainWindow::tailscaleIsInstalled(bool installed) {
         QMessageBox::warning(this, tr("Error"), tr("It does not look like you have installed Tailscale on this machine.\nOr tailscale isn't in your PATH.\n\nYou can download and install tailscale from https://tailscale.com"));
 
         close();
-        // Since we are getting the signal from within a process, delay the exit a bit to allow the invoking process to 
+        // Since we are getting the signal from within a process, delay the exit a bit to allow the invoking process to
         // complete before exiting the application
         QTimer::singleShot(500, [this]() {
             QApplication::exit(-1);
@@ -463,8 +463,6 @@ void MainWindow::onShowTailScriptFileSaveLocationPicker() {
         ui->txtTailScriptFilesSavePath->setText(selection.first().trimmed());
         settings.tailScriptFilesSavePath(selection.first().trimmed());
     }
-
-    startListeningForIncomingFiles();
 }
 
 namespace
@@ -550,18 +548,18 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
 
 void MainWindow::showAdvertiseRoutesDialog() const {
     auto knownRoutes = pCurrentExecution->currentSettings().getFilteredAdvertiseRoutes();
-    
+
     AdvertiseRoutesDlg dlg(knownRoutes);
     dlg.setWindowIcon(windowIcon());
     auto result = dlg.exec();
     if (result != QDialog::Accepted)
         return;
-    
+
     const auto& routes = dlg.getDefinedRoutes();
     pCurrentExecution->advertiseRoutes(routes);
 }
 
-void MainWindow::showDnsSettingsDialog() const {    
+void MainWindow::showDnsSettingsDialog() const {
     DnsSettingsDlg dlg(pDnsStatus, ui->chkUseTailscaleDns->isChecked());
     dlg.setWindowIcon(windowIcon());
     dlg.exec();

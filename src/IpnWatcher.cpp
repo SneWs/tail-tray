@@ -17,11 +17,6 @@ IpnWatcher::~IpnWatcher() {
 }
 
 void IpnWatcher::start() {
-#ifdef Q_OS_WIN
-    qDebug() << "Windows detected — not starting IpnWatcher.";
-    return;
-#endif
-
     if (m_process != nullptr) {
         stop();
     }

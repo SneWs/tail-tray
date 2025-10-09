@@ -219,18 +219,9 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                         new QString(file));
                 });
 
-                auto scripts = scriptManager.getDefinedScripts();
-
-                if (!scripts.isEmpty()) {
-
-                    auto* scriptsMenu = deviceMenu->addMenu(tr("Scriptable Actions"));
-                    deviceScriptMenus.insert(dev.id, scriptsMenu);
-
-                    storedDeviceIps.insert(dev.id, dev.tailscaleIPs.first());
-                    storedDeviceDns.insert(dev.id, dev.dnsName);
-
-                    rebuildScriptsMenu(dev.id, dev.tailscaleIPs.first(), dev.dnsName);
-                }
+                storedDeviceIps.insert(dev.id, dev.tailscaleIPs.first());
+                storedDeviceDns.insert(dev.id, dev.dnsName);
+                rebuildScriptsMenu(dev.id, dev.tailscaleIPs.first(), dev.dnsName);
             }
             disposableConnectedMenuActions.push_back(action);
         }
@@ -495,13 +486,30 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 }
 
 void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString& ip, const QString& dnsName) {
+    auto scripts = scriptManager.getDefinedScripts();
+
+    if (!scripts.isEmpty() && !deviceScriptMenus.contains(deviceId)) {
+        for (auto* m : disposableMenus) {
+            if (m->title().contains(ip, Qt::CaseInsensitive) ||
+                m->title().contains(dnsName, Qt::CaseInsensitive)) {
+
+                auto* scriptsMenu = m->addMenu(tr("Scriptable Actions"));
+                deviceScriptMenus.insert(deviceId, scriptsMenu);
+                disposableMenus.push_back(scriptsMenu);
+
+                storedDeviceIps.insert(deviceId, ip);
+                storedDeviceDns.insert(deviceId, dnsName);
+                break;
+            }
+        }
+    }
+
     if (!deviceScriptMenus.contains(deviceId))
         return;
 
     QMenu* scriptsMenu = deviceScriptMenus.value(deviceId);
     scriptsMenu->clear();
 
-    auto scripts = scriptManager.getDefinedScripts();
     if (scripts.isEmpty())
         return;
 

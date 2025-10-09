@@ -219,18 +219,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                         new QString(file));
                 });
 
-                auto scripts = scriptManager.getDefinedScripts();
-
-                if (!scripts.isEmpty()) {
-
-                    auto* scriptsMenu = deviceMenu->addMenu(tr("Scriptable Actions"));
-                    deviceScriptMenus.insert(dev.id, scriptsMenu);
-
-                    storedDeviceIps.insert(dev.id, dev.tailscaleIPs.first());
-                    storedDeviceDns.insert(dev.id, dev.dnsName);
-
-                    rebuildScriptsMenu(dev.id, dev.tailscaleIPs.first(), dev.dnsName);
-                }
+                rebuildScriptsMenu(dev.id, dev.tailscaleIPs.first(), dev.dnsName);
             }
             disposableConnectedMenuActions.push_back(action);
         }
@@ -495,15 +484,34 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 }
 
 void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString& ip, const QString& dnsName) {
+    auto scripts = scriptManager.getDefinedScripts();
+
+    if (scripts.isEmpty()) {
+        if (deviceScriptMenus.contains(deviceId)) {
+            QMenu* menu = deviceScriptMenus.value(deviceId);
+            menu->deleteLater();
+            deviceScriptMenus.remove(deviceId);
+        }
+        return;
+    }
+
+    if (!deviceScriptMenus.contains(deviceId)) {
+        for (QMenu* menu : disposableMenus) {
+            if (menu->title().contains(dnsName, Qt::CaseInsensitive)) {
+                QMenu* scriptsMenu = menu->addMenu(tr("Scriptable Actions"));
+                deviceScriptMenus.insert(deviceId, scriptsMenu);
+                storedDeviceIps.insert(deviceId, ip);
+                storedDeviceDns.insert(deviceId, dnsName);
+                break;
+            }
+        }
+    }
+
     if (!deviceScriptMenus.contains(deviceId))
         return;
 
     QMenu* scriptsMenu = deviceScriptMenus.value(deviceId);
     scriptsMenu->clear();
-
-    auto scripts = scriptManager.getDefinedScripts();
-    if (scripts.isEmpty())
-        return;
 
     for (const auto& script : scripts) {
         QFileInfo fileInfo(script);

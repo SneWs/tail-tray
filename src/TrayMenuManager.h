@@ -46,12 +46,16 @@ private:
     std::unique_ptr<QAction> pRestartTailscale;
     std::unique_ptr<SysCommand> pSysCommand;
     ScriptManager scriptManager;
+    QHash<QString, QMenu*> deviceScriptMenus;
+    QHash<QString, QString> storedDeviceIps;
+    QHash<QString, QString> storedDeviceDns;
 
 private:
     void buildNotLoggedInMenu() const;
     void buildNotConnectedMenu(const TailStatus& pTailStatus) const;
     void buildConnectedMenu(const TailStatus& pTailStatus);
     void buildAccountsMenu() const;
+    void rebuildScriptsMenu(const QString& deviceId, const QString& ip, const QString& dnsName);
 
     void setupWellKnownActions() const;
 };

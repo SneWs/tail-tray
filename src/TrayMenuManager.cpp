@@ -508,6 +508,27 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
     buildAccountsMenu();
 }
 
+void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString& ip, const QString& dnsName) {
+    if (!deviceScriptMenus.contains(deviceId))
+        return;
+
+    QMenu* scriptsMenu = deviceScriptMenus.value(deviceId);
+    scriptsMenu->clear();
+
+    auto scripts = scriptManager.getDefinedScripts();
+    if (scripts.isEmpty())
+        return;
+
+    for (const auto& script : scripts) {
+        QFileInfo fileInfo(script);
+        QAction* action = scriptsMenu->addAction(fileInfo.baseName());
+        connect(action, &QAction::triggered, this, [fileInfo, ip, dnsName]() {
+            qDebug() << "Running script:" << fileInfo.absoluteFilePath();
+            QProcess::startDetached(fileInfo.absoluteFilePath(), { ip, dnsName });
+        });
+    }
+}
+
 void TrayMenuManager::buildAccountsMenu() const {
     if (pThisDevice->menu() == nullptr) {
         pThisDevice->setMenu(new QMenu());

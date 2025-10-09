@@ -19,7 +19,6 @@ QStringList ScriptManager::getDefinedScripts() {
     QString dirPath = userScriptsDir();
     QDir dir(dirPath);
     if (!dir.exists()) {
-        // No scripts directory, return empty list
         return scripts;
     }
 

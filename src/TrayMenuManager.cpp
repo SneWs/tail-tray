@@ -219,7 +219,18 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                         new QString(file));
                 });
 
-                rebuildScriptsMenu(dev.id, dev.tailscaleIPs.first(), dev.dnsName);
+                auto scripts = scriptManager.getDefinedScripts();
+
+                if (!scripts.isEmpty()) {
+
+                    auto* scriptsMenu = deviceMenu->addMenu(tr("Scriptable Actions"));
+                    deviceScriptMenus.insert(dev.id, scriptsMenu);
+
+                    storedDeviceIps.insert(dev.id, dev.tailscaleIPs.first());
+                    storedDeviceDns.insert(dev.id, dev.dnsName);
+
+                    rebuildScriptsMenu(dev.id, dev.tailscaleIPs.first(), dev.dnsName);
+                }
             }
             disposableConnectedMenuActions.push_back(action);
         }
@@ -484,34 +495,15 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 }
 
 void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString& ip, const QString& dnsName) {
-    auto scripts = scriptManager.getDefinedScripts();
-
-    if (scripts.isEmpty()) {
-        if (deviceScriptMenus.contains(deviceId)) {
-            QMenu* menu = deviceScriptMenus.value(deviceId);
-            menu->deleteLater();
-            deviceScriptMenus.remove(deviceId);
-        }
-        return;
-    }
-
-    if (!deviceScriptMenus.contains(deviceId)) {
-        for (QMenu* menu : disposableMenus) {
-            if (menu->title().contains(dnsName, Qt::CaseInsensitive)) {
-                QMenu* scriptsMenu = menu->addMenu(tr("Scriptable Actions"));
-                deviceScriptMenus.insert(deviceId, scriptsMenu);
-                storedDeviceIps.insert(deviceId, ip);
-                storedDeviceDns.insert(deviceId, dnsName);
-                break;
-            }
-        }
-    }
-
     if (!deviceScriptMenus.contains(deviceId))
         return;
 
     QMenu* scriptsMenu = deviceScriptMenus.value(deviceId);
     scriptsMenu->clear();
+
+    auto scripts = scriptManager.getDefinedScripts();
+    if (scripts.isEmpty())
+        return;
 
     for (const auto& script : scripts) {
         QFileInfo fileInfo(script);
@@ -528,9 +520,28 @@ void TrayMenuManager::onScriptsUpdated() {
     if (scripts.isEmpty())
         return;
 
-    for (auto it = deviceScriptMenus.begin(); it != deviceScriptMenus.end(); ++it) {
-        const QString& deviceId = it.key();
-        rebuildScriptsMenu(deviceId, storedDeviceIps[deviceId], storedDeviceDns[deviceId]);
+    if (deviceScriptMenus.isEmpty()) {
+        for (const auto& [id, ip] : storedDeviceIps.asKeyValueRange()) {
+            const QString& dns = storedDeviceDns[id];
+
+            for (auto* m : disposableMenus) {
+                if (m->title().contains(ip, Qt::CaseInsensitive) ||
+                    m->title().contains(dns, Qt::CaseInsensitive)) {
+
+                    auto* scriptsMenu = m->addMenu(tr("Scriptable Actions"));
+                    deviceScriptMenus.insert(id, scriptsMenu);
+                    disposableMenus.push_back(scriptsMenu);
+
+                    rebuildScriptsMenu(id, ip, dns);
+                    break;
+                }
+            }
+        }
+    } else {
+        for (auto it = deviceScriptMenus.begin(); it != deviceScriptMenus.end(); ++it) {
+            const QString& deviceId = it.key();
+            rebuildScriptsMenu(deviceId, storedDeviceIps[deviceId], storedDeviceDns[deviceId]);
+        }
     }
 }
 

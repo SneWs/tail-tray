@@ -18,6 +18,7 @@
 #include "models/TailStatus.h"
 #include "PleaseWaitDlg.h"
 #include "NotificationsManager.h"
+#include "scriptfolderwatcher.h"
 
 #if defined(DAVFS_ENABLED)
 #include "TailDriveUiManager.h"
@@ -58,6 +59,8 @@ private:
     std::unique_ptr<TailDriveUiManager> pTailDriveUiManager;
 #endif
     std::unique_ptr<NotificationsManager> pNotificationsManager;
+    std::unique_ptr<ScriptFolderWatcher> pScriptWatcher;
+    std::unique_ptr<ScriptManager> pScriptManager;
 
     TailState eCurrentState;
     TailSettings settings;

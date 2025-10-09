@@ -6,12 +6,19 @@
 #include <QString>
 #include <QStringList>
 
-class ScriptManager {
+class ScriptManager : public QObject
+{
+    Q_OBJECT
 public:
-    explicit ScriptManager(TailSettings &s) : settings(s) {}
+    explicit ScriptManager(TailSettings& s, QObject *parent = nullptr)
+        : settings(s)
+        , QObject(parent)
+    {}
     QString userScriptsDir();
 
     QStringList getDefinedScripts();
+
+    void reloadScripts();
 
 private:
     TailSettings& settings;

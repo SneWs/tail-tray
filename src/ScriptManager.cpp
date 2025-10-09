@@ -34,3 +34,8 @@ QStringList ScriptManager::getDefinedScripts() {
 
     return scripts;
 }
+
+void ScriptManager::reloadScripts() {
+    qDebug() << "TJKLDFJLÖSJDÖFJÖLJ";
+    return;
+}

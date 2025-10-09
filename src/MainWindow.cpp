@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget* parent)
     , pIpnWatcher(std::make_unique<IpnWatcher>(this))
     , eCurrentState(TailState::NoAccount)
     , settings(this)
+    , pScriptWatcher(std::make_unique<ScriptFolderWatcher>(this))
 {
     ui->setupUi(this);
 
@@ -80,6 +81,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->btnTailscaleDnsSettings, &QPushButton::clicked, this, &MainWindow::showDnsSettingsDialog);
 
     connect(pTrayManager.get(), &TrayMenuManager::ipAddressCopiedToClipboard, this, &MainWindow::ipAddressCopiedToClipboard);
+
+    connect(pScriptWatcher.get(), &ScriptFolderWatcher::scriptsChanged,
+        pScriptManager.get(), &ScriptManager::reloadScripts);
 
     changeToState(TailState::NotLoggedIn);
 
@@ -462,6 +466,7 @@ void MainWindow::onShowTailScriptFileSaveLocationPicker() {
         const auto& selection = dlg.selectedFiles();
         ui->txtTailScriptFilesSavePath->setText(selection.first().trimmed());
         settings.tailScriptFilesSavePath(selection.first().trimmed());
+        pScriptWatcher->startWatching(selection.first().trimmed());
     }
 }
 

@@ -516,9 +516,28 @@ void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString&
 }
 
 void TrayMenuManager::onScriptsUpdated() {
+    auto scripts = scriptManager.getDefinedScripts();
+    if (scripts.isEmpty())
+        return;
+
     for (auto it = deviceScriptMenus.begin(); it != deviceScriptMenus.end(); ++it) {
         const QString& deviceId = it.key();
-        rebuildScriptsMenu(deviceId, storedDeviceIps[deviceId], storedDeviceDns[deviceId]);
+        const QString& ip = storedDeviceIps[deviceId];
+        const QString& dnsName = storedDeviceDns[deviceId];
+
+        if (!deviceScriptMenus.contains(deviceId)) {
+            for (QMenu* menu : disposableMenus) {
+                if (menu->title().contains(dnsName, Qt::CaseInsensitive)) {
+                    auto* scriptsMenu = menu->addMenu(tr("Scriptable Actions"));
+                    deviceScriptMenus.insert(deviceId, scriptsMenu);
+                    break;
+                }
+            }
+        }
+
+        if (deviceScriptMenus.contains(deviceId)) {
+            rebuildScriptsMenu(deviceId, ip, dnsName);
+        }
     }
 }
 

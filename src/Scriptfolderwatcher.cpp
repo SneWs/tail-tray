@@ -24,6 +24,10 @@ void ScriptFolderWatcher::startWatching(const QString& path) {
     emit scriptsChanged();
 }
 
+void ScriptFolderWatcher::stopWatching() {
+    watcher.removePaths(watcher.directories());
+}
+
 void ScriptFolderWatcher::onDirectoryChanged(const QString& path) {
     qDebug() << "Changes in script folder:" << path;
 

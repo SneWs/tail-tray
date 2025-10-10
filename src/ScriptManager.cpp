@@ -22,12 +22,12 @@ QStringList ScriptManager::getDefinedScripts() {
         return scripts;
     }
 
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.sh", QDir::Files);
+    QFileInfoList files = dir.entryInfoList(QStringList() << "*.bat", QDir::Files);
     for (const QFileInfo& file : files) {
-        if (!file.isExecutable()) {
-            qWarning() << "Script file is not executable: " << file.absoluteFilePath() << ", skipping file.";
-            continue;
-        }
+        //if (!file.isExecutable()) {
+          //  qWarning() << "Script file is not executable: " << file.absoluteFilePath() << ", skipping file.";
+            //continue;
+        //}
         scripts << file.absoluteFilePath();
     }
 

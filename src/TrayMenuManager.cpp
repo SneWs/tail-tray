@@ -486,12 +486,8 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 }
 
 void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString& ip, const QString& dnsName) {
-    auto scripts = scriptManager.getDefinedScripts();
+    auto scripts = scriptManager->getDefinedScripts();
 
-<<<<<<< HEAD
-=======
-    qDebug() << "test2";
->>>>>>> 333f039b3db00efa8d10272d9f2586f74cb38ade
     if (!scripts.isEmpty() && !deviceScriptMenus.contains(deviceId)) {
         for (auto* m : disposableMenus) {
             if (m->title().contains(ip, Qt::CaseInsensitive) ||
@@ -511,13 +507,17 @@ void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString&
     if (!deviceScriptMenus.contains(deviceId))
         return;
 
-    QMenu* scriptsMenu = deviceScriptMenus.value(deviceId);
+    QPointer<QMenu> scriptsMenu = deviceScriptMenus.value(deviceId);
+    if (scriptsMenu.isNull())
+        return;
+
     scriptsMenu->clear();
 
     if (scripts.isEmpty())
         return;
 
     for (const auto& script : scripts) {
+        if (scriptsMenu.isNull()) return;
         QFileInfo fileInfo(script);
         QAction* action = scriptsMenu->addAction(fileInfo.baseName());
         connect(action, &QAction::triggered, this, [fileInfo, ip, dnsName]() {
@@ -528,11 +528,18 @@ void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString&
 }
 
 void TrayMenuManager::onScriptsUpdated() {
-    auto scripts = scriptManager.getDefinedScripts();
+    auto scripts = scriptManager->getDefinedScripts();
+
+    for (auto it = deviceScriptMenus.begin(); it != deviceScriptMenus.end();) {
+        if (it.value().isNull())
+            it = deviceScriptMenus.erase(it);
+        else
+            ++it;
+    }
 
     if (scripts.isEmpty()) {
         for (auto it = deviceScriptMenus.begin(); it != deviceScriptMenus.end(); ) {
-            QMenu* scriptsMenu = it.value();
+            QPointer<QMenu> scriptsMenu = it.value();
             if (scriptsMenu) {
                 if (auto* parentMenu = qobject_cast<QMenu*>(scriptsMenu->parentWidget())) {
                     parentMenu->removeAction(scriptsMenu->menuAction());

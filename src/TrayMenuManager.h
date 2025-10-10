@@ -6,6 +6,7 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QString>
+#include <QPointer>
 
 #include "TailRunner.h"
 #include "TailSettings.h"
@@ -49,7 +50,7 @@ private:
     std::unique_ptr<QAction> pRestartTailscale;
     std::unique_ptr<SysCommand> pSysCommand;
     ScriptManager* scriptManager;
-    QHash<QString, QMenu*> deviceScriptMenus;
+    QHash<QString, QPointer<QMenu>> deviceScriptMenus;
     QHash<QString, QString> storedDeviceIps;
     QHash<QString, QString> storedDeviceDns;
 

@@ -16,7 +16,7 @@ class TrayMenuManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent = nullptr);
+    explicit TrayMenuManager(TailSettings& s, TailRunner* runner, ScriptManager* scriptMgr, QObject* parent = nullptr);
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void stateChangedTo(TailState newState, const TailStatus& pTailStatus);
@@ -48,7 +48,7 @@ private:
     std::unique_ptr<QAction> pRefreshLocalDns;
     std::unique_ptr<QAction> pRestartTailscale;
     std::unique_ptr<SysCommand> pSysCommand;
-    ScriptManager scriptManager;
+    ScriptManager* scriptManager;
     QHash<QString, QMenu*> deviceScriptMenus;
     QHash<QString, QString> storedDeviceIps;
     QHash<QString, QString> storedDeviceDns;

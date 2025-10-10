@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
-    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
+    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), pScriptManager.get(), this);
     pNotificationsManager = std::make_unique<NotificationsManager>(pTrayManager.get(), this);
 
     // Remove the tail drive tab by default
@@ -129,6 +129,9 @@ void MainWindow::shutdown() {
 
     if (pCurrentExecution != nullptr)
         pCurrentExecution->shutdown();
+
+    if (pScriptWatcher)
+        pScriptWatcher->stopWatching();
 }
 
 void MainWindow::showSettingsTab() {

@@ -14,33 +14,33 @@
 #include <algorithm>
 
 namespace {
-    static QList<QAction*> disposableConnectedMenuActions = {};
-    static QList<QMenu*> disposableMenus = {};
+static QList<QAction*> disposableConnectedMenuActions = {};
+static QList<QMenu*> disposableMenus = {};
 
-    void cleanupDisposableActions() {
-        for (QAction* ac : disposableConnectedMenuActions) {
-            delete ac;
-        }
-
-        disposableConnectedMenuActions.clear();
+void cleanupDisposableActions() {
+    for (QAction* ac : disposableConnectedMenuActions) {
+        delete ac;
     }
 
-    void cleanupDisposableMenus() {
-        for (QMenu* m : disposableMenus) {
-            if (m)
-                m->deleteLater();
-        }
-
-        disposableMenus.clear();
-    }
+    disposableConnectedMenuActions.clear();
 }
 
-TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent)
+void cleanupDisposableMenus() {
+    for (QMenu* m : disposableMenus) {
+        if (m)
+            m->deleteLater();
+    }
+
+    disposableMenus.clear();
+}
+}
+
+TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ScriptManager* scriptMgr, QObject* parent)
     : QObject(parent)
     , settings(s)
     , pTailRunner(runner)
     , pSysCommand(std::make_unique<SysCommand>())
-    , scriptManager(s)
+    , scriptManager(scriptMgr)
 {
     pTrayMenu = std::make_unique<QMenu>("Tail Tray");
 
@@ -80,22 +80,22 @@ void TrayMenuManager::stateChangedTo(TailState newState, const TailStatus& pTail
     cleanupDisposableMenus();
 
     switch (newState) {
-        case TailState::Connected:
-        case TailState::LoggedIn: {
-            buildConnectedMenu(pTailStatus);
-            break;
-        }
-        case TailState::NoAccount:
-        case TailState::NotLoggedIn: {
-            buildNotLoggedInMenu();
-            break;
-        }
-        case TailState::NotConnected: {
-            buildNotConnectedMenu(pTailStatus);
-            break;
-        }
-        default:
-            assert(!"Unhandled TailState status!");
+    case TailState::Connected:
+    case TailState::LoggedIn: {
+        buildConnectedMenu(pTailStatus);
+        break;
+    }
+    case TailState::NoAccount:
+    case TailState::NotLoggedIn: {
+        buildNotLoggedInMenu();
+        break;
+    }
+    case TailState::NotConnected: {
+        buildNotConnectedMenu(pTailStatus);
+        break;
+    }
+    default:
+        assert(!"Unhandled TailState status!");
     }
 }
 
@@ -104,12 +104,12 @@ void TrayMenuManager::buildNotLoggedInMenu() const {
     pTrayMenu->addAction(pLoginAction.get());
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
     pTrayMenu->addAction(pPreferences.get());
     pTrayMenu->addAction(pAbout.get());
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
     pTrayMenu->addAction(pQuitAction.get());
 
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
@@ -120,7 +120,7 @@ void TrayMenuManager::buildNotConnectedMenu(const TailStatus& pTailStatus) const
     pTrayMenu->addAction(pConnect.get());
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
 
     if (pTailStatus.user.id > 0)
         pThisDevice->setText(pTailStatus.user.loginName);
@@ -132,12 +132,12 @@ void TrayMenuManager::buildNotConnectedMenu(const TailStatus& pTailStatus) const
     actions->addAction(pRefreshLocalDns.get());
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
     pTrayMenu->addAction(pPreferences.get());
     pTrayMenu->addAction(pAbout.get());
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
     pTrayMenu->addAction(pQuitAction.get());
 
     pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
@@ -152,7 +152,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
 
     pThisDevice->setText(pTailStatus.user.loginName);
     pTrayMenu->addAction(pThisDevice.get());
@@ -196,7 +196,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
                 disposableConnectedMenuActions.push_back(
                     deviceMenu->addSeparator()
-                );
+                    );
 
                 auto* sendFileAction = deviceMenu->addAction(tr("Send file"));
                 disposableConnectedMenuActions.push_back(sendFileAction);
@@ -216,7 +216,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
                     // The user data will be cleaned up when the signal is triggered back to us
                     pTailRunner->sendFile(name, file,
-                        new QString(file));
+                                          new QString(file));
                 });
 
                 storedDeviceIps.insert(dev.id, dev.tailscaleIPs.first());
@@ -274,7 +274,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
             if (pTailStatus.drives.count() > 0) {
                 disposableConnectedMenuActions.push_back(
                     drives->addSeparator()
-                );
+                    );
             }
 
             for (const auto& drive : pTailStatus.drives) {
@@ -302,7 +302,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
                 disposableConnectedMenuActions.push_back(
                     driveMenu->addSeparator()
-                );
+                    );
 
                 auto* openAction = driveMenu->addAction(tr("Open in file manager"));
                 disposableConnectedMenuActions.push_back(openAction);
@@ -316,7 +316,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
 
     auto* actions = pTrayMenu->addMenu(tr("Custom Actions"));
     disposableMenus.push_back(actions);
@@ -325,7 +325,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
 
     auto* exitNodes = pTrayMenu->addMenu(tr("Exit nodes"));
     disposableMenus.push_back(exitNodes);
@@ -345,12 +345,12 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                 hasMullvadNodes = true;
                 continue;
             }
-            
+
             auto name = dev.getShortDnsName();
             if (!dev.online) {
                 name += tr(" (offline)");
             }
-            
+
             auto* action = exitNodes->addAction(name);
             disposableConnectedMenuActions.push_back(action);
 
@@ -385,7 +385,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
     if (hasMullvadNodes) {
         disposableConnectedMenuActions.push_back(
             exitNodes->addSeparator()
-        );
+            );
 
         auto* mullvadExitNodes = exitNodes->addMenu(tr("Mullvad Exit Nodes"));
         disposableMenus.push_back(mullvadExitNodes);
@@ -410,7 +410,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                     if (!peer.online) {
                         dnsName += tr(" (offline)");
                     }
-                    
+
                     auto* action = cityMenu->addAction(dnsName);
                     disposableConnectedMenuActions.push_back(action);
 
@@ -446,7 +446,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
     disposableConnectedMenuActions.push_back(
         exitNodes->addSeparator()
-    );
+        );
 
     QAction* runExitNode = exitNodes->addAction(tr("Run as exit node"));
     disposableConnectedMenuActions.push_back(runExitNode);
@@ -473,12 +473,12 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
     pTrayMenu->addAction(pPreferences.get());
     pTrayMenu->addAction(pAbout.get());
     disposableConnectedMenuActions.push_back(
         pTrayMenu->addSeparator()
-    );
+        );
     pTrayMenu->addAction(pQuitAction.get());
 
     pSysTray->setIcon(QIcon(":/icons/tray-on.png"));
@@ -488,6 +488,10 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
 void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString& ip, const QString& dnsName) {
     auto scripts = scriptManager.getDefinedScripts();
 
+<<<<<<< HEAD
+=======
+    qDebug() << "test2";
+>>>>>>> 333f039b3db00efa8d10272d9f2586f74cb38ade
     if (!scripts.isEmpty() && !deviceScriptMenus.contains(deviceId)) {
         for (auto* m : disposableMenus) {
             if (m->title().contains(ip, Qt::CaseInsensitive) ||
@@ -525,8 +529,28 @@ void TrayMenuManager::rebuildScriptsMenu(const QString& deviceId, const QString&
 
 void TrayMenuManager::onScriptsUpdated() {
     auto scripts = scriptManager.getDefinedScripts();
-    if (scripts.isEmpty())
+
+    if (scripts.isEmpty()) {
+        for (auto it = deviceScriptMenus.begin(); it != deviceScriptMenus.end(); ) {
+            QMenu* scriptsMenu = it.value();
+            if (scriptsMenu) {
+                if (auto* parentMenu = qobject_cast<QMenu*>(scriptsMenu->parentWidget())) {
+                    parentMenu->removeAction(scriptsMenu->menuAction());
+                }
+
+                scriptsMenu->deleteLater();
+            }
+            it = deviceScriptMenus.erase(it);
+        }
         return;
+    }
+
+    if (deviceScriptMenus.isEmpty()) {
+        for (auto id : storedDeviceIps.keys()) {
+            rebuildScriptsMenu(id, storedDeviceIps[id], storedDeviceDns[id]);
+        }
+        return;
+    }
 
     for (auto it = deviceScriptMenus.begin(); it != deviceScriptMenus.end(); ++it) {
         const QString& deviceId = it.key();
@@ -601,19 +625,19 @@ void TrayMenuManager::setupWellKnownActions() const {
     });
 
     connect(pSysTray.get(), &QSystemTrayIcon::activated,
-        this, [this](QSystemTrayIcon::ActivationReason reason) {
-            auto* wnd = dynamic_cast<MainWindow*>(this->parent());
-            if (reason == QSystemTrayIcon::ActivationReason::Trigger) {
-                if (wnd->isVisible())
-                    wnd->hide();
-                else {
-                    // NOTE: When settings are read, they will call settings to UI so will be in sync on show
-                    pTailRunner->readSettings();
-                    wnd->showSettingsTab();
+            this, [this](QSystemTrayIcon::ActivationReason reason) {
+                auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+                if (reason == QSystemTrayIcon::ActivationReason::Trigger) {
+                    if (wnd->isVisible())
+                        wnd->hide();
+                    else {
+                        // NOTE: When settings are read, they will call settings to UI so will be in sync on show
+                        pTailRunner->readSettings();
+                        wnd->showSettingsTab();
+                    }
                 }
             }
-        }
-    );
+            );
 
     connect(pRestartTailscale.get(), &QAction::triggered, this, [this](bool) {
         pSysCommand->restartTailscaleDaemon();

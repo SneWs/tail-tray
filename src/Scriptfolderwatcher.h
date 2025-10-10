@@ -11,6 +11,8 @@ public:
 
     void startWatching(const QString& path);
 
+    void stopWatching();
+
 signals:
     void scriptsChanged();
 

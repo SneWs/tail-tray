@@ -17,7 +17,6 @@ IpnWatcher::~IpnWatcher() {
 }
 
 void IpnWatcher::start() {
-
     if (m_process != nullptr) {
         stop();
     }

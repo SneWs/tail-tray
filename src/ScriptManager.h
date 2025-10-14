@@ -11,8 +11,8 @@ class ScriptManager : public QObject
     Q_OBJECT
 public:
     explicit ScriptManager(TailSettings& s, QObject *parent = nullptr)
-        : settings(s)
-        , QObject(parent)
+        : QObject(parent)
+        , settings(s)
     {}
     QString userScriptsDir();
 

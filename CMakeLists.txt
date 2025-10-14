@@ -136,7 +136,6 @@ elseif (WIN32)
             MANUAL_FINALIZATION
             ${PROJECT_SOURCES}
             ${app_icon_resource_windows}
-            src/scriptfolderwatcher.h src/scriptfolderwatcher.cpp
     )
 else ()
     qt_add_executable(tail-tray

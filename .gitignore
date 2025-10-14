@@ -15,6 +15,7 @@ build/
 cmake-build-debug/
 cmake-build-release/
 .cache/
+.vs/
 
 packaging/
 .flatpak-builder/

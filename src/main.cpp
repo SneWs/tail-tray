@@ -1,6 +1,5 @@
 #include "MainWindow.h"
 #include "SingleApplicationImpl.h"
-#include "ScriptManager.h"
 
 #include <QApplication>
 #include <QDir>

@@ -33,21 +33,23 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistT
 
 option(BUILD_TESTS "Build tests" ON)
 
-# Use KNotifications
-option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
-if (KNOTIFICATIONS_ENABLED)
-    message("KNotifications has been enabled! This requires Plasma 6")
+if (!WIN32)
+    # Use KNotifications
+    option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
+    if (KNOTIFICATIONS_ENABLED)
+        message("KNotifications has been enabled! This requires Plasma 6")
 
-    find_package(ECM REQUIRED NO_MODULE)
-    set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
-    include(KDEInstallDirs)
-    include(KDECMakeSettings)
+        find_package(ECM REQUIRED NO_MODULE)
+        set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+        include(KDEInstallDirs)
+        include(KDECMakeSettings)
 
-    add_definitions(-DKNOTIFICATIONS_ENABLED)
-    find_package(KF6Notifications)
-else ()
-    message("KNotifications has not been enabled!")
-endif (KNOTIFICATIONS_ENABLED)
+        add_definitions(-DKNOTIFICATIONS_ENABLED)
+        find_package(KF6Notifications)
+    else ()
+        message("KNotifications has not been enabled!")
+    endif (KNOTIFICATIONS_ENABLED)
+endif (!WIN32)
 
 set(PROJECT_SOURCES
     src/main.cpp

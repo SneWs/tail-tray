@@ -18,6 +18,7 @@
 #include "models/TailStatus.h"
 #include "PleaseWaitDlg.h"
 #include "NotificationsManager.h"
+#include "ScriptManager.h"
 
 #if defined(DAVFS_ENABLED)
 #include "TailDriveUiManager.h"
@@ -58,6 +59,7 @@ private:
     std::unique_ptr<TailDriveUiManager> pTailDriveUiManager;
 #endif
     std::unique_ptr<NotificationsManager> pNotificationsManager;
+    std::unique_ptr<ScriptManager> pScriptManager;
 
     TailState eCurrentState;
     TailSettings settings;
@@ -100,6 +102,8 @@ private slots:
     // Warnings, Errors etc reporting (Toast messages)
     void showWarningMessage(const QString& title, const QString& message, bool timeLimited = true);
     void showErrorMessage(const QString& title, const QString& message, bool timeLimited = true);
+
+    void onScriptManagerScriptsChanged() const;
 
 private:
     // Switch to the new state and return the prev (old) state back to caller

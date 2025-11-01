@@ -49,10 +49,6 @@ TailRunner::TailRunner(const TailSettings& s, QObject* parent)
 {
 }
 
-TailRunner::~TailRunner()
-{
-}
-
 void TailRunner::shutdown() {
     // Kill off any pending process calls, this is needed in cases such as:
     // - When the user is in a pending login state, then the process is waiting for user to complete web auth flows

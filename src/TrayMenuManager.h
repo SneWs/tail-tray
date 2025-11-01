@@ -16,7 +16,7 @@ class TrayMenuManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent = nullptr);
+    explicit TrayMenuManager(TailSettings& s, TailRunner* runner, ScriptManager* scriptManager, QObject* parent = nullptr);
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void stateChangedTo(TailState newState, const TailStatus& pTailStatus);
@@ -30,6 +30,7 @@ private:
     QList<TailAccountInfo> accounts;
     TailSettings& settings;
     TailRunner* pTailRunner;
+    ScriptManager* pScriptManager;
     std::unique_ptr<QSystemTrayIcon> pSysTray;
     std::unique_ptr<QMenu> pTrayMenu;
     std::unique_ptr<QAction> pQuitAction;
@@ -45,7 +46,7 @@ private:
     std::unique_ptr<QAction> pRefreshLocalDns;
     std::unique_ptr<QAction> pRestartTailscale;
     std::unique_ptr<SysCommand> pSysCommand;
-    ScriptManager scriptManager;
+    QStringList scripts;
 
 private:
     void buildNotLoggedInMenu() const;

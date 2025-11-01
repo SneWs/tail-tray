@@ -34,7 +34,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
     accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
-    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), this);
+    pScriptManager = std::make_unique<ScriptManager>(settings, this);
+    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), pScriptManager.get(), this);
     pNotificationsManager = std::make_unique<NotificationsManager>(pTrayManager.get(), this);
 
     // Remove the tail drive tab by default
@@ -98,10 +99,16 @@ MainWindow::MainWindow(QWidget* parent)
     ui->lblTailnetLockTitle->setEnabled(false);
     ui->btnManageTailnetLocks->setEnabled(false);
 
+    // Script manager hooks
+    connect(pScriptManager.get(), &ScriptManager::availableScriptsChanged,
+        this, &MainWindow::onScriptManagerScriptsChanged);
+
 #if defined(WINDOWS_BUILD)
     // On windows this looks like crap, so don't use it
     ui->twNetworkStatus->setAlternatingRowColors(false);
 #endif
+
+    pScriptManager->tryInstallWatcher();
 }
 
 void MainWindow::shutdown() {
@@ -309,6 +316,8 @@ void MainWindow::settingsClosed() {
         pCurrentExecution->start();
 
     hide();
+
+    pScriptManager->tryInstallWatcher();
 }
 
 void MainWindow::loginFlowStarting(const QString& loginUrl) {
@@ -618,6 +627,11 @@ void MainWindow::showErrorMessage(const QString& title, const QString& message, 
     }
 
     pNotificationsManager->showErrorNotification(title, message);
+}
+
+void MainWindow::onScriptManagerScriptsChanged() const {
+    // Trigger re-load of menus
+    pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
 }
 
 bool MainWindow::isTailDriveFileAlreadySetup() {

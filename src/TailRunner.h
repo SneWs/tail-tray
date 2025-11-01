@@ -39,7 +39,7 @@ class BufferedProcessWrapper : public QObject
     Q_OBJECT
 public:
     explicit BufferedProcessWrapper(Command cmd, bool emitOnActualSignals = false, QObject* parent = nullptr);
-    ~BufferedProcessWrapper() = default;
+    ~BufferedProcessWrapper() override = default;
 
     /// Start the process with the given command and arguments
     void start(const QString& cmd, QStringList args, bool jsonResult, bool usePkExec, void* userData);
@@ -48,7 +48,8 @@ public:
     [[nodiscard]] Command command() const { return eCommand; }
     [[nodiscard]] void* userData() const { return pUserData; }
     [[nodiscard]] bool isRunning() const { return proc != nullptr && proc->state() == QProcess::Running; }
-    void cancel(bool raiseEvents = true) {
+
+    void cancel(const bool raiseEvents = true) {
         if (proc != nullptr) {
             proc->terminate();
         }
@@ -84,7 +85,7 @@ class TailRunner : public QObject
     Q_OBJECT
 public:
     explicit TailRunner(const TailSettings& s, QObject* parent = nullptr);
-    ~TailRunner() override;
+    ~TailRunner() override = default;
 
     void shutdown();
 

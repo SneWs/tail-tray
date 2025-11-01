@@ -2,6 +2,12 @@
 #include <QDir>
 #include <QFileInfoList>
 #include <QDebug>
+#include <QFileSystemWatcher>
+
+ScriptManager::ScriptManager(TailSettings &s, QObject* parent)
+    : QObject(parent)
+    , settings(s)
+{ }
 
 QString ScriptManager::userScriptsDir() const {
     QString configuredDir = settings.tailScriptFilesSavePath();
@@ -13,8 +19,7 @@ QString ScriptManager::userScriptsDir() const {
 
 QStringList ScriptManager::getDefinedScripts() const {
     QStringList scripts{};
-    const QString dirPath = userScriptsDir();
-    const QDir dir(dirPath);
+    const QDir dir(userScriptsDir());
     if (!dir.exists()) {
         // No scripts directory, return empty list
         return scripts;
@@ -30,4 +35,24 @@ QStringList ScriptManager::getDefinedScripts() const {
     }
 
     return scripts;
+}
+
+void ScriptManager::tryInstallWatcher() {
+    if (pWatcher) {
+        pWatcher.reset(nullptr);
+    }
+
+    const QDir dir(userScriptsDir());
+    if (!dir.exists())
+        return;
+
+    pWatcher = std::make_unique<QFileSystemWatcher>(this);
+    connect(pWatcher.get(), &QFileSystemWatcher::directoryChanged,
+            this,    &ScriptManager::onDirectoryChanged);
+
+    pWatcher->addPath(dir.absolutePath());
+}
+
+void ScriptManager::onDirectoryChanged(const QString&) {
+    emit availableScriptsChanged();
 }

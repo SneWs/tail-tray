@@ -14,8 +14,8 @@
 #include <algorithm>
 
 namespace {
-    static QList<QAction*> disposableConnectedMenuActions = {};
-    static QList<QMenu*> disposableMenus = {};
+    QList<QAction*> disposableConnectedMenuActions = {};
+    QList<QMenu*> disposableMenus = {};
 
     void cleanupDisposableActions() {
         for (QAction* ac : disposableConnectedMenuActions) {
@@ -35,12 +35,12 @@ namespace {
     }
 }
 
-TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, QObject* parent)
+TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ScriptManager* scriptManager, QObject* parent)
     : QObject(parent)
     , settings(s)
     , pTailRunner(runner)
+    , pScriptManager(scriptManager)
     , pSysCommand(std::make_unique<SysCommand>())
-    , scriptManager(s)
 {
     pTrayMenu = std::make_unique<QMenu>("Tail Tray");
 
@@ -157,6 +157,9 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
     pThisDevice->setText(pTailStatus.user.loginName);
     pTrayMenu->addAction(pThisDevice.get());
 
+    // Re-scan for custom scripts
+    scripts = pScriptManager->getDefinedScripts();
+
     auto* netDevs = pTrayMenu->addMenu(tr("Network devices"));
     disposableMenus.push_back(netDevs);
     for (const auto& dev : pTailStatus.peers) {
@@ -219,8 +222,6 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                         new QString(file));
                 });
 
-                auto scripts = scriptManager.getDefinedScripts();
-
                 if (!scripts.isEmpty()) {
 
                     auto* scriptsMenu = deviceMenu->addMenu(tr("Scriptable Actions"));
@@ -229,9 +230,10 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus& pTailStatus) {
                     const auto& ip = dev.tailscaleIPs.first();
                     for (const auto& script : scripts) {
                         QFileInfo fileInfo(script);
-                        QAction* action = scriptsMenu->addAction(fileInfo.baseName());
+                        QAction* fileAction = scriptsMenu->addAction(fileInfo.baseName());
+                        disposableConnectedMenuActions.push_back(fileAction);
                         auto dnsName = dev.dnsName;
-                        connect(action, &QAction::triggered, this, [fileInfo, ip, dnsName]() {
+                        connect(fileAction, &QAction::triggered, this, [fileInfo, ip, dnsName]() {
                             qDebug() << "Running script: " << fileInfo.absoluteFilePath();
                             qint64 pid = 0;
                             auto success = QProcess::startDetached(fileInfo.absoluteFilePath(), { ip, dnsName }, fileInfo.absolutePath(), &pid);

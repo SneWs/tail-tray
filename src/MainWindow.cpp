@@ -74,6 +74,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(pCurrentExecution.get(), &TailRunner::loginFlowStarting, this, &MainWindow::loginFlowStarting);
     connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
     connect(pCurrentExecution.get(), &TailRunner::fileSent, this, &MainWindow::fileSentToDevice);
+    connect(pCurrentExecution.get(), &TailRunner::newPeerDiscovered, this, &MainWindow::onNewPeerDiscovered);
+    connect(pCurrentExecution.get(), &TailRunner::peerRemoved, this, &MainWindow::onPeerRemoved);
 
     connect(pNetworkStateMonitor.get(), &NetworkStateMonitor::netCheckCompleted, this, &MainWindow::netCheckCompleted);
     connect(pIpnWatcher.get(), &IpnWatcher::eventReceived, this, &MainWindow::onIpnEvent);
@@ -388,9 +390,21 @@ void MainWindow::onIpnEvent(const IpnEventData& eventData) {
     pCurrentExecution->bootstrap();
 }
 
-void MainWindow::ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname) {
+void MainWindow::ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname) const {
         pNotificationsManager->showNotification(tr("IP address copied"),
             "IP Address " + ipAddress + " for " + hostname + " have been copied to clipboard!");
+}
+
+void MainWindow::onNewPeerDiscovered(const TailDeviceInfo& peer) const {
+    pNotificationsManager->showNotification(tr("Tailnet Devices"),
+    tr("A new device have been discovered on your tailnet!\n\nDevice: %1 (%2)")
+        .arg(peer.getShortDnsName(), peer.os));
+}
+
+void MainWindow::onPeerRemoved(const TailDeviceInfo& peer) const {
+    pNotificationsManager->showNotification(tr("Tailnet Devices"),
+    tr("A device have been removed from your tailnet!\n\nDevice: %1 (%2)")
+        .arg(peer.getShortDnsName(), peer.os));
 }
 
 #if defined(DAVFS_ENABLED)

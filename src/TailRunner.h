@@ -122,6 +122,7 @@ public:
 private:
     const TailSettings& settings;
     CurrentTailPrefs currentPrefs;
+    TailStatus lastKnownStatus;
 
 signals:
     void tailscaleIsInstalled(bool installed);
@@ -133,8 +134,9 @@ signals:
     void loginFlowCompleted(bool success);
     void driveListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);
     void fileSent(bool success, const QString& errorMsg, void* userData);
-
     void commandError(const QString& errorMsg, bool requiresSudoError);
+    void newPeerDiscovered(const TailDeviceInfo& peer);
+    void peerRemoved(const TailDeviceInfo& peer);
 
 private:
     void runCommand(Command cmdType, const QString& cmd, const QStringList& args, bool jsonResult = false, bool usePkExec = false, void* userData = nullptr);

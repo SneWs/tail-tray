@@ -79,6 +79,14 @@ public:
         return *this;
     }
 
+    [[nodiscard]] bool containsPeer(const TailDeviceInfo& peer) {
+        for (const auto& p : peers) {
+            if (p.id == peer.id)
+                return true;
+        }
+        return false;
+    }
+
     static TailStatus parse(const QJsonObject& obj) {
         TailStatus newStatus{};
         newStatus.version = jsonReadString(obj, "Version");
@@ -144,7 +152,7 @@ public:
         return newStatus;
     }
 
-    QMap<QString, QMap<QString, QList<TailDeviceInfo>>> getMullvadExitNodesByCountry() const {
+    [[nodiscard]] QMap<QString, QMap<QString, QList<TailDeviceInfo>>> getMullvadExitNodesByCountry() const {
         QMap<QString, QMap<QString, QList<TailDeviceInfo>>> countryMap;
 
         for (const auto& peer : peers) {

@@ -46,8 +46,8 @@ TailRunner::TailRunner(const TailSettings& s, QObject* parent)
     : QObject(parent)
     , settings(s)
     , currentPrefs()
-{
-}
+    , lastKnownStatus()
+{ }
 
 void TailRunner::shutdown() {
     // Kill off any pending process calls, this is needed in cases such as:
@@ -503,7 +503,36 @@ void TailRunner::onProcessFinished(BufferedProcessWrapper* process, int exitCode
 }
 
 void TailRunner::parseStatusResponse(const QJsonObject& obj) {
-    emit statusUpdated(TailStatus::parse(obj));
+    auto newStatus = TailStatus::parse(obj);
+    auto oldStatus = lastKnownStatus;
+    lastKnownStatus = newStatus;
+
+    emit statusUpdated(newStatus);
+
+    // If this is startup or a full refresh etc. we do not diff
+    if (oldStatus.peers.length() < 1) {
+        return;
+    }
+
+    // Diff peers and track newly added peers
+    for (const auto& peer : lastKnownStatus.peers) {
+        const auto existsFromBefore = oldStatus.containsPeer(peer);
+        if (!existsFromBefore) {
+            // New peer added
+            qDebug() << "New peer discovered" << peer.getShortDnsName() << " / " << peer.dnsName;
+            emit newPeerDiscovered(peer);
+        }
+    }
+
+    // Diff peers and track removed peers
+    for (const auto& peer : oldStatus.peers) {
+        const auto stillExists = lastKnownStatus.containsPeer(peer);
+        if (!stillExists) {
+            // Peer removed
+            qDebug() << "Peer removed" << peer.getShortDnsName() << " / " << peer.dnsName;
+            emit peerRemoved(peer);
+        }
+    }
 }
 
 void TailRunner::parseSettingsResponse(const QJsonObject& obj) {

@@ -1,4 +1,4 @@
-name: Build Ubuntu 25.04 - Deb
+name: Build Ubuntu 25.10 - Deb
 
 on:
   push:
@@ -32,13 +32,13 @@ jobs:
           mkdir -p ${{ steps.strings.outputs.build-output-dir }}
           echo "Build output directory: ${{ steps.strings.outputs.build-output-dir }}"
 
-      - name: Package DEB file for Ubuntu 25.04
+      - name: Package DEB file for Ubuntu 25.10
         uses: jtdor/build-deb-action@v1
         env:
           DEB_BUILD_OPTIONS: noautodbgsym
         with:
           artifacts-dir: build
-          docker-image: ubuntu:25.04
+          docker-image: ubuntu:25.10
           extra-build-deps: devscripts git libkf6notifications-dev extra-cmake-modules qt6-tools-dev qt6-tools-dev-tools davfs2
           buildpackage-opts: --build=binary --no-sign
           before-build-hook: |
@@ -49,13 +49,13 @@ jobs:
               -S /github/workspace \
               -G "Unix Makefiles"
             
-            debchange --controlmaint --local="ubuntu-25.04-plucky~git$(git rev-parse --short HEAD)" "CI build"
+            debchange --controlmaint --local="ubuntu-25.10-plucky~git$(git rev-parse --short HEAD)" "CI build"
 
       - name: Upload DEB for PR builds
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: Ubuntu-25.04.deb
+          name: Ubuntu-25.10.deb
           path: ${{ steps.strings.outputs.build-output-dir }}/*.deb
           overwrite: true
       
@@ -65,5 +65,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          mv ${{ steps.strings.outputs.build-output-dir }}/*ubuntu-25.04*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-ubuntu-25.04.deb
+          mv ${{ steps.strings.outputs.build-output-dir }}/*ubuntu-25.10*.deb ${{ steps.strings.outputs.build-output-dir }}/tail-tray-ubuntu-25.10.deb
           gh release upload latest ${{ steps.strings.outputs.build-output-dir }}/*.deb --clobber

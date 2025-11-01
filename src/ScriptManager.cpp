@@ -1,23 +1,20 @@
 #include "ScriptManager.h"
-#include <QStandardPaths>
 #include <QDir>
 #include <QFileInfoList>
 #include <QDebug>
 
-QString ScriptManager::userScriptsDir() {
+QString ScriptManager::userScriptsDir() const {
     QString configuredDir = settings.tailScriptFilesSavePath();
     if (configuredDir.isEmpty()) {
-        return QString();
+        return {};
     }
-    else {
-        return configuredDir;
-    }
+    return configuredDir;
 }
 
-QStringList ScriptManager::getDefinedScripts() {
-    QStringList scripts;
-    QString dirPath = userScriptsDir();
-    QDir dir(dirPath);
+QStringList ScriptManager::getDefinedScripts() const {
+    QStringList scripts{};
+    const QString dirPath = userScriptsDir();
+    const QDir dir(dirPath);
     if (!dir.exists()) {
         // No scripts directory, return empty list
         return scripts;

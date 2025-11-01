@@ -8,10 +8,12 @@
 
 class ScriptManager {
 public:
-    explicit ScriptManager(TailSettings &s) : settings(s) {}
-    QString userScriptsDir();
+    explicit ScriptManager(TailSettings &s)
+        : settings(s)
+    {}
 
-    QStringList getDefinedScripts();
+    [[nodiscard]] QString userScriptsDir() const;
+    [[nodiscard]] QStringList getDefinedScripts() const;
 
 private:
     TailSettings& settings;

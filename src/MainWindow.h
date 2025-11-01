@@ -65,6 +65,8 @@ private:
 
     QMap<QString, QDateTime> seenWarningsAndErrors;
 
+    bool isFixingOperator;
+
 private slots:
     void tailscaleIsInstalled(bool installed);
     void settingsReadyToRead();

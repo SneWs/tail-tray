@@ -30,7 +30,7 @@ void IpnWatcher::start() {
     connect(m_process.get(), &QProcess::readyReadStandardOutput,
         this, &IpnWatcher::onProcessCanReadStdOut);
 
-    connect(m_process.get(), &QProcess::readAllStandardError,
+    connect(m_process.get(), &QProcess::readyReadStandardError,
         this, &IpnWatcher::onProcessCanReadStandardError);
 
     QStringList args;

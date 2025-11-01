@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget* parent)
     , pIpnWatcher(std::make_unique<IpnWatcher>(this))
     , eCurrentState(TailState::NoAccount)
     , settings(this)
+    , isFixingOperator(false)
 {
     ui->setupUi(this);
 
@@ -225,9 +226,14 @@ void MainWindow::settingsReadyToRead() {
 
     syncSettingsToUi();
 
+    if (isFixingOperator)
+        return;
+
     // Make sure current user is operator
     auto isUserOperator = tailscalePrefs.operatorUser == qEnvironmentVariable("USER");
     if (!isUserOperator && !tailscalePrefs.loggedOut) {
+        isFixingOperator = true;
+
         const auto response = QMessageBox::warning(nullptr,
            "Failed to run command",
            "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
@@ -236,8 +242,12 @@ void MainWindow::settingsReadyToRead() {
         if (response == QMessageBox::Ok) {
             pCurrentExecution->setOperator();
         }
+
+        isFixingOperator = false;
     }
     else {
+        isFixingOperator = false;
+
         // Operator confirmed, lets continue the flow
         pCurrentExecution->getAccounts();
     }
@@ -269,6 +279,11 @@ void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
 void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
     if (isSudoRequired)
     {
+        if (isFixingOperator)
+            return;
+
+        isFixingOperator = true;
+
         const auto& prefs = pCurrentExecution->currentSettings();
         if (prefs.loggedOut) {
             return;

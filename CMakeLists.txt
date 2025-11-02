@@ -33,7 +33,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistT
 
 option(BUILD_TESTS "Build tests" ON)
 
-if (!WIN32)
+if (UNIX AND NOT APPLE)
     # Use KNotifications
     option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
     if (KNOTIFICATIONS_ENABLED)

@@ -48,7 +48,7 @@ void ScriptManager::tryInstallWatcher() {
 
     pWatcher = std::make_unique<QFileSystemWatcher>(this);
     connect(pWatcher.get(), &QFileSystemWatcher::directoryChanged,
-            this,    &ScriptManager::onDirectoryChanged);
+            this, &ScriptManager::onDirectoryChanged);
 
     pWatcher->addPath(dir.absolutePath());
 }

@@ -32,11 +32,11 @@ find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
 
 option(BUILD_TESTS "Build tests" ON)
+option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
 
 if (UNIX AND NOT APPLE)
-    # Use KNotifications
-    option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
     if (KNOTIFICATIONS_ENABLED)
+        # Use KNotifications
         message("KNotifications has been enabled! This requires Plasma 6")
 
         find_package(ECM REQUIRED NO_MODULE)

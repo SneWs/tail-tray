@@ -49,7 +49,7 @@ if (UNIX AND NOT APPLE)
     else ()
         message("KNotifications has not been enabled!")
     endif (KNOTIFICATIONS_ENABLED)
-endif (!WIN32)
+endif (UNIX AND NOT APPLE)
 
 set(PROJECT_SOURCES
     src/main.cpp

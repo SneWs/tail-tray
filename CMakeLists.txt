@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(tail-tray VERSION 0.2.26 LANGUAGES CXX)
+project(tail-tray VERSION 0.2.27 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

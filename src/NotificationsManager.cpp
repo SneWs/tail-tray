@@ -34,7 +34,7 @@ void NotificationsManager::showFileNotification(const QString& title, const QStr
     const QString& iconName) {
 
 #if defined(KNOTIFICATIONS_ENABLED)
-    auto* notification = new KNotification("FileTransfer", KNotification::NotificationFlag::CloseOnTimeout, this);
+    auto* notification = new KNotification("FileTransfer", KNotification::NotificationFlag::Persistent, this);
     notification->setTitle(title);
     notification->setText(message);
 
@@ -94,5 +94,38 @@ void NotificationsManager::showErrorNotification(const QString& title, const QSt
     notification->sendEvent();
 #else
     m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Critical, 5000);
+#endif
+}
+
+void NotificationsManager::showNodeConnectedNotification(const QString& nodeName, const QString& ipAddress, const QString& os)
+{
+#if defined(KNOTIFICATIONS_ENABLED)
+    auto* notification = new KNotification("NodeConnected", KNotification::NotificationFlag::Persistent, this);
+    notification->setTitle(tr("Tailnet Devices"));
+    notification->setText(tr("A new device have been discovered on your tailnet!\n\nDevice: %1 (%2) - %3")
+        .arg(nodeName, ipAddress, os));
+
+    notification->setIconName("online");
+    notification->sendEvent();
+#else
+    m_pTrayMgr->trayIcon()->showMessage(tr("Tailnet Devices"),
+    tr("A new device have been discovered on your tailnet!\n\nDevice: %1 (%2) - %3")
+        .arg(nodeName, ipAddress, os), QSystemTrayIcon::Information, 8000);
+#endif
+}
+void NotificationsManager::showNodeDisconnectedNotification(const QString& nodeName, const QString& ipAddress, const QString& os)
+{
+#if defined(KNOTIFICATIONS_ENABLED)
+    auto* notification = new KNotification("NodeDisconnected", KNotification::NotificationFlag::Persistent, this);
+    notification->setTitle(tr("Tailnet Devices"));
+    notification->setText(tr("A device have been removed from your tailnet!\n\nDevice: %1 (%2) - %3")
+        .arg(nodeName, ipAddress, os));
+
+    notification->setIconName("offline");
+    notification->sendEvent();
+#else
+    m_pTrayMgr->trayIcon()->showMessage(tr("Tailnet Devices"),
+    tr("A device have been removed from your tailnet!\n\nDevice: %1 (%2) - %3")
+        .arg(nodeName, ipAddress, os), QSystemTrayIcon::Information, 8000);
 #endif
 }

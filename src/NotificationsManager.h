@@ -23,6 +23,9 @@ public:
     void showWarningNotification(const QString& title, const QString& message, const QString& iconName = QString("dialog-warning"));
     void showErrorNotification(const QString& title, const QString& message, const QString& iconName = QString("dialog-error"));
 
+    void showNodeConnectedNotification(const QString& nodeName, const QString& ipAddress, const QString& os);
+    void showNodeDisconnectedNotification(const QString& nodeName, const QString& ipAddress, const QString& os);
+
 private:
     TrayMenuManager const* m_pTrayMgr;
 };

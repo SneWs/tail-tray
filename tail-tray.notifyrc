@@ -15,3 +15,15 @@
     Comment=A file have been sent or received on this machine over Tailscale/Wireguard
     Action=Sound|Popup
     Urgency=Normal
+
+[Event/NodeConnected]
+    Name=NodeConnected
+    Comment=A new node has been detected on the tailscale network
+    Action=Sound|Popup
+    Urgency=Normal
+
+[Event/NodeDisconnected]
+    Name=NodeDisconnected
+    Comment=A node has been removed from the tailscale network
+    Action=Sound|Popup
+    Urgency=Normal

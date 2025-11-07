@@ -3,6 +3,11 @@
         "*.nginx": "NGINX",
         "filesystem": "cpp",
         "xstring": "cpp",
-        "qjsonobject": "cpp"
-    }
+        "qjsonobject": "cpp",
+        "system_error": "cpp"
+    },
+    "cmake.configureArgs": [
+        "-DKNOTIFICATIONS_ENABLED=ON",
+        "-DDAVFS_ENABLED=OFF"
+    ]
 }

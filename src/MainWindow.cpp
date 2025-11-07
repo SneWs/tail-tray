@@ -396,15 +396,11 @@ void MainWindow::ipAddressCopiedToClipboard(const QString& ipAddress, const QStr
 }
 
 void MainWindow::onNewPeerDiscovered(const TailDeviceInfo& peer) const {
-    pNotificationsManager->showNotification(tr("Tailnet Devices"),
-    tr("A new device have been discovered on your tailnet!\n\nDevice: %1 (%2)")
-        .arg(peer.getShortDnsName(), peer.os));
+    pNotificationsManager->showNodeConnectedNotification(peer.getShortDnsName(), peer.tailscaleIPs.join(", "), peer.os);
 }
 
 void MainWindow::onPeerRemoved(const TailDeviceInfo& peer) const {
-    pNotificationsManager->showNotification(tr("Tailnet Devices"),
-    tr("A device have been removed from your tailnet!\n\nDevice: %1 (%2)")
-        .arg(peer.getShortDnsName(), peer.os));
+    pNotificationsManager->showNodeDisconnectedNotification(peer.getShortDnsName(), peer.tailscaleIPs.join(", "), peer.os);
 }
 
 #if defined(DAVFS_ENABLED)

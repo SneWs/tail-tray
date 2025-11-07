@@ -768,7 +768,9 @@ void MainWindow::onTailStatusChanged(const TailStatus& pNewStatus)
     }
 
     accountsTabUi->onTailStatusChanged(pTailStatus);
+#if defined(DAVFS_ENABLED)
     pTailDriveUiManager->stateChangedTo(eCurrentState, pTailStatus);
+#endif
 }
 
 bool MainWindow::shallowCheckForNetworkAvailable() {

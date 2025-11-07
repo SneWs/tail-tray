@@ -16,7 +16,9 @@ class TestTailStatus : public QObject
 private slots:
     void testParsingSucceeds() {
         QFile file("./data/tail-status-mullvad.json");
-        file.open(QIODevice::ReadOnly);
+        auto success = file.open(QIODevice::ReadOnly);
+        QVERIFY(success);
+
         auto json = QJsonDocument::fromJson(file.readAll());
         file.close();
 
@@ -28,7 +30,9 @@ private slots:
 
     void testParsingMullvadExtras() {
         QFile file("./data/tail-status-mullvad.json");
-        file.open(QIODevice::ReadOnly);
+        auto success = file.open(QIODevice::ReadOnly);
+        QVERIFY(success);
+
         auto json = QJsonDocument::fromJson(file.readAll());
         file.close();
 
@@ -45,7 +49,9 @@ private slots:
 
     void testSortingMullvadPeersByCountry() {
         QFile file("./data/tail-status-mullvad.json");
-        file.open(QIODevice::ReadOnly);
+        auto success = file.open(QIODevice::ReadOnly);
+        QVERIFY(success);
+
         auto json = QJsonDocument::fromJson(file.readAll());
         file.close();
 
@@ -77,7 +83,9 @@ private slots:
 
     void testSortingMullvadPeersByDnsName() {
         QFile file("./data/tail-status-mullvad.json");
-        file.open(QIODevice::ReadOnly);
+        auto success = file.open(QIODevice::ReadOnly);
+        QVERIFY(success);
+
         auto json = QJsonDocument::fromJson(file.readAll());
         file.close();
 

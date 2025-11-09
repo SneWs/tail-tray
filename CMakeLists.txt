@@ -106,6 +106,7 @@ set(PROJECT_SOURCES
     src/NotificationsManager.cpp
     src/ScriptManager.h
     src/ScriptManager.cpp
+    src/Version.h
 )
 
 if (APPLE)
@@ -167,6 +168,8 @@ if (KNOTIFICATIONS_ENABLED)
 endif (KNOTIFICATIONS_ENABLED)
 
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
+# Generate Version.h from template
+configure_file(src/Version.h.in ${CMAKE_SOURCE_DIR}/src/Version.h @ONLY)
 
 if (UNIX AND NOT APPLE)
     include(GNUInstallDirs)
@@ -177,6 +180,14 @@ install(TARGETS tail-tray
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+if (UNIVERSAL_CROSSBUILD)
+    install(FILES "${CMAKE_BINARY_DIR}/tail_tray_en_US.qm"
+            "${CMAKE_BINARY_DIR}/tail_tray_sv_SE.qm"
+            "${CMAKE_BINARY_DIR}/tail_tray_fr_FR.qm"
+            "${CMAKE_BINARY_DIR}/tail_tray_de_DE.qm"
+            DESTINATION "${FULL_LIBDIR_PATH}")
+endif ()
 
 if (UNIX AND NOT APPLE)
     configure_file(tail-tray.desktop.in
@@ -191,12 +202,6 @@ if (UNIX AND NOT APPLE)
 if (KNOTIFICATIONS_ENABLED)
     install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
 endif (KNOTIFICATIONS_ENABLED)
-
-    install(FILES "${CMAKE_BINARY_DIR}/tail_tray_en_US.qm"
-            "${CMAKE_BINARY_DIR}/tail_tray_sv_SE.qm"
-            "${CMAKE_BINARY_DIR}/tail_tray_fr_FR.qm"
-            "${CMAKE_BINARY_DIR}/tail_tray_de_DE.qm"
-            DESTINATION "${FULL_LIBDIR_PATH}")
 
     install(FILES icons/tailscale.png
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps

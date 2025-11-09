@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "Version.h"
 
 #include <QDir>
 #include <QFile>

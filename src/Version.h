@@ -1,0 +1,6 @@
+#pragma once
+
+#define TAIL_TRAY_VERSION "0.2.27"
+#define TAIL_TRAY_VERSION_MAJOR 0
+#define TAIL_TRAY_VERSION_MINOR 2
+#define TAIL_TRAY_VERSION_PATCH 27

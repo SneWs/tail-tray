@@ -434,7 +434,6 @@ void TailRunner::onProcessErrorOccurred(BufferedProcessWrapper* wrapper, QProces
 void TailRunner::onProcessFinished(BufferedProcessWrapper* process, int exitCode, const QProcess::ExitStatus exitStatus) {
     qDebug() << "Process exit code " << exitCode << " - " << exitStatus;
 
-    //runCompletedCleanup();
     process->deleteLater();
 
     const auto commandInfo = process->command();

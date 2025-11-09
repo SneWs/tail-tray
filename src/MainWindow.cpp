@@ -112,6 +112,9 @@ MainWindow::MainWindow(QWidget* parent)
 #endif
 
     pScriptManager->tryInstallWatcher();
+
+    // Tag version from build
+    ui->lblVersionNumberTailTray->setText(tr("Version ") + TAIL_TRAY_VERSION);
 }
 
 void MainWindow::shutdown() {
@@ -762,7 +765,7 @@ void MainWindow::onTailStatusChanged(const TailStatus& pNewStatus)
         }
 
         auto formattedVersion = pTailStatus.version.mid(0, pTailStatus.version.indexOf("-"));
-        ui->lblVersionNumber->setText(tr("Version ") + formattedVersion);
+        ui->lblVersionNumberTailscale->setText("Tailscale " + tr("Version ") + formattedVersion);
     }
     else {
         changeToState(TailState::NotLoggedIn);

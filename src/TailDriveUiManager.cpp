@@ -136,7 +136,8 @@ void TailDriveUiManager::fixTailDriveDavFsSetup() const {
     (void)davDir.mkpath(".davfs2"); // Don't care for return val
 
     QFile davFsSecret(homeDavFsSecret);
-    davFsSecret.open(QIODevice::ReadWrite);
+    if (!davFsSecret.open(QIODevice::ReadWrite))
+        return;
 
     // We need to add our config lines
     davFsSecret.seek(davFsSecret.size());

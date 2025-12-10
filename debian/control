@@ -12,7 +12,6 @@ Build-Depends:
  clang,
  cmake,
  davfs2,
- libkf6notifications-dev [dist:ubuntu25.04+ debian13+]
 Standards-Version: 4.6.2
 Homepage: https://github.com/SneWs/tail-tray
 Vcs-Browser: https://github.com/SneWs/tail-tray
@@ -25,5 +24,6 @@ Depends:
  ${misc:Depends},
 Suggests:
  davfs2,
+ libkf6notifications-dev,
 Description: Tailscale tray application
  Tailscale tray menu and UI for KDE Plasma Desktop

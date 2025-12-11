@@ -25,16 +25,20 @@ static ThemeManager themeManager = {};
 }
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()),
-      accountsTabUi(nullptr), pTrayManager(nullptr), pCurrentExecution(nullptr),
-      pLoginInProgressDlg(nullptr), pFileReceiver(nullptr),
-      pNetworkStateMonitor(std::make_unique<NetworkStateMonitor>(this)),
-      pIpnWatcher(std::make_unique<IpnWatcher>(this)),
-      eCurrentState(TailState::NoAccount), settings(this),
-      isFixingOperator(false) {
-  ui->setupUi(this);
+  : QMainWindow(parent)
+  , ui(std::make_unique<Ui::MainWindow>())
+  , accountsTabUi(nullptr)
+  , pTrayManager(nullptr)
+  , pCurrentExecution(nullptr)
+  , pLoginInProgressDlg(nullptr)
+  , pFileReceiver(nullptr)
+  , pNetworkStateMonitor(std::make_unique<NetworkStateMonitor>(this))
+  , pIpnWatcher(std::make_unique<IpnWatcher>(this))
+  , eCurrentState(TailState::NoAccount), settings(this)
+  , isFixingOperator(false) {
 
-    themeManager.activate();
+  ui->setupUi(this);
+  themeManager.activate();
 
   pCurrentExecution = std::make_unique<TailRunner>(settings, this);
   accountsTabUi = std::make_unique<AccountsTabUiManager>(
@@ -745,11 +749,29 @@ void MainWindow::showEvent(QShowEvent *event) {
   pCurrentExecution->readSettings();
 }
 
+void MainWindow::refreshThemebasedItems()
+{
+	// HACK to ensure that icons are properly updated when theme changes
+  //  auto wasVisible = isVisible();
+  //  if (!wasVisible) {
+  //      // We need to show the window to be able to update icons properly
+		//showNormal();
+  //  }
+
+    // Refresh UI & tray state
+    changeToState(eCurrentState);
+    syncSettingsToUi();
+    pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
+
+    //if (!wasVisible) {
+    //    // Restore previous visibility state
+    //    hide();
+    //}
+}
+
 bool MainWindow::event(QEvent* event) {
     if (event->type() == QEvent::StyleChange) {
-        // Refresh UI & tray state
-        syncSettingsToUi();
-        pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
+        refreshThemebasedItems();
     }
 
     return QMainWindow::event(event);
@@ -766,6 +788,13 @@ TailState MainWindow::changeToState(TailState newState) {
     pTailStatus.user = TailUser{};
   }
 
+  if (newState == TailState::Connected) {
+      setWindowIcon(themeManager.getConnectedTrayIcon());
+  }
+  else {
+      setWindowIcon(themeManager.getDisConnectedTrayIcon());
+  }
+
   if (didChangeState) {
     // If we're not connected, don't allow showing/changing tabs etc
     if (newState == TailState::Connected) {
@@ -774,7 +803,6 @@ TailState MainWindow::changeToState(TailState newState) {
       ui->tabSettings->setDisabled(false);
       ui->tabTailDrive->setDisabled(false);
 
-      setWindowIcon(themeManager.getConnectedTrayIcon());
       if (didChangeState) {
         seenWarningsAndErrors.clear();
       }

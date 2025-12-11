@@ -35,9 +35,12 @@ void cleanupDisposableMenus() {
 }
 } // namespace
 
-TrayMenuManager::TrayMenuManager(TailSettings &s, TailRunner *runner,
+TrayMenuManager::TrayMenuManager(TailSettings &s, TailRunner *runner, ThemeManager& tm,
                                  ScriptManager *scriptManager, QObject *parent)
-    : QObject(parent), settings(s), pTailRunner(runner),
+    : QObject(parent),
+      settings(s),
+      pTailRunner(runner),
+      themeManager(tm),
       pScriptManager(scriptManager),
       pSysCommand(std::make_unique<SysCommand>()) {
   pTrayMenu = std::make_unique<QMenu>("Tail Tray");
@@ -45,7 +48,7 @@ TrayMenuManager::TrayMenuManager(TailSettings &s, TailRunner *runner,
   pSysTray = std::make_unique<QSystemTrayIcon>(this);
   pSysTray->setContextMenu(pTrayMenu.get());
   pSysTray->setToolTip("Tailscale");
-  pSysTray->setIcon(QIcon(":/tray/dark-off"));
+  pSysTray->setIcon(themeManager.getDisConnectedTrayIcon());
   pSysTray->setVisible(true);
 
   pQuitAction = std::make_unique<QAction>(tr("Quit"));
@@ -100,6 +103,7 @@ void TrayMenuManager::stateChangedTo(TailState newState,
 }
 
 void TrayMenuManager::buildNotLoggedInMenu() const {
+  pSysTray->setIcon(themeManager.getDisConnectedTrayIcon());
   pTrayMenu->clear();
   pTrayMenu->addAction(pLoginAction.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
@@ -107,12 +111,11 @@ void TrayMenuManager::buildNotLoggedInMenu() const {
   pTrayMenu->addAction(pAbout.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
   pTrayMenu->addAction(pQuitAction.get());
-
-  pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
 }
 
 void TrayMenuManager::buildNotConnectedMenu(
     const TailStatus &pTailStatus) const {
+  pSysTray->setIcon(themeManager.getDisConnectedTrayIcon());
   pTrayMenu->clear();
   pTrayMenu->addAction(pConnect.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
@@ -131,12 +134,11 @@ void TrayMenuManager::buildNotConnectedMenu(
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
   pTrayMenu->addAction(pQuitAction.get());
 
-  pSysTray->setIcon(QIcon(":/icons/tray-off.png"));
-
   buildAccountsMenu();
 }
 
 void TrayMenuManager::buildConnectedMenu(const TailStatus &pTailStatus) {
+  pSysTray->setIcon(themeManager.getConnectedTrayIcon());
   pTrayMenu->clear();
   pTrayMenu->addAction(pConnected.get());
   pTrayMenu->addAction(pDisconnect.get());
@@ -489,7 +491,6 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus &pTailStatus) {
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
   pTrayMenu->addAction(pQuitAction.get());
 
-  pSysTray->setIcon(QIcon(":/tray/dark-on"));
   buildAccountsMenu();
 }
 

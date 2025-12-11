@@ -17,6 +17,13 @@
 #include "DnsSettingsDlg.h"
 #include "KnownValues.h"
 
+#include "ThemeManager.h"
+
+namespace
+{
+static ThemeManager themeManager = {};
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()),
       accountsTabUi(nullptr), pTrayManager(nullptr), pCurrentExecution(nullptr),
@@ -27,12 +34,14 @@ MainWindow::MainWindow(QWidget *parent)
       isFixingOperator(false) {
   ui->setupUi(this);
 
+    themeManager.activate();
+
   pCurrentExecution = std::make_unique<TailRunner>(settings, this);
   accountsTabUi = std::make_unique<AccountsTabUiManager>(
       ui.get(), pCurrentExecution.get(), this);
   pScriptManager = std::make_unique<ScriptManager>(settings, this);
   pTrayManager = std::make_unique<TrayMenuManager>(
-      settings, pCurrentExecution.get(), pScriptManager.get(), this);
+      settings, pCurrentExecution.get(), themeManager, pScriptManager.get(), this);
   pNotificationsManager =
       std::make_unique<NotificationsManager>(pTrayManager.get(), this);
 
@@ -736,6 +745,16 @@ void MainWindow::showEvent(QShowEvent *event) {
   pCurrentExecution->readSettings();
 }
 
+bool MainWindow::event(QEvent* event) {
+    if (event->type() == QEvent::StyleChange) {
+        // Refresh UI & tray state
+        syncSettingsToUi();
+        pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
+    }
+
+    return QMainWindow::event(event);
+}
+
 TailState MainWindow::changeToState(TailState newState) {
   auto retVal = eCurrentState;
   auto didChangeState = eCurrentState != newState;
@@ -755,7 +774,7 @@ TailState MainWindow::changeToState(TailState newState) {
       ui->tabSettings->setDisabled(false);
       ui->tabTailDrive->setDisabled(false);
 
-      setWindowIcon(QIcon(":/tray/dark-on"));
+      setWindowIcon(themeManager.getConnectedTrayIcon());
       if (didChangeState) {
         seenWarningsAndErrors.clear();
       }
@@ -765,7 +784,7 @@ TailState MainWindow::changeToState(TailState newState) {
       ui->tabTailDrive->setDisabled(true);
       ui->tabWidget->setCurrentIndex(0);
 
-      setWindowIcon(QIcon(":/tray/dark-off"));
+      setWindowIcon(themeManager.getDisConnectedTrayIcon());
     }
   }
 
@@ -840,6 +859,10 @@ bool MainWindow::shallowCheckForNetworkAvailable() {
 }
 
 void MainWindow::syncSettingsToUi() const {
+    auto themeIcon = themeManager.getConnectedTrayIcon();
+    ui->lblUserImage->setPixmap(themeIcon.pixmap(128, 128));
+    ui->lblTailscaleIcon->setPixmap(themeIcon.pixmap(128, 128));
+
   ui->chkAllowIncomingCnx->setChecked(settings.allowIncomingConnections());
   ui->chkUseTailscaleDns->setChecked(settings.useTailscaleDns());
   ui->chkRunAsExitNode->setChecked(settings.advertiseAsExitNode());

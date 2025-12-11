@@ -106,6 +106,8 @@ set(PROJECT_SOURCES
     src/NotificationsManager.cpp
     src/ScriptManager.h
     src/ScriptManager.cpp
+    src/ThemeManager.h
+    src/ThemeManager.cpp
     src/Version.h
 )
 
@@ -203,7 +205,7 @@ if (UNIX AND NOT APPLE)
         install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
     endif (KNOTIFICATIONS_ENABLED)
 
-    install(FILES icons/tail-tray-dark.svg tail-tray.svg
+    install(FILES icons/tail-tray-dark.svg icons/tail-tray.svg
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps
     )
 endif ()

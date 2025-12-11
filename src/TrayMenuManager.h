@@ -12,11 +12,14 @@
 #include "SysCommand.h"
 #include "ScriptManager.h"
 
+#include "ThemeManager.h"
+
 class TrayMenuManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit TrayMenuManager(TailSettings& s, TailRunner* runner, ScriptManager* scriptManager, QObject* parent = nullptr);
+    explicit TrayMenuManager(TailSettings& s, TailRunner* runner, ThemeManager& tm,
+                             ScriptManager* scriptManager, QObject* parent = nullptr);
 
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void stateChangedTo(TailState newState, const TailStatus& pTailStatus);
@@ -30,6 +33,7 @@ private:
     QList<TailAccountInfo> accounts;
     TailSettings& settings;
     TailRunner* pTailRunner;
+    ThemeManager& themeManager;
     ScriptManager* pScriptManager;
     std::unique_ptr<QSystemTrayIcon> pSysTray;
     std::unique_ptr<QMenu> pTrayMenu;

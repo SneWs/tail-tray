@@ -40,10 +40,6 @@
   <property name="windowTitle">
    <string>Tail Tray</string>
   </property>
-  <property name="windowIcon">
-   <iconset resource="../resources.qrc">
-    <normaloff>:/tray/active-icon</normaloff>:/tray/active-icon</iconset>
-  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_26">
     <item>
@@ -58,7 +54,7 @@
        <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>4</number>
       </property>
       <property name="iconSize">
        <size>
@@ -188,7 +184,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="../resources.qrc">:/icons/tray-on.png</pixmap>
+                 <pixmap resource="../resources.qrc">:/tray/dark-on</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1637,7 +1633,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QLabel" name="label_20">
+             <widget class="QLabel" name="lblTailscaleIcon">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -1660,7 +1656,7 @@
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="../resources.qrc">:/icons/tray-on.png</pixmap>
+               <pixmap resource="../resources.qrc">:/tray/dark-on</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>

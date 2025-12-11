@@ -118,6 +118,7 @@ private:
 
 protected:
     void showEvent(QShowEvent* event) override;
+    bool event(QEvent* event) override;
 };
 
 #endif // MAINWINDOW_H

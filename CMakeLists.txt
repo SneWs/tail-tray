@@ -68,8 +68,8 @@ set(PROJECT_SOURCES
     src/models/CurrentTailPrefs.h
     src/models/JsonHelpers.h
     src/models/Models.h
-    src/models/IpnEvents.h 
-    src/models/TailPrefsConfig.h 
+    src/models/IpnEvents.h
+    src/models/TailPrefsConfig.h
     src/TrayMenuManager.cpp
     src/TrayMenuManager.h
     src/TailSettings.cpp
@@ -155,14 +155,14 @@ qt_add_translations(tail-tray TS_FILES
 qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
 target_link_libraries(
-    tail-tray PRIVATE 
-    Qt${QT_VERSION_MAJOR}::Widgets 
-    Qt${QT_VERSION_MAJOR}::Network 
+    tail-tray PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Network
 )
 
 if (KNOTIFICATIONS_ENABLED)
     target_link_libraries(
-        tail-tray PRIVATE 
+        tail-tray PRIVATE
         KF6::Notifications
     )
 endif (KNOTIFICATIONS_ENABLED)
@@ -199,12 +199,12 @@ if (UNIX AND NOT APPLE)
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
     )
 
-if (KNOTIFICATIONS_ENABLED)
-    install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
-endif (KNOTIFICATIONS_ENABLED)
+    if (KNOTIFICATIONS_ENABLED)
+        install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
+    endif (KNOTIFICATIONS_ENABLED)
 
-    install(FILES icons/tailscale.png
-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps
+    install(FILES icons/tail-tray-dark.svg tail-tray.svg
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps
     )
 endif ()
 
@@ -214,3 +214,4 @@ if (BUILD_TESTS)
     # Add the tests subdirectory so it is built with the main project
     add_subdirectory(tests)
 endif ()
+

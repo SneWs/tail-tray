@@ -3,4 +3,10 @@
         <file>icons/tray-on.png</file>
         <file>icons/tray-off.png</file>
     </qresource>
+    <qresource prefix="/tray">
+        <file alias="dark-ff">icons/icon-dark-off.svg</file>
+        <file alias="dark-on">icons/icon-dark-on.svg</file>
+        <file alias="light-off">icons/icon-light-off.svg</file>
+        <file alias="light-on">icons/icon-light-on.svg</file>
+    </qresource>
 </RCC>

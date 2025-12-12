@@ -162,14 +162,8 @@ target_link_libraries(
     Qt${QT_VERSION_MAJOR}::Network
 )
 
-if (KNOTIFICATIONS_ENABLED)
-    target_link_libraries(
-        tail-tray PRIVATE
-        KF6::Notifications
-    )
-endif (KNOTIFICATIONS_ENABLED)
-
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
+
 # Generate Version.h from template
 configure_file(src/Version.h.in ${CMAKE_SOURCE_DIR}/src/Version.h @ONLY)
 
@@ -192,6 +186,13 @@ if (UNIVERSAL_CROSSBUILD)
 endif ()
 
 if (UNIX AND NOT APPLE)
+    if (KNOTIFICATIONS_ENABLED)
+        target_link_libraries(
+            tail-tray PRIVATE
+            KF6::Notifications
+        )
+    endif (KNOTIFICATIONS_ENABLED)
+
     configure_file(tail-tray.desktop.in
         ${CMAKE_SOURCE_DIR}/tail-tray.desktop
         @ONLY
@@ -205,6 +206,7 @@ if (UNIX AND NOT APPLE)
         install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
     endif (KNOTIFICATIONS_ENABLED)
 
+    # Icon files...
     install(FILES icons/tail-tray-dark.svg icons/tail-tray.svg
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps
     )

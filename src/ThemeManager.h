@@ -13,6 +13,11 @@ public:
   bool isDarkMode();
   QIcon getConnectedTrayIcon();
   QIcon getDisConnectedTrayIcon();
+
+  void setOverride(const QString& theme);
+
+private:
+  QString themeOverride;
 };
 
 #endif

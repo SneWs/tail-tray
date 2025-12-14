@@ -4,13 +4,26 @@
 #include <QPalette>
 #include <QStyleHints>
 
-ThemeManager::ThemeManager() : QObject() {}
+ThemeManager::ThemeManager()
+    : QObject()
+    , themeOverride("")
+{ }
 
 ThemeManager::~ThemeManager() {}
 
-void ThemeManager::activate() {}
+void ThemeManager::setOverride(const QString& theme) {
+    themeOverride = theme;
+}
+
+void ThemeManager::activate() {
+
+}
 
 bool ThemeManager::isDarkMode() {
+    if (themeOverride.length() > 1) {
+        return !(themeOverride != "dark");
+    }
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
   const auto scheme = QGuiApplication::styleHints()->colorScheme();
   return scheme == Qt::ColorScheme::Dark;

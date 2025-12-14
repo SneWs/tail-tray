@@ -39,10 +39,13 @@ public:
     void tailDriveEnabled(bool enabled);
 
     [[nodiscard]] QString tailFilesDefaultSavePath() const;
-    void tailFilesDefaultSavePath(const QString &path);
+    void tailFilesDefaultSavePath(const QString& path);
 
     [[nodiscard]] QString tailScriptFilesSavePath() const;
-    void tailScriptFilesSavePath(const QString &path);
+    void tailScriptFilesSavePath(const QString& path);
+
+    [[nodiscard]] QString preferedTheme() const;
+    void preferedTheme(const QString& theme);
 
 private:
     QSettings settings;

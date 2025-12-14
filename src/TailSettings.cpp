@@ -102,3 +102,11 @@ QString TailSettings::tailScriptFilesSavePath() const {
 void TailSettings::tailScriptFilesSavePath(const QString& path) {
     settings.setValue("tailScriptsSavePath", path);
 }
+
+QString TailSettings::preferedTheme() const {
+    return settings.value("preferedTheme", "").toString();
+}
+
+void TailSettings::preferedTheme(const QString& theme) {
+    settings.setValue("preferedTheme", theme);
+}

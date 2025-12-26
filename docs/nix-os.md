@@ -3,13 +3,13 @@ You can install tail-tray with the Nix-Package Manager or on NixOS via the confi
 
 ##### Nix-Package Manager
 ```bash
-# persistant on NixOS
+# persistent on NixOS
 nix-env -iA nixos.tail-tray nixos.tailscale
 
-# persistant on non NixOS
+# persistent on non NixOS
 nix-env -iA nixpkgs.tail-tray nixpkgs.tailscale
 
-# non persistant
+# non persistent
 nix-shell -p tail-tray tailscale
 ```
 

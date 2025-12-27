@@ -41,6 +41,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ScriptMana
     , pTailRunner(runner)
     , pScriptManager(scriptManager)
     , pSysCommand(std::make_unique<SysCommand>())
+    , lastKnownState(TailState::NotLoggedIn)
 {
     pTrayMenu = std::make_unique<QMenu>("Tail Tray");
 
@@ -78,6 +79,8 @@ void TrayMenuManager::onAccountsListed(const QList<TailAccountInfo>& foundAccoun
 void TrayMenuManager::stateChangedTo(TailState newState, const TailStatus& pTailStatus) {
     cleanupDisposableActions();
     cleanupDisposableMenus();
+
+    lastKnownState = newState;
 
     switch (newState) {
         case TailState::Connected:
@@ -586,6 +589,15 @@ void TrayMenuManager::setupWellKnownActions() const {
                     // NOTE: When settings are read, they will call settings to UI so will be in sync on show
                     pTailRunner->readSettings();
                     wnd->showSettingsTab();
+                }
+            }
+            else if (reason == QSystemTrayIcon::ActivationReason::MiddleClick) {
+                // Toggle "on/off" on middle click
+                if (lastKnownState == TailState::Connected) {
+                    pTailRunner->stop();
+                }
+                else if (lastKnownState == TailState::NotConnected) {
+                    pTailRunner->start();
                 }
             }
         }

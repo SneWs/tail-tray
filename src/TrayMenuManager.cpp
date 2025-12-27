@@ -35,15 +35,15 @@ void cleanupDisposableMenus() {
 }
 } // namespace
 
-TrayMenuManager::TrayMenuManager(TailSettings &s, TailRunner *runner, ThemeManager& tm,
-                                 ScriptManager *scriptManager, QObject *parent)
-    : QObject(parent),
-      settings(s),
-      pTailRunner(runner),
-      themeManager(tm),
-      pScriptManager(scriptManager),
-      pSysCommand(std::make_unique<SysCommand>()) {
-  pTrayMenu = std::make_unique<QMenu>("Tail Tray");
+TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ScriptManager* scriptManager, QObject* parent)
+    : QObject(parent)
+    , settings(s)
+    , pTailRunner(runner)
+    , pScriptManager(scriptManager)
+    , pSysCommand(std::make_unique<SysCommand>())
+    , lastKnownState(TailState::NotLoggedIn)
+{
+    pTrayMenu = std::make_unique<QMenu>("Tail Tray");
 
   pSysTray = std::make_unique<QSystemTrayIcon>(this);
   pSysTray->setContextMenu(pTrayMenu.get());
@@ -77,10 +77,11 @@ void TrayMenuManager::onAccountsListed(
   accounts = foundAccounts;
 }
 
-void TrayMenuManager::stateChangedTo(TailState newState,
-                                     const TailStatus &pTailStatus) {
-  cleanupDisposableActions();
-  cleanupDisposableMenus();
+void TrayMenuManager::stateChangedTo(TailState newState, const TailStatus& pTailStatus) {
+    cleanupDisposableActions();
+    cleanupDisposableMenus();
+
+    lastKnownState = newState;
 
   switch (newState) {
   case TailState::Connected:
@@ -571,7 +572,17 @@ void TrayMenuManager::setupWellKnownActions() const {
                 wnd->showSettingsTab();
               }
             }
-          });
+            else if (reason == QSystemTrayIcon::ActivationReason::MiddleClick) {
+                // Toggle "on/off" on middle click
+                if (lastKnownState == TailState::Connected) {
+                    pTailRunner->stop();
+                }
+                else if (lastKnownState == TailState::NotConnected) {
+                    pTailRunner->start();
+                }
+            }
+        }
+    );
 
   connect(pRestartTailscale.get(), &QAction::triggered, this,
           [this](bool) { pSysCommand->restartTailscaleDaemon(); });

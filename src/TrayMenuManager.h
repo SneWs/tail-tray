@@ -51,6 +51,7 @@ private:
     std::unique_ptr<QAction> pRestartTailscale;
     std::unique_ptr<SysCommand> pSysCommand;
     QStringList scripts;
+    TailState lastKnownState;
 
 private:
     void buildNotLoggedInMenu() const;

@@ -35,10 +35,12 @@ void cleanupDisposableMenus() {
 }
 } // namespace
 
-TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ScriptManager* scriptManager, QObject* parent)
+TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ThemeManager& tm, 
+  ScriptManager* scriptManager, QObject* parent)
     : QObject(parent)
     , settings(s)
     , pTailRunner(runner)
+    , themeManager(tm)
     , pScriptManager(scriptManager)
     , pSysCommand(std::make_unique<SysCommand>())
     , lastKnownState(TailState::NotLoggedIn)

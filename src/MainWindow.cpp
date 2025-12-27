@@ -6,18 +6,26 @@
 
 #include "Paths.h"
 
-#include <QList>
+#include <QDesktopServices>
 #include <QFileDialog>
+#include <QList>
 #include <QMessageBox>
 #include <QShowEvent>
+#include <QComboBox>
 #include <memory>
-#include <QDesktopServices>
 
-#include "KnownValues.h"
 #include "AdvertiseRoutesDlg.h"
 #include "DnsSettingsDlg.h"
+#include "KnownValues.h"
 
-MainWindow::MainWindow(QWidget* parent)
+#include "ThemeManager.h"
+
+namespace
+{
+static ThemeManager themeManager = {};
+}
+
+MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(std::make_unique<Ui::MainWindow>())
     , accountsTabUi(nullptr)
@@ -27,72 +35,98 @@ MainWindow::MainWindow(QWidget* parent)
     , pFileReceiver(nullptr)
     , pNetworkStateMonitor(std::make_unique<NetworkStateMonitor>(this))
     , pIpnWatcher(std::make_unique<IpnWatcher>(this))
-    , eCurrentState(TailState::NoAccount)
-    , settings(this)
-    , isFixingOperator(false)
-{
+    , eCurrentState(TailState::NoAccount), settings(this)
+    , isFixingOperator(false) {
+
     ui->setupUi(this);
+    themeManager.activate();
 
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
-    accountsTabUi = std::make_unique<AccountsTabUiManager>(ui.get(), pCurrentExecution.get(), this);
+    accountsTabUi = std::make_unique<AccountsTabUiManager>(
+        ui.get(), pCurrentExecution.get(), this);
     pScriptManager = std::make_unique<ScriptManager>(settings, this);
-    pTrayManager = std::make_unique<TrayMenuManager>(settings, pCurrentExecution.get(), pScriptManager.get(), this);
-    pNotificationsManager = std::make_unique<NotificationsManager>(pTrayManager.get(), this);
+    pTrayManager = std::make_unique<TrayMenuManager>(
+        settings, pCurrentExecution.get(), themeManager, pScriptManager.get(), this);
+    pNotificationsManager =
+        std::make_unique<NotificationsManager>(pTrayManager.get(), this);
 
     // Remove the tail drive tab by default
     ui->tabWidget->removeTab(2);
 
 // Davfs or not
 #if defined(DAVFS_ENABLED)
-    pTailDriveUiManager = std::make_unique<TailDriveUiManager>(ui.get(), pCurrentExecution.get(), this);
-    
+    pTailDriveUiManager = std::make_unique<TailDriveUiManager>(
+        ui.get(), pCurrentExecution.get(), this);
+
     // Make sure to adjust tail drive based on the check state
     if (settings.tailDriveEnabled()) {
-        ui->tabWidget->insertTab(3, ui->tabTailDrive, QIcon::fromTheme("drive-removable-media"), "Tail Drive");
+        ui->tabWidget->insertTab(3, ui->tabTailDrive,
+                                 QIcon::fromTheme("drive-removable-media"),
+                                 "Tail Drive");
     }
 
-    connect(pCurrentExecution.get(), &TailRunner::driveListed, this, &MainWindow::drivesListed);
+    connect(pCurrentExecution.get(), &TailRunner::driveListed, this,
+            &MainWindow::drivesListed);
 #else
     settings.tailDriveEnabled(false);
     ui->chkUseTailDrive->setChecked(false);
     ui->chkUseTailDrive->setVisible(false);
     ui->lblTailDrive->setVisible(false);
-    ui->tailDriveLayoutRow->parentWidget()->layout()->removeItem(ui->tailDriveLayoutRow);
+    ui->tailDriveLayoutRow->parentWidget()->layout()->removeItem(
+        ui->tailDriveLayoutRow);
 #endif
 
-    connect(ui->btnSelectTailFileDefaultSaveLocation, &QPushButton::clicked,
-        this, &MainWindow::onShowTailFileSaveLocationPicker);
+    connect(ui->btnSelectTailFileDefaultSaveLocation, &QPushButton::clicked, this,
+            &MainWindow::onShowTailFileSaveLocationPicker);
 
-    connect(ui->btnSelectTailScripFileSaveLocation, &QPushButton::clicked,
-        this, &MainWindow::onShowTailScriptFileSaveLocationPicker);
+    connect(ui->btnSelectTailScripFileSaveLocation, &QPushButton::clicked, this,
+            &MainWindow::onShowTailScriptFileSaveLocationPicker);
 
-    connect(pCurrentExecution.get(), &TailRunner::tailscaleIsInstalled, this, &MainWindow::tailscaleIsInstalled);
-    connect(pCurrentExecution.get(), &TailRunner::settingsRead, this, &MainWindow::settingsReadyToRead);
-    connect(pCurrentExecution.get(), &TailRunner::dnsStatusRead, this, &MainWindow::dnsStatusUpdated);
-    connect(pCurrentExecution.get(), &TailRunner::accountsListed, this, &MainWindow::onAccountsListed);
-    connect(pCurrentExecution.get(), &TailRunner::commandError, this, &MainWindow::onCommandError);
-    connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this, &MainWindow::onTailStatusChanged);
-    connect(pCurrentExecution.get(), &TailRunner::loginFlowStarting, this, &MainWindow::loginFlowStarting);
-    connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this, &MainWindow::loginFlowCompleted);
-    connect(pCurrentExecution.get(), &TailRunner::fileSent, this, &MainWindow::fileSentToDevice);
-    connect(pCurrentExecution.get(), &TailRunner::newPeerDiscovered, this, &MainWindow::onNewPeerDiscovered);
-    connect(pCurrentExecution.get(), &TailRunner::peerRemoved, this, &MainWindow::onPeerRemoved);
+    connect(pCurrentExecution.get(), &TailRunner::tailscaleIsInstalled, this,
+            &MainWindow::tailscaleIsInstalled);
+    connect(pCurrentExecution.get(), &TailRunner::settingsRead, this,
+            &MainWindow::settingsReadyToRead);
+    connect(pCurrentExecution.get(), &TailRunner::dnsStatusRead, this,
+            &MainWindow::dnsStatusUpdated);
+    connect(pCurrentExecution.get(), &TailRunner::accountsListed, this,
+            &MainWindow::onAccountsListed);
+    connect(pCurrentExecution.get(), &TailRunner::commandError, this,
+            &MainWindow::onCommandError);
+    connect(pCurrentExecution.get(), &TailRunner::statusUpdated, this,
+            &MainWindow::onTailStatusChanged);
+    connect(pCurrentExecution.get(), &TailRunner::loginFlowStarting, this,
+            &MainWindow::loginFlowStarting);
+    connect(pCurrentExecution.get(), &TailRunner::loginFlowCompleted, this,
+            &MainWindow::loginFlowCompleted);
+    connect(pCurrentExecution.get(), &TailRunner::fileSent, this,
+            &MainWindow::fileSentToDevice);
+    connect(pCurrentExecution.get(), &TailRunner::newPeerDiscovered, this,
+            &MainWindow::onNewPeerDiscovered);
+    connect(pCurrentExecution.get(), &TailRunner::peerRemoved, this,
+            &MainWindow::onPeerRemoved);
 
-    connect(pNetworkStateMonitor.get(), &NetworkStateMonitor::netCheckCompleted, this, &MainWindow::netCheckCompleted);
-    connect(pIpnWatcher.get(), &IpnWatcher::eventReceived, this, &MainWindow::onIpnEvent);
+    connect(pNetworkStateMonitor.get(), &NetworkStateMonitor::netCheckCompleted,
+            this, &MainWindow::netCheckCompleted);
+    connect(pIpnWatcher.get(), &IpnWatcher::eventReceived, this,
+            &MainWindow::onIpnEvent);
 
-    connect(ui->btnAdvertiseRoutes, &QPushButton::clicked, this, &MainWindow::showAdvertiseRoutesDialog);
-    connect(ui->btnTailscaleDnsSettings, &QPushButton::clicked, this, &MainWindow::showDnsSettingsDialog);
+    connect(ui->btnAdvertiseRoutes, &QPushButton::clicked, this,
+            &MainWindow::showAdvertiseRoutesDialog);
+    connect(ui->btnTailscaleDnsSettings, &QPushButton::clicked, this,
+            &MainWindow::showDnsSettingsDialog);
 
-    connect(pTrayManager.get(), &TrayMenuManager::ipAddressCopiedToClipboard, this, &MainWindow::ipAddressCopiedToClipboard);
+    connect(pTrayManager.get(), &TrayMenuManager::ipAddressCopiedToClipboard,
+            this, &MainWindow::ipAddressCopiedToClipboard);
 
     changeToState(TailState::NotLoggedIn);
 
-    // NOTE! We first check and validate that the tailscale binary / service / daemon is installed
-    // if we get a positive outcome from that, we will bootstrap the rest of the flow.
+    // NOTE! We first check and validate that the tailscale binary / service /
+    // daemon is installed if we get a positive outcome from that, we will
+    // bootstrap the rest of the flow.
     pCurrentExecution->checkIfInstalled();
 
-    connect(ui->btnSettingsClose, &QPushButton::clicked, this, &MainWindow::settingsClosed);
+    connect(ui->btnSettingsClose, &QPushButton::clicked, this,
+            &MainWindow::settingsClosed);
 
     // Make sure the settings tab is selected by default
     ui->tabWidget->setCurrentIndex(1);
@@ -103,8 +137,36 @@ MainWindow::MainWindow(QWidget* parent)
     ui->btnManageTailnetLocks->setEnabled(false);
 
     // Script manager hooks
-    connect(pScriptManager.get(), &ScriptManager::availableScriptsChanged,
-        this, &MainWindow::onScriptManagerScriptsChanged);
+    connect(pScriptManager.get(), &ScriptManager::availableScriptsChanged, this,
+            &MainWindow::onScriptManagerScriptsChanged);
+
+    // Theme overrides
+    ui->drpThemes->addItem("Follow System", "");
+    ui->drpThemes->addItem("Dark", "dark");
+    ui->drpThemes->addItem("Light", "light");
+    ui->drpThemes->setCurrentIndex(0);
+    connect(ui->drpThemes, &QComboBox::currentIndexChanged, this,
+        [this](int index) {
+            auto theme = ui->drpThemes->currentData().toString();
+            qDebug() << "Theme override selected: " << theme;
+            settings.preferedTheme(theme);
+            themeManager.setOverride(theme);
+            changeToState(eCurrentState);
+        }
+    );
+
+    auto preferedTheme = settings.preferedTheme();
+    if (preferedTheme.length() > 1) {
+        // We have a override
+        if (preferedTheme == "light") {
+            ui->drpThemes->setCurrentIndex(2);
+        }
+        else {
+            ui->drpThemes->setCurrentIndex(1);
+        }
+
+        themeManager.setOverride(preferedTheme);
+    }
 
 #if defined(WINDOWS_BUILD)
     // On windows this looks like crap, so don't use it
@@ -157,20 +219,25 @@ void MainWindow::showNetworkStatusTab() {
 
 void MainWindow::tailscaleIsInstalled(bool installed) {
     if (!installed) {
-        qDebug() << "WARNING! Tailscale isn't installed. We will not be able to continue running Tail Tray!";
-        qDebug() << "You can download and install tailscale from https://tailscale.com";
+        qDebug() << "WARNING! Tailscale isn't installed. We will not be able to "
+                    "continue running Tail Tray!";
+        qDebug()
+            << "You can download and install tailscale from https://tailscale.com";
 
         changeToState(TailState::NotLoggedIn);
         showNormal();
 
-        QMessageBox::warning(this, tr("Error"), tr("It does not look like you have installed Tailscale on this machine.\nOr tailscale isn't in your PATH.\n\nYou can download and install tailscale from https://tailscale.com"));
+        QMessageBox::warning(
+            this, tr("Error"),
+            tr("It does not look like you have installed Tailscale on this "
+               "machine.\nOr tailscale isn't in your PATH.\n\nYou can download and "
+               "install tailscale from https://tailscale.com"));
 
         close();
-        // Since we are getting the signal from within a process, delay the exit a bit to allow the invoking process to 
-        // complete before exiting the application
-        QTimer::singleShot(500, [this]() {
-            QApplication::exit(-1);
-        });
+        // Since we are getting the signal from within a process, delay the exit a
+        // bit to allow the invoking process to complete before exiting the
+        // application
+        QTimer::singleShot(500, [this]() { QApplication::exit(-1); });
         return;
     }
 
@@ -179,8 +246,10 @@ void MainWindow::tailscaleIsInstalled(bool installed) {
     // NOTE: The bootstrap to get this started is as follows:
     // 1. Read settings from Tailscale daemon
     // 2. Once that is successfully read, it will internally call getAccounts()
-    // 3. Once getAccounts() have returned it will once again internally call getStatus()
-    // 4. Once getStatus() returns we are in a running state, eg logged in and connected OR logged out OR logged in and disconnected etc...
+    // 3. Once getAccounts() have returned it will once again internally call
+    // getStatus()
+    // 4. Once getStatus() returns we are in a running state, eg logged in and
+    // connected OR logged out OR logged in and disconnected etc...
     pCurrentExecution->bootstrap();
     pIpnWatcher->start();
 }
@@ -199,14 +268,15 @@ void MainWindow::settingsReadyToRead() {
     // qDebug() << "Shields up: " << tailscalePrefs->shieldsUp;
     // qDebug() << "Want running: " << tailscalePrefs->wantRunning;
     // qDebug() << "Allow single hosts: " << tailscalePrefs->allowSingleHosts;
-    // qDebug() << "No stateful filtering: " << tailscalePrefs->noStatefulFiltering;
-    // qDebug() << "Run web client: " << tailscalePrefs->runWebClient;
-    // qDebug() << "Control panel URL: " << tailscalePrefs->controlURL;
-    // qDebug() << "Corporate DNS: " << tailscalePrefs->corpDNS;
-    // qDebug() << "Internal exit node prior: " << tailscalePrefs->internalExitNodePrior;
-    // qDebug() << "Run SSH: " << tailscalePrefs->runSSH;
-    // qDebug() << "No SNAT: " << tailscalePrefs->noSNAT;
-    // qDebug() << "Allow Exit node LAN Access: " << tailscalePrefs->exitNodeAllowLANAccess;
+    // qDebug() << "No stateful filtering: " <<
+    // tailscalePrefs->noStatefulFiltering; qDebug() << "Run web client: " <<
+    // tailscalePrefs->runWebClient; qDebug() << "Control panel URL: " <<
+    // tailscalePrefs->controlURL; qDebug() << "Corporate DNS: " <<
+    // tailscalePrefs->corpDNS; qDebug() << "Internal exit node prior: " <<
+    // tailscalePrefs->internalExitNodePrior; qDebug() << "Run SSH: " <<
+    // tailscalePrefs->runSSH; qDebug() << "No SNAT: " << tailscalePrefs->noSNAT;
+    // qDebug() << "Allow Exit node LAN Access: " <<
+    // tailscalePrefs->exitNodeAllowLANAccess;
     auto isExitNode = tailscalePrefs.isExitNode();
     // if (isExitNode) {
     //     qDebug() << "Advertise routes (We are exit node and advertising)";
@@ -214,20 +284,21 @@ void MainWindow::settingsReadyToRead() {
     //         qDebug() << "\tRoute " << r;
     // }
 
-    //qDebug() << "Exit node Id: " << tailscalePrefs->exitNodeId;
-    // if (!tailscalePrefs->exitNodeId.isEmpty()) {
-    //     if (pTailStatus != nullptr && pTailStatus->peers.count() > 0) {
-    //         for (const auto& p : pTailStatus->peers) {
-    //             if (p->id == tailscalePrefs->exitNodeId) {
-    //                 qDebug() << "\tExit node by name: " << p->getShortDnsName();
-    //             }
-    //         }
-    //     }
-    // }
-    // qDebug() << "Exit node Ip: " << tailscalePrefs->exitNodeIp;
+    // qDebug() << "Exit node Id: " << tailscalePrefs->exitNodeId;
+    //  if (!tailscalePrefs->exitNodeId.isEmpty()) {
+    //      if (pTailStatus != nullptr && pTailStatus->peers.count() > 0) {
+    //          for (const auto& p : pTailStatus->peers) {
+    //              if (p->id == tailscalePrefs->exitNodeId) {
+    //                  qDebug() << "\tExit node by name: " <<
+    //                  p->getShortDnsName();
+    //              }
+    //          }
+    //      }
+    //  }
+    //  qDebug() << "Exit node Ip: " << tailscalePrefs->exitNodeIp;
 
 #if defined(WINDOWS_BUILD)
-    //qDebug() << "Notepad URLs: " << tailscalePrefs->notepadURLs;
+    // qDebug() << "Notepad URLs: " << tailscalePrefs->notepadURLs;
 #endif
 
     // Sync settings with local settings
@@ -243,22 +314,23 @@ void MainWindow::settingsReadyToRead() {
         return;
 
     // Make sure current user is operator
-    auto isUserOperator = tailscalePrefs.operatorUser == qEnvironmentVariable("USER");
+    auto isUserOperator =
+        tailscalePrefs.operatorUser == qEnvironmentVariable("USER");
     if (!isUserOperator && !tailscalePrefs.loggedOut) {
         isFixingOperator = true;
 
-        const auto response = QMessageBox::warning(nullptr,
-           "Failed to run command",
-           "To be able to control tailscale you need to be root or set yourself as operator. Do you want to set yourself as operator?",
-           QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+        const auto response = QMessageBox::warning(
+            nullptr, "Failed to run command",
+            "To be able to control tailscale you need to be root or set yourself "
+            "as operator. Do you want to set yourself as operator?",
+            QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
 
         if (response == QMessageBox::Ok) {
             pCurrentExecution->setOperator();
         }
 
         isFixingOperator = false;
-    }
-    else {
+    } else {
         isFixingOperator = false;
 
         // Operator confirmed, lets continue the flow
@@ -266,7 +338,7 @@ void MainWindow::settingsReadyToRead() {
     }
 }
 
-void MainWindow::dnsStatusUpdated(const TailDnsStatus& dnsStatus) {
+void MainWindow::dnsStatusUpdated(const TailDnsStatus &dnsStatus) {
     pDnsStatus = dnsStatus;
 
     // qDebug() << "DNS Status recv from Tailscale:";
@@ -280,7 +352,7 @@ void MainWindow::dnsStatusUpdated(const TailDnsStatus& dnsStatus) {
     //     qDebug() << "\t" << d;
 }
 
-void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
+void MainWindow::onAccountsListed(const QList<TailAccountInfo> &foundAccounts) {
     accounts = foundAccounts;
     pTrayManager->onAccountsListed(foundAccounts);
     pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
@@ -289,21 +361,22 @@ void MainWindow::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
     accountsTabUi->onTailStatusChanged(pTailStatus);
 }
 
-void MainWindow::onCommandError(const QString& error, bool isSudoRequired) {
-    if (isSudoRequired)
-    {
+void MainWindow::onCommandError(const QString &error, bool isSudoRequired) {
+    if (isSudoRequired) {
         if (isFixingOperator)
             return;
 
         isFixingOperator = true;
 
-        const auto& prefs = pCurrentExecution->currentSettings();
+        const auto &prefs = pCurrentExecution->currentSettings();
         if (prefs.loggedOut) {
             return;
         }
 
-        const auto response = QMessageBox::warning(this, tr("Sudo required"),
-            error + tr("\n\nTo use Tail Tray you need to be set as operator. Do you want to set yourself as operator now?"),
+        const auto response = QMessageBox::warning(
+            this, tr("Sudo required"),
+            error + tr("\n\nTo use Tail Tray you need to be set as operator. Do "
+                       "you want to set yourself as operator now?"),
             QMessageBox::Ok | QMessageBox::Cancel);
 
         if (response == QMessageBox::Ok)
@@ -326,8 +399,9 @@ void MainWindow::settingsClosed() {
     pScriptManager->tryInstallWatcher();
 }
 
-void MainWindow::loginFlowStarting(const QString& loginUrl) {
-    qDebug() << "Login flow starting... Will send user to" << (loginUrl.isEmpty() ? "Waiting for URL..." : loginUrl);
+void MainWindow::loginFlowStarting(const QString &loginUrl) {
+    qDebug() << "Login flow starting... Will send user to"
+             << (loginUrl.isEmpty() ? "Waiting for URL..." : loginUrl);
 
     if (!loginUrl.isEmpty()) {
         QDesktopServices::openUrl(QUrl(loginUrl));
@@ -338,22 +412,25 @@ void MainWindow::loginFlowStarting(const QString& loginUrl) {
 
     // And create and show dialog for login flow...
     if (pLoginInProgressDlg == nullptr) {
-        pLoginInProgressDlg = std::make_unique<PleaseWaitDlg>(tr("Please wait, login flow is running..."));
+        pLoginInProgressDlg = std::make_unique<PleaseWaitDlg>(
+            tr("Please wait, login flow is running..."));
         pLoginInProgressDlg->setModal(true);
         pLoginInProgressDlg->setFixedSize(300, 200);
-        connect(pLoginInProgressDlg.get(), &PleaseWaitDlg::userCancelled, this, [this]() {
-            qDebug() << "User cancelling Login flow...";
+        connect(pLoginInProgressDlg.get(), &PleaseWaitDlg::userCancelled, this,
+                [this]() {
+                    qDebug() << "User cancelling Login flow...";
 
-            pCurrentExecution->cancelLoginFlow();
-            loginFlowCompleted(false);
-        });
+                    pCurrentExecution->cancelLoginFlow();
+                    loginFlowCompleted(false);
+                });
     }
 
     pLoginInProgressDlg->show();
 }
 
 void MainWindow::loginFlowCompleted(bool success) {
-    qDebug() << "Login flow completed with" << (success ? "Success" : "Failure/Cancelled");
+    qDebug() << "Login flow completed with"
+             << (success ? "Success" : "Failure/Cancelled");
 
     pLoginInProgressDlg.reset();
 
@@ -362,62 +439,71 @@ void MainWindow::loginFlowCompleted(bool success) {
         showSettingsTab();
 
         pCurrentExecution->start();
-    }
-    else {
+    } else {
         // Failure
-        QMessageBox::warning(this, tr("Login failure"), tr("Login failed. Please try again"),
-            QMessageBox::Ok, QMessageBox::Ok);
+        QMessageBox::warning(this, tr("Login failure"),
+                             tr("Login failed. Please try again"), QMessageBox::Ok,
+                             QMessageBox::Ok);
     }
 }
 
-void MainWindow::onIpnEvent(const IpnEventData& eventData) {
+void MainWindow::onIpnEvent(const IpnEventData &eventData) {
     if (eventData.Health.Warnings.networkStatus.ImpactsConnectivity) {
-        if (eventData.Health.Warnings.networkStatus.WarnableCode == "network-status") {
+        if (eventData.Health.Warnings.networkStatus.WarnableCode ==
+            "network-status") {
             if (eCurrentState != TailState::Connected) {
                 if (!eventData.Health.Warnings.networkStatus.Text.isEmpty()) {
-                    showWarningMessage(eventData.Health.Warnings.networkStatus.Title, eventData.Health.Warnings.networkStatus.Text);
+                    showWarningMessage(eventData.Health.Warnings.networkStatus.Title,
+                                       eventData.Health.Warnings.networkStatus.Text);
                 }
             }
         }
-    }
-    else {
+    } else {
         if (eventData.Health.Warnings.networkStatus.Severity == "warning") {
             if (!eventData.Health.Warnings.networkStatus.Text.isEmpty())
-                showWarningMessage(eventData.Health.Warnings.networkStatus.Title, eventData.Health.Warnings.networkStatus.Text);
-        }
-        else if (eventData.Health.Warnings.networkStatus.Severity == "error") {
+                showWarningMessage(eventData.Health.Warnings.networkStatus.Title,
+                                   eventData.Health.Warnings.networkStatus.Text);
+        } else if (eventData.Health.Warnings.networkStatus.Severity == "error") {
             if (!eventData.Health.Warnings.networkStatus.Text.isEmpty())
-                showErrorMessage(eventData.Health.Warnings.networkStatus.Title, eventData.Health.Warnings.networkStatus.Text);
+                showErrorMessage(eventData.Health.Warnings.networkStatus.Title,
+                                 eventData.Health.Warnings.networkStatus.Text);
         }
     }
 
     pCurrentExecution->bootstrap();
 }
 
-void MainWindow::ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname) const {
-        pNotificationsManager->showNotification(tr("IP address copied"),
-            "IP Address " + ipAddress + " for " + hostname + " have been copied to clipboard!");
+void MainWindow::ipAddressCopiedToClipboard(const QString &ipAddress,
+                                            const QString &hostname) const {
+    pNotificationsManager->showNotification(
+        tr("IP address copied"), "IP Address " + ipAddress + " for " + hostname +
+            " have been copied to clipboard!");
 }
 
-void MainWindow::onNewPeerDiscovered(const TailDeviceInfo& peer) const {
-    pNotificationsManager->showNodeConnectedNotification(peer.getShortDnsName(), peer.tailscaleIPs.join(", "), peer.os);
+void MainWindow::onNewPeerDiscovered(const TailDeviceInfo &peer) const {
+    pNotificationsManager->showNodeConnectedNotification(
+        peer.getShortDnsName(), peer.tailscaleIPs.join(", "), peer.os);
 }
 
-void MainWindow::onPeerRemoved(const TailDeviceInfo& peer) const {
-    pNotificationsManager->showNodeDisconnectedNotification(peer.getShortDnsName(), peer.tailscaleIPs.join(", "), peer.os);
+void MainWindow::onPeerRemoved(const TailDeviceInfo &peer) const {
+    pNotificationsManager->showNodeDisconnectedNotification(
+        peer.getShortDnsName(), peer.tailscaleIPs.join(", "), peer.os);
 }
 
 #if defined(DAVFS_ENABLED)
-void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg) {
+void MainWindow::drivesListed(const QList<TailDriveInfo> &drives, bool error,
+                              const QString &errorMsg) {
     if (error) {
         pTailStatus.drivesConfigured = false;
         qDebug() << errorMsg;
-        qDebug() << "To read more about configuring tail drives, see https://tailscale.com/kb/1369/taildrive";
+        qDebug() << "To read more about configuring tail drives, see "
+                    "https://tailscale.com/kb/1369/taildrive";
 
-        QMessageBox::information(nullptr,
-            tr("Tail Drive - Error"),
-            tr("Tail drives needs to be enabled in ACL. Please go to the admin dashboard.\n\n") + errorMsg,
-            QMessageBox::Ok);
+        QMessageBox::information(nullptr, tr("Tail Drive - Error"),
+                                 tr("Tail drives needs to be enabled in ACL. "
+                                    "Please go to the admin dashboard.\n\n") +
+                                     errorMsg,
+                                 QMessageBox::Ok);
 
         return; // Nothing more to do here
     }
@@ -435,19 +521,22 @@ void MainWindow::drivesListed(const QList<TailDriveInfo>& drives, bool error, co
 }
 #endif
 
-void MainWindow::fileSentToDevice(bool success, const QString& errorMsg, void* userData) const {
+void MainWindow::fileSentToDevice(bool success, const QString &errorMsg,
+                                  void *userData) const {
     if (!success) {
-        pNotificationsManager->showErrorNotification(tr("Failed to send file"), errorMsg);
+        pNotificationsManager->showErrorNotification(tr("Failed to send file"),
+                                                     errorMsg);
     }
 
     if (userData == nullptr) {
         return;
     }
 
-    auto userDataStr = static_cast<QString*>(userData);
+    auto userDataStr = static_cast<QString *>(userData);
     QFileInfo fileInfo(*userDataStr);
-    pNotificationsManager->showFileNotification(tr("File sent"),
-        tr("The file %1 has been sent!").arg(*userDataStr), fileInfo);
+    pNotificationsManager->showFileNotification(
+        tr("File sent"), tr("The file %1 has been sent!").arg(*userDataStr),
+        fileInfo);
 
     delete userDataStr;
 }
@@ -456,32 +545,36 @@ void MainWindow::startListeningForIncomingFiles() {
     if (pFileReceiver != nullptr)
         pFileReceiver.reset();
 
-    pFileReceiver = std::make_unique<TailFileReceiver>(settings.tailFilesDefaultSavePath(), this);
-    connect(pFileReceiver.get(), &TailFileReceiver::fileReceived,
-        this, &MainWindow::onTailnetFileReceived);
+    pFileReceiver = std::make_unique<TailFileReceiver>(
+        settings.tailFilesDefaultSavePath(), this);
+    connect(pFileReceiver.get(), &TailFileReceiver::fileReceived, this,
+            &MainWindow::onTailnetFileReceived);
 
-    connect(pFileReceiver.get(), &TailFileReceiver::errorListening,
-        this, [this](const QString& errorMsg) {
-            pNotificationsManager->showErrorNotification(tr("Error"), errorMsg);
-        });
+    connect(pFileReceiver.get(), &TailFileReceiver::errorListening, this,
+            [this](const QString &errorMsg) {
+                pNotificationsManager->showErrorNotification(tr("Error"), errorMsg);
+            });
 }
 
 void MainWindow::onTailnetFileReceived(QString filePath) const {
     const QFileInfo file(filePath);
     pNotificationsManager->showFileNotification(tr("File received"),
-        tr("File %1 has been saved in %2").arg(file.fileName()).arg(file.absolutePath()),
-            file);
+                                                tr("File %1 has been saved in %2")
+                                                    .arg(file.fileName())
+                                                    .arg(file.absolutePath()),
+                                                file);
 }
 
 void MainWindow::onShowTailFileSaveLocationPicker() {
-    QFileDialog dlg(this, tr("Select folder"), ui->txtTailFilesDefaultSavePath->text());
+    QFileDialog dlg(this, tr("Select folder"),
+                    ui->txtTailFilesDefaultSavePath->text());
     dlg.setFileMode(QFileDialog::FileMode::Directory);
     dlg.setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
     dlg.setOption(QFileDialog::Option::ShowDirsOnly, true);
 
     auto result = dlg.exec();
     if (result == QFileDialog::Accepted) {
-        const auto& selection = dlg.selectedFiles();
+        const auto &selection = dlg.selectedFiles();
         ui->txtTailFilesDefaultSavePath->setText(selection.first().trimmed());
         settings.tailFilesDefaultSavePath(selection.first().trimmed());
     }
@@ -490,14 +583,15 @@ void MainWindow::onShowTailFileSaveLocationPicker() {
 }
 
 void MainWindow::onShowTailScriptFileSaveLocationPicker() {
-    QFileDialog dlg(this, tr("Select folder"), ui->txtTailScriptFilesSavePath->text());
+    QFileDialog dlg(this, tr("Select folder"),
+                    ui->txtTailScriptFilesSavePath->text());
     dlg.setFileMode(QFileDialog::FileMode::Directory);
     dlg.setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
     dlg.setOption(QFileDialog::Option::ShowDirsOnly, true);
 
     auto result = dlg.exec();
     if (result == QFileDialog::Accepted) {
-        const auto& selection = dlg.selectedFiles();
+        const auto &selection = dlg.selectedFiles();
         ui->txtTailScriptFilesSavePath->setText(selection.first().trimmed());
         settings.tailScriptFilesSavePath(selection.first().trimmed());
     }
@@ -505,38 +599,42 @@ void MainWindow::onShowTailScriptFileSaveLocationPicker() {
     startListeningForIncomingFiles();
 }
 
-namespace
-{
-    static QList<QTableWidgetItem*> netCheckWidgetItems{};
+namespace {
+static QList<QTableWidgetItem *> netCheckWidgetItems{};
 
-    static void cleanupDisposableNetCheckWidgetItems() {
-        for (auto* wi : netCheckWidgetItems) {
-            delete wi;
-        }
-        netCheckWidgetItems.clear();
+static void cleanupDisposableNetCheckWidgetItems() {
+    for (auto *wi : netCheckWidgetItems) {
+        delete wi;
     }
+    netCheckWidgetItems.clear();
 }
+} // namespace
 
-void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& results, QList<QPair<QString, float>>& latencies) const {
+void MainWindow::netCheckCompleted(
+    bool success, const QMap<QString, QString> &results,
+    QList<QPair<QString, float>> &latencies) const {
     cleanupDisposableNetCheckWidgetItems();
 
     ui->twNetworkStatus->clear();
     ui->twNetworkStatus->setColumnCount(2);
-    ui->twNetworkStatus->setHorizontalHeaderLabels(QStringList() << tr("Property") << tr("Value"));
-    ui->twNetworkStatus->setRowCount(static_cast<int>(results.count() + latencies.count() + 1));
+    ui->twNetworkStatus->setHorizontalHeaderLabels(QStringList() << tr("Property")
+                                                                 << tr("Value"));
+    ui->twNetworkStatus->setRowCount(
+        static_cast<int>(results.count() + latencies.count() + 1));
 
     // For latencies, we want to sort on lowest latencies first
     // Sort the list based on the second element (the value)
-    std::sort(latencies.begin(), latencies.end(), [](const QPair<QString, float>& a, const QPair<QString, float>& b) {
-        return a.second < b.second;
-    });
+    std::sort(latencies.begin(), latencies.end(),
+              [](const QPair<QString, float> &a, const QPair<QString, float> &b) {
+                  return a.second < b.second;
+              });
 
     int i = 0;
     for (auto it = results.begin(); it != results.end(); ++it) {
-        const auto& key = it.key();
-        const auto& value = it.value();
-        auto* w1 = new QTableWidgetItem(key);
-        auto* w2 = new QTableWidgetItem(value);
+        const auto &key = it.key();
+        const auto &value = it.value();
+        auto *w1 = new QTableWidgetItem(key);
+        auto *w2 = new QTableWidgetItem(value);
         netCheckWidgetItems.push_back(w1);
         netCheckWidgetItems.push_back(w2);
 
@@ -545,9 +643,10 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
 
         if (key == "Nearest DERP") {
             // Find the DERP Latency
-            for (const auto& derp : latencies) {
+            for (const auto &derp : latencies) {
                 if (derp.first == value) {
-                    ui->twNetworkStatus->item(i, 1)->setText(value + " (" + QString::number(derp.second) + "ms)");
+                    ui->twNetworkStatus->item(i, 1)->setText(
+                        value + " (" + QString::number(derp.second) + "ms)");
                     break;
                 }
             }
@@ -557,8 +656,8 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
     }
 
     // Add DERP header
-    auto* w1 = new QTableWidgetItem("DERP Latencies");
-    auto* w2 = new QTableWidgetItem("");
+    auto *w1 = new QTableWidgetItem("DERP Latencies");
+    auto *w2 = new QTableWidgetItem("");
     netCheckWidgetItems.push_back(w1);
     netCheckWidgetItems.push_back(w2);
 
@@ -567,8 +666,8 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
     ++i;
 
     for (auto it = latencies.begin(); it != latencies.end(); ++it) {
-        const auto& key = it->first;
-        const auto& value = it->second;
+        const auto &key = it->first;
+        const auto &value = it->second;
         w1 = new QTableWidgetItem(key);
         netCheckWidgetItems.push_back(w1);
         ui->twNetworkStatus->setItem(i, 0, w1);
@@ -587,19 +686,20 @@ void MainWindow::netCheckCompleted(bool success, const QMap<QString, QString>& r
 }
 
 void MainWindow::showAdvertiseRoutesDialog() const {
-    auto knownRoutes = pCurrentExecution->currentSettings().getFilteredAdvertiseRoutes();
-    
+    auto knownRoutes =
+        pCurrentExecution->currentSettings().getFilteredAdvertiseRoutes();
+
     AdvertiseRoutesDlg dlg(knownRoutes);
     dlg.setWindowIcon(windowIcon());
     auto result = dlg.exec();
     if (result != QDialog::Accepted)
         return;
-    
-    const auto& routes = dlg.getDefinedRoutes();
+
+    const auto &routes = dlg.getDefinedRoutes();
     pCurrentExecution->advertiseRoutes(routes);
 }
 
-void MainWindow::showDnsSettingsDialog() const {    
+void MainWindow::showDnsSettingsDialog() const {
     DnsSettingsDlg dlg(pDnsStatus, ui->chkUseTailscaleDns->isChecked());
     dlg.setWindowIcon(windowIcon());
     dlg.exec();
@@ -607,7 +707,8 @@ void MainWindow::showDnsSettingsDialog() const {
     ui->chkUseTailscaleDns->setChecked(dlg.isTailscaleDnsEnabled());
 }
 
-void MainWindow::showWarningMessage(const QString& title, const QString& message, bool timeLimited) {
+void MainWindow::showWarningMessage(const QString &title,
+                                    const QString &message, bool timeLimited) {
     auto key = message.toLower().trimmed();
     if (timeLimited) {
         auto now = QDateTime::currentDateTime();
@@ -615,9 +716,8 @@ void MainWindow::showWarningMessage(const QString& title, const QString& message
             auto lastShown = seenWarningsAndErrors[message];
             auto diff = lastShown.secsTo(now);
             if (diff < 60 * 60) // 1 hour
-                return; // No point in showing the same message again
-        }
-        else {
+                return;           // No point in showing the same message again
+        } else {
             seenWarningsAndErrors.insert(key, now);
         }
     }
@@ -625,7 +725,8 @@ void MainWindow::showWarningMessage(const QString& title, const QString& message
     pNotificationsManager->showWarningNotification(title, message);
 }
 
-void MainWindow::showErrorMessage(const QString& title, const QString& message, bool timeLimited) {
+void MainWindow::showErrorMessage(const QString &title, const QString &message,
+                                  bool timeLimited) {
     auto key = message.toLower().trimmed();
     if (timeLimited) {
         auto now = QDateTime::currentDateTime();
@@ -633,9 +734,8 @@ void MainWindow::showErrorMessage(const QString& title, const QString& message, 
             auto lastShown = seenWarningsAndErrors[message];
             auto diff = lastShown.secsTo(now);
             if (diff < 60 * 60) // 1 hour
-                return; // No point in showing the same message again
-        }
-        else {
+                return;           // No point in showing the same message again
+        } else {
             seenWarningsAndErrors.insert(key, now);
         }
     }
@@ -660,7 +760,7 @@ bool MainWindow::isTailDriveFileAlreadySetup() {
 
     auto fileContent = QString(davFsSecret.readAll());
     auto lines = fileContent.split('\n', Qt::SkipEmptyParts);
-    for (const auto& line : lines) {
+    for (const auto &line : lines) {
         if (line.trimmed().startsWith('#'))
             continue; // Comment
         if (line.contains(KnownValues::tailDavFsUrl, Qt::CaseInsensitive)) {
@@ -671,24 +771,57 @@ bool MainWindow::isTailDriveFileAlreadySetup() {
     return false;
 }
 
-void MainWindow::showEvent(QShowEvent* event) {
+void MainWindow::showEvent(QShowEvent *event) {
     QMainWindow::showEvent(event);
 
     // Read settings, and it will be synced to UI once read
     pCurrentExecution->readSettings();
 }
 
-TailState MainWindow::changeToState(TailState newState)
+void MainWindow::refreshThemebasedItems()
 {
+    // HACK to ensure that icons are properly updated when theme changes
+    //  auto wasVisible = isVisible();
+    //  if (!wasVisible) {
+    //      // We need to show the window to be able to update icons properly
+    //showNormal();
+    //  }
+
+    // Refresh UI & tray state
+    changeToState(eCurrentState);
+    syncSettingsToUi();
+    pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
+
+    //if (!wasVisible) {
+    //    // Restore previous visibility state
+    //    hide();
+    //}
+}
+
+bool MainWindow::event(QEvent* event) {
+    if (event->type() == QEvent::StyleChange) {
+        refreshThemebasedItems();
+    }
+
+    return QMainWindow::event(event);
+}
+
+TailState MainWindow::changeToState(TailState newState) {
     auto retVal = eCurrentState;
     auto didChangeState = eCurrentState != newState;
     eCurrentState = newState;
 
-    if (eCurrentState == TailState::NotLoggedIn)
-    {
+    if (eCurrentState == TailState::NotLoggedIn) {
         // Clear the status
         pTailStatus = TailStatus{};
         pTailStatus.user = TailUser{};
+    }
+
+    if (newState == TailState::Connected) {
+        setWindowIcon(themeManager.getConnectedTrayIcon());
+    }
+    else {
+        setWindowIcon(themeManager.getDisConnectedTrayIcon());
     }
 
     if (didChangeState) {
@@ -699,18 +832,16 @@ TailState MainWindow::changeToState(TailState newState)
             ui->tabSettings->setDisabled(false);
             ui->tabTailDrive->setDisabled(false);
 
-            setWindowIcon(QIcon(":/icons/tray-on.png"));
             if (didChangeState) {
                 seenWarningsAndErrors.clear();
             }
-        }
-        else {
+        } else {
             ui->tabNetworkStatus->setDisabled(true);
             ui->tabSettings->setDisabled(true);
             ui->tabTailDrive->setDisabled(true);
             ui->tabWidget->setCurrentIndex(0);
 
-            setWindowIcon(QIcon(":/icons/tray-off.png"));
+            setWindowIcon(themeManager.getDisConnectedTrayIcon());
         }
     }
 
@@ -727,25 +858,24 @@ TailState MainWindow::changeToState(TailState newState)
         startListeningForIncomingFiles();
 
 #if defined(DAVFS_ENABLED)
-    pTailDriveUiManager->stateChangedTo(newState, pTailStatus);
-    if (settings.tailDriveEnabled()) {
-        pCurrentExecution->listDrives();
-    }
+        pTailDriveUiManager->stateChangedTo(newState, pTailStatus);
+        if (settings.tailDriveEnabled()) {
+            pCurrentExecution->listDrives();
+        }
 #endif
     }
 
     return retVal;
 }
 
-void MainWindow::onTailStatusChanged(const TailStatus& pNewStatus)
-{
+void MainWindow::onTailStatusChanged(const TailStatus &pNewStatus) {
     // NOTE: Make sure to capture any stored drive data from prev drive listing
     //       if not we will lose track of the drives
     QList<TailDriveInfo> drives = pTailStatus.drives;
     pTailStatus = pNewStatus;
     pTailStatus.drives = drives;
 
-    const auto& tailscalePrefs = pCurrentExecution->currentSettings();
+    const auto &tailscalePrefs = pCurrentExecution->currentSettings();
 
     if (pTailStatus.user.id > 0) {
         if (pTailStatus.self.online)
@@ -753,21 +883,21 @@ void MainWindow::onTailStatusChanged(const TailStatus& pNewStatus)
         else
             changeToState(TailState::NotConnected);
 
-        if (pTailStatus.health.count() > 0)
-        {
+        if (pTailStatus.health.count() > 0) {
             auto now = QDateTime::currentDateTime();
             QString str{};
-            for (const auto& s : pTailStatus.health)
+            for (const auto &s : pTailStatus.health)
                 str += s + "\n";
 
             if (str.length() > 1)
                 showWarningMessage(tr("Warning"), str);
         }
 
-        auto formattedVersion = pTailStatus.version.mid(0, pTailStatus.version.indexOf("-"));
-        ui->lblVersionNumberTailscale->setText("Tailscale " + tr("Version ") + formattedVersion);
-    }
-    else {
+        auto formattedVersion =
+            pTailStatus.version.mid(0, pTailStatus.version.indexOf("-"));
+        ui->lblVersionNumberTailscale->setText("Tailscale " + tr("Version ") +
+                                               formattedVersion);
+    } else {
         changeToState(TailState::NotLoggedIn);
     }
 
@@ -778,7 +908,7 @@ void MainWindow::onTailStatusChanged(const TailStatus& pNewStatus)
 }
 
 bool MainWindow::shallowCheckForNetworkAvailable() {
-    auto* inst = QNetworkInformation::instance();
+    auto *inst = QNetworkInformation::instance();
     if (inst->reachability() == QNetworkInformation::Reachability::Online)
         return true;
 
@@ -786,11 +916,16 @@ bool MainWindow::shallowCheckForNetworkAvailable() {
 }
 
 void MainWindow::syncSettingsToUi() const {
+    auto themeIcon = themeManager.getConnectedTrayIcon();
+    ui->lblUserImage->setPixmap(themeIcon.pixmap(128, 128));
+    ui->lblTailscaleIcon->setPixmap(themeIcon.pixmap(128, 128));
+
     ui->chkAllowIncomingCnx->setChecked(settings.allowIncomingConnections());
     ui->chkUseTailscaleDns->setChecked(settings.useTailscaleDns());
     ui->chkRunAsExitNode->setChecked(settings.advertiseAsExitNode());
     ui->chkAcceptRoutes->setChecked(settings.acceptRoutes());
-    ui->chkExitNodeAllowNetworkAccess->setChecked(settings.exitNodeAllowLanAccess());
+    ui->chkExitNodeAllowNetworkAccess->setChecked(
+        settings.exitNodeAllowLanAccess());
     ui->chkStartOnLogin->setChecked(settings.startOnLogin());
     ui->chkUseTailDrive->setChecked(settings.tailDriveEnabled());
     ui->txtTailDriveDefaultMountPath->setText(settings.tailDriveMountPath());
@@ -801,8 +936,8 @@ void MainWindow::syncSettingsToUi() const {
     // Windows does support auto update
     ui->chkAutoUpdateTailscale->setChecked(settings.autoUpdateTailscale());
 #else
-    // Auto update is only supported on select platforms, Linux is not one of them (in general)
-    // So we hide the option on Linux
+    // Auto update is only supported on select platforms, Linux is not one of them
+    // (in general) So we hide the option on Linux
     ui->lblTailScaleAutoUpdate->setVisible(false);
     ui->chkAutoUpdateTailscale->setVisible(false);
     ui->lblTailScaleAutoUpdate->setEnabled(false);
@@ -810,13 +945,12 @@ void MainWindow::syncSettingsToUi() const {
     ui->tabSettings->layout()->removeItem(ui->layoutAutoUpdate);
 #endif
 
-    auto advertisedRoutes = pCurrentExecution->currentSettings().getFilteredAdvertiseRoutes();
+    auto advertisedRoutes =
+        pCurrentExecution->currentSettings().getFilteredAdvertiseRoutes();
     if (advertisedRoutes.count() > 0) {
-        ui->lblAdvertisingNumRoutes->setText(tr("Advertising %1 routes")
-            .arg(advertisedRoutes.count())
-        );
-    }
-    else {
+        ui->lblAdvertisingNumRoutes->setText(
+            tr("Advertising %1 routes").arg(advertisedRoutes.count()));
+    } else {
         ui->lblAdvertisingNumRoutes->setText(tr("No routes advertised"));
     }
 
@@ -831,17 +965,20 @@ void MainWindow::syncSettingsToUi() const {
     }
 
     configDir.cd("autostart");
-    ui->chkStartOnLogin->setChecked(QFile::exists(configDir.absolutePath() + "/tail-tray.desktop"));
+    ui->chkStartOnLogin->setChecked(
+        QFile::exists(configDir.absolutePath() + "/tail-tray.desktop"));
 }
 
 void MainWindow::syncSettingsFromUi() {
     settings.allowIncomingConnections(ui->chkAllowIncomingCnx->isChecked());
     settings.useTailscaleDns(ui->chkUseTailscaleDns->isChecked());
     settings.advertiseAsExitNode(ui->chkRunAsExitNode->isChecked());
-    settings.exitNodeAllowLanAccess(ui->chkExitNodeAllowNetworkAccess->isChecked());
+    settings.exitNodeAllowLanAccess(
+        ui->chkExitNodeAllowNetworkAccess->isChecked());
     settings.startOnLogin(ui->chkStartOnLogin->isChecked());
     settings.tailDriveEnabled(ui->chkUseTailDrive->isChecked());
-    settings.tailDriveMountPath(ui->txtTailDriveDefaultMountPath->text().trimmed());
+    settings.tailDriveMountPath(
+        ui->txtTailDriveDefaultMountPath->text().trimmed());
     settings.acceptRoutes(ui->chkAcceptRoutes->isChecked());
 
 #if defined(WINDOWS_BUILD)
@@ -850,7 +987,8 @@ void MainWindow::syncSettingsFromUi() {
 
     const QDir dir(ui->txtTailFilesDefaultSavePath->text().trimmed());
     if (dir.exists()) {
-        settings.tailFilesDefaultSavePath(ui->txtTailFilesDefaultSavePath->text().trimmed());
+        settings.tailFilesDefaultSavePath(
+            ui->txtTailFilesDefaultSavePath->text().trimmed());
         startListeningForIncomingFiles();
     }
 
@@ -862,21 +1000,22 @@ void MainWindow::syncSettingsFromUi() {
         if (dir.exists()) {
             settings.tailScriptFilesSavePath(scriptPath);
         } else {
-                settings.tailScriptFilesSavePath("");
-                ui->txtTailScriptFilesSavePath->clear();
-            }
+            settings.tailScriptFilesSavePath("");
+            ui->txtTailScriptFilesSavePath->clear();
+        }
     }
 
     auto homeDir = QDir::home();
-    auto targetFile = homeDir.absolutePath() + "/.config/autostart/tail-tray.desktop";
+    auto targetFile =
+        homeDir.absolutePath() + "/.config/autostart/tail-tray.desktop";
     if (settings.startOnLogin()) {
         if (!QFile::exists(targetFile)) {
             (void)homeDir.mkpath(".config/autostart");
-            QFile::copy(QString(DATAROOTDIR)
-                + QString("/applications/tail-tray.desktop"), targetFile);
+            QFile::copy(QString(DATAROOTDIR) +
+                            QString("/applications/tail-tray.desktop"),
+                        targetFile);
         }
-    }
-    else {
+    } else {
         QFile::remove(targetFile);
     }
 

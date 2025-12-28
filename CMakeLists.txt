@@ -6,6 +6,13 @@ project(tail-tray VERSION 0.2.27 LANGUAGES CXX)
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
 find_package(Qt6LinguistTools REQUIRED)
+qt_add_translations(tail-tray TS_FILES
+    translations/tail_tray_en_US.ts
+    translations/tail_tray_sv_SE.ts
+    translations/tail_tray_de_DE.ts
+    translations/tail_tray_fr_FR.ts
+)
+qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -154,6 +161,7 @@ else ()
     )
 
 endif ()
+
 
 # These must be called before any qt_add_executable calls
 qt_add_translations(tail-tray TS_FILES

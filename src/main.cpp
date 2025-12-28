@@ -52,8 +52,9 @@ int main(int argc, char** argv) {
 
     // Try to load
     auto didLoad = translator.load(locale, "tail_tray", "_", translationDirRoot);
-    if (didLoad)
+    if (didLoad) {
         QCoreApplication::installTranslator(&translator);
+    }
     else {
         // Load from fallback, eg same path as the binary is located at
         didLoad = translator.load(locale, "tail_tray", "_",
@@ -68,7 +69,14 @@ int main(int argc, char** argv) {
     }
 
     MainWindow w;
-    w.hide();
+
+	// HACK: Workaround to make sure that the tray icon is updated correctly when style/theme changes
+    {
+        w.show();
+        QTimer::singleShot(100, &w, [&w]() {
+            w.hide();
+        });
+    }
 
     auto ec = a.exec();
     return ec;

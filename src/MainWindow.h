@@ -44,6 +44,8 @@ public:
 
     void userLoggedOut() { changeToState(TailState::NotLoggedIn); }
 
+    void refreshThemebasedItems();
+
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     std::unique_ptr<AccountsTabUiManager> accountsTabUi;
@@ -118,6 +120,7 @@ private:
 
 protected:
     void showEvent(QShowEvent* event) override;
+    bool event(QEvent* event) override;
 };
 
 #endif // MAINWINDOW_H

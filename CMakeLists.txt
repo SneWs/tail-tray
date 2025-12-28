@@ -68,8 +68,8 @@ set(PROJECT_SOURCES
     src/models/CurrentTailPrefs.h
     src/models/JsonHelpers.h
     src/models/Models.h
-    src/models/IpnEvents.h 
-    src/models/TailPrefsConfig.h 
+    src/models/IpnEvents.h
+    src/models/TailPrefsConfig.h
     src/TrayMenuManager.cpp
     src/TrayMenuManager.h
     src/TailSettings.cpp
@@ -106,6 +106,8 @@ set(PROJECT_SOURCES
     src/NotificationsManager.cpp
     src/ScriptManager.h
     src/ScriptManager.cpp
+    src/ThemeManager.h
+    src/ThemeManager.cpp
     src/Version.h
 )
 
@@ -155,19 +157,13 @@ qt_add_translations(tail-tray TS_FILES
 qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
 target_link_libraries(
-    tail-tray PRIVATE 
-    Qt${QT_VERSION_MAJOR}::Widgets 
-    Qt${QT_VERSION_MAJOR}::Network 
+    tail-tray PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Network
 )
 
-if (KNOTIFICATIONS_ENABLED)
-    target_link_libraries(
-        tail-tray PRIVATE 
-        KF6::Notifications
-    )
-endif (KNOTIFICATIONS_ENABLED)
-
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
+
 # Generate Version.h from template
 configure_file(src/Version.h.in ${CMAKE_SOURCE_DIR}/src/Version.h @ONLY)
 
@@ -190,6 +186,13 @@ if (UNIVERSAL_CROSSBUILD)
 endif ()
 
 if (UNIX AND NOT APPLE)
+    if (KNOTIFICATIONS_ENABLED)
+        target_link_libraries(
+            tail-tray PRIVATE
+            KF6::Notifications
+        )
+    endif (KNOTIFICATIONS_ENABLED)
+
     configure_file(tail-tray.desktop.in
         ${CMAKE_SOURCE_DIR}/tail-tray.desktop
         @ONLY
@@ -199,12 +202,13 @@ if (UNIX AND NOT APPLE)
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
     )
 
-if (KNOTIFICATIONS_ENABLED)
-    install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
-endif (KNOTIFICATIONS_ENABLED)
+    if (KNOTIFICATIONS_ENABLED)
+        install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
+    endif (KNOTIFICATIONS_ENABLED)
 
-    install(FILES icons/tailscale.png
-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps
+    # Icon files...
+    install(FILES icons/tail-tray-dark.svg icons/tail-tray.svg
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps
     )
 endif ()
 
@@ -214,3 +218,4 @@ if (BUILD_TESTS)
     # Add the tests subdirectory so it is built with the main project
     add_subdirectory(tests)
 endif ()
+

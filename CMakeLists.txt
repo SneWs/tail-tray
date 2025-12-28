@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.21)
 
 project(tail-tray VERSION 0.2.27 LANGUAGES CXX)
 
+# These must be called before any qt_add_executable calls and as early as possible
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
+find_package(Qt6LinguistTools REQUIRED)
+qt_add_translations(tail-tray TS_FILES
+    translations/tail_tray_en_US.ts
+    translations/tail_tray_sv_SE.ts
+    translations/tail_tray_de_DE.ts
+    translations/tail_tray_fr_FR.ts
+)
+qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -9,6 +21,19 @@ set(CMAKE_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Always include KDEInstallDirs before any find_package(Qt6 ...) or other modules that may include GNUInstallDirs
+if (UNIX AND NOT APPLE)
+    option(KNOTIFICATIONS_ENABLED "Enable KNotifications" ON)
+    if (KNOTIFICATIONS_ENABLED)
+        find_package(ECM REQUIRED NO_MODULE)
+        set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+        include(KDEInstallDirs)
+        include(KDECMakeSettings)
+    endif ()
+else ()
+    include(GNUInstallDirs)
+endif ()
 
 # Use Davfs or not
 option(DAVFS_ENABLED "Enable DAVFS" ON)
@@ -28,28 +53,17 @@ add_definitions(-DTRANSLATIONS_DIR="${FULL_LIBDIR_PATH}")
 
 message(STATUS "Full path of translations install path: ${FULL_LIBDIR_PATH}")
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
-
 option(BUILD_TESTS "Build tests" ON)
-option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
-
 if (UNIX AND NOT APPLE)
     if (KNOTIFICATIONS_ENABLED)
         # Use KNotifications
         message("KNotifications has been enabled! This requires Plasma 6")
-
-        find_package(ECM REQUIRED NO_MODULE)
-        set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
-        include(KDEInstallDirs)
-        include(KDECMakeSettings)
-
         add_definitions(-DKNOTIFICATIONS_ENABLED)
         find_package(KF6Notifications)
     else ()
         message("KNotifications has not been enabled!")
-    endif (KNOTIFICATIONS_ENABLED)
-endif (UNIX AND NOT APPLE)
+    endif ()
+endif ()
 
 set(PROJECT_SOURCES
     src/main.cpp
@@ -148,18 +162,20 @@ else ()
 
 endif ()
 
+
+# These must be called before any qt_add_executable calls
 qt_add_translations(tail-tray TS_FILES
-        translations/tail_tray_en_US.ts
-        translations/tail_tray_sv_SE.ts
-        translations/tail_tray_de_DE.ts
-        translations/tail_tray_fr_FR.ts
+    translations/tail_tray_en_US.ts
+    translations/tail_tray_sv_SE.ts
+    translations/tail_tray_de_DE.ts
+    translations/tail_tray_fr_FR.ts
 )
 qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
 target_link_libraries(
     tail-tray PRIVATE
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Network
+    Qt6::Widgets
+    Qt6::Network
 )
 
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
@@ -167,9 +183,7 @@ configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
 # Generate Version.h from template
 configure_file(src/Version.h.in ${CMAKE_SOURCE_DIR}/src/Version.h @ONLY)
 
-if (UNIX AND NOT APPLE)
-    include(GNUInstallDirs)
-endif ()
+
 
 install(TARGETS tail-tray
     BUNDLE DESTINATION .

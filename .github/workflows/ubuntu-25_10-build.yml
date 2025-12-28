@@ -39,7 +39,7 @@ jobs:
         with:
           artifacts-dir: build
           docker-image: ubuntu:25.10
-          extra-build-deps: devscripts git extra-cmake-modules qt6-tools-dev qt6-tools-dev-tools davfs2 libxcb-cursor0 kf6-knotifications-devel 
+          extra-build-deps: devscripts git libkf6notifications-dev extra-cmake-modules qt6-tools-dev qt6-tools-dev-tools davfs2
           buildpackage-opts: --build=binary --no-sign
           before-build-hook: |
             apt-get install libkf6notifications-dev

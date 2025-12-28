@@ -70,7 +70,7 @@ jobs:
       with:
         artifacts-dir: build
         docker-image: ubuntu:24.04
-        extra-build-deps: devscripts git extra-cmake-modules qt6-tools-dev qt6-tools-dev-tools davfs2 libxcb-cursor0
+        extra-build-deps: devscripts git
         before-build-hook: |
           git checkout debian/changelog
           debchange --controlmaint --local="ubuntu-24.04-noble" "New upstream release"

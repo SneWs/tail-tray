@@ -780,22 +780,10 @@ void MainWindow::showEvent(QShowEvent *event) {
 
 void MainWindow::refreshThemebasedItems()
 {
-    // HACK to ensure that icons are properly updated when theme changes
-    //  auto wasVisible = isVisible();
-    //  if (!wasVisible) {
-    //      // We need to show the window to be able to update icons properly
-    //showNormal();
-    //  }
-
     // Refresh UI & tray state
     changeToState(eCurrentState);
     syncSettingsToUi();
     pTrayManager->stateChangedTo(eCurrentState, pTailStatus);
-
-    //if (!wasVisible) {
-    //    // Restore previous visibility state
-    //    hide();
-    //}
 }
 
 bool MainWindow::event(QEvent* event) {

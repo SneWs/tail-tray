@@ -3,14 +3,14 @@
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
   <property name="windowModality">
-   <enum>Qt::WindowModality::NonModal</enum>
+   <enum>Qt::NonModal</enum>
   </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>589</width>
-    <height>792</height>
+    <width>588</width>
+    <height>698</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,7 +22,7 @@
   <property name="minimumSize">
    <size>
     <width>588</width>
-    <height>792</height>
+    <height>698</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -34,7 +34,7 @@
   <property name="baseSize">
    <size>
     <width>588</width>
-    <height>562</height>
+    <height>750</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -51,7 +51,7 @@
        </size>
       </property>
       <property name="tabPosition">
-       <enum>QTabWidget::TabPosition::North</enum>
+       <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
        <number>1</number>
@@ -63,7 +63,7 @@
        </size>
       </property>
       <property name="elideMode">
-       <enum>Qt::TextElideMode::ElideLeft</enum>
+       <enum>Qt::ElideLeft</enum>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -123,10 +123,10 @@
               <item>
                <spacer name="horizontalSpacer">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeType">
-                 <enum>QSizePolicy::Policy::Expanding</enum>
+                 <enum>QSizePolicy::MinimumExpanding</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -150,7 +150,7 @@
               <item>
                <spacer name="horizontalSpacer_11">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -194,7 +194,7 @@
               <item>
                <spacer name="horizontalSpacer_12">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -364,7 +364,7 @@
               <item>
                <spacer name="horizontalSpacer_7">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -403,7 +403,7 @@
               <item>
                <spacer name="horizontalSpacer_8">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -466,7 +466,7 @@
               <item>
                <spacer name="horizontalSpacer_9">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -492,7 +492,7 @@
               <item>
                <spacer name="horizontalSpacer_10">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -507,7 +507,7 @@
             <item>
              <spacer name="verticalSpacer_4">
               <property name="orientation">
-               <enum>Qt::Orientation::Vertical</enum>
+               <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -534,7 +534,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="sizeConstraint">
-           <enum>QLayout::SizeConstraint::SetNoConstraint</enum>
+           <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -573,7 +573,7 @@
                <string>General</string>
               </property>
               <property name="textFormat">
-               <enum>Qt::TextFormat::PlainText</enum>
+               <enum>Qt::PlainText</enum>
               </property>
              </widget>
             </item>
@@ -659,7 +659,7 @@
                 <item>
                  <spacer name="horizontalSpacer_5">
                   <property name="orientation">
-                   <enum>Qt::Orientation::Horizontal</enum>
+                   <enum>Qt::Horizontal</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -783,7 +783,7 @@
               <item>
                <spacer name="horizontalSpacer_2">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -873,7 +873,7 @@
               <item>
                <spacer name="horizontalSpacer_15">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -961,7 +961,7 @@
                 <item>
                  <spacer name="horizontalSpacer_3">
                   <property name="orientation">
-                   <enum>Qt::Orientation::Horizontal</enum>
+                   <enum>Qt::Horizontal</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -1065,7 +1065,7 @@
               <item>
                <spacer name="horizontalSpacer_4">
                 <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
+                 <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -1163,7 +1163,7 @@
                 <item>
                  <spacer name="horizontalSpacer_23">
                   <property name="orientation">
-                   <enum>Qt::Orientation::Horizontal</enum>
+                   <enum>Qt::Horizontal</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -1357,68 +1357,20 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_10">
-          <property name="leftMargin">
-           <number>9</number>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-          <property name="topMargin">
-           <number>9</number>
+          <property name="sizeType">
+           <enum>QSizePolicy::MinimumExpanding</enum>
           </property>
-          <property name="rightMargin">
-           <number>9</number>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
           </property>
-          <property name="bottomMargin">
-           <number>9</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="label_9">
-            <property name="minimumSize">
-             <size>
-              <width>140</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>140</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Theme Override</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_26">
-            <property name="spacing">
-             <number>2</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="label_12">
-              <property name="text">
-               <string>Icon theme override (force dark or light icon theme)</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="drpThemes">
-              <property name="currentText">
-               <string/>
-              </property>
-              <property name="placeholderText">
-               <string>Select Icon theme override</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -1482,10 +1434,10 @@
            <bool>false</bool>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+           <enum>QAbstractItemView::NoSelection</enum>
           </property>
           <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
+           <enum>QAbstractItemView::SelectItems</enum>
           </property>
           <property name="iconSize">
            <size>
@@ -1497,7 +1449,7 @@
            <bool>false</bool>
           </property>
           <property name="gridStyle">
-           <enum>Qt::PenStyle::NoPen</enum>
+           <enum>Qt::NoPen</enum>
           </property>
           <property name="wordWrap">
            <bool>false</bool>
@@ -1527,7 +1479,7 @@
           <item>
            <spacer name="horizontalSpacer_24">
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -1617,7 +1569,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Important information&lt;br/&gt;&lt;/span&gt;On Linux, to be able to mount shares from other machines you will need to do some setup first:&lt;/p&gt;&lt;p&gt;Make sure to add http://100.100.100.100:8080 to your ~/.davfs2/secrets file&lt;/p&gt;&lt;p&gt;The file itself contains documentation on how to define this. For username you can enter Guest and leave password empty. Read more over at &lt;a href=&quot;https://wiki.archlinux.org/title/Davfs2&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#7636dd;&quot;&gt;https://wiki.archlinux.org/title/Davfs2&lt;/span&gt;&lt;/a&gt; and at Tailscale &lt;a href=&quot;https://tailscale.com/kb/1369/taildrive?tab=linux&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#7636dd;&quot;&gt;https://tailscale.com/kb/1369/taildrive?tab=linux&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textFormat">
-           <enum>Qt::TextFormat::MarkdownText</enum>
+           <enum>Qt::PlainText</enum>
           </property>
           <property name="scaledContents">
            <bool>false</bool>
@@ -1635,7 +1587,7 @@
           <item>
            <spacer name="horizontalSpacer_25">
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -1667,7 +1619,7 @@
         <item>
          <widget class="QTableWidget" name="twNetworkStatus">
           <property name="editTriggers">
-           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+           <set>QAbstractItemView::NoEditTriggers</set>
           </property>
           <property name="showDropIndicator" stdset="0">
            <bool>false</bool>
@@ -1676,10 +1628,10 @@
            <bool>true</bool>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+           <enum>QAbstractItemView::NoSelection</enum>
           </property>
           <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
+           <enum>QAbstractItemView::SelectItems</enum>
           </property>
           <property name="rowCount">
            <number>0</number>
@@ -1697,6 +1649,90 @@
            <bool>false</bool>
           </attribute>
          </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabUISettings">
+       <attribute name="title">
+        <string>&amp;UI</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_30">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <property name="topMargin">
+           <number>9</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <property name="bottomMargin">
+           <number>9</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_9">
+            <property name="minimumSize">
+             <size>
+              <width>140</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>140</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Theme Override</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_26">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>Icon theme override (force dark or light icon theme)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="drpThemes">
+              <property name="currentText">
+               <string/>
+              </property>
+              <property name="placeholderText">
+               <string>Select Icon theme override</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>535</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -1718,7 +1754,7 @@
             <item>
              <spacer name="horizontalSpacer_13">
               <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -1766,15 +1802,15 @@
             <item>
              <spacer name="verticalSpacer_12">
               <property name="orientation">
-               <enum>Qt::Orientation::Vertical</enum>
+               <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Policy::Fixed</enum>
+               <enum>QSizePolicy::Fixed</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
-                <height>40</height>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
              </spacer>
@@ -1824,23 +1860,20 @@
               <property name="text">
                <string>Tailscale Version 0.0.0.1</string>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft</set>
-              </property>
              </widget>
             </item>
             <item>
              <spacer name="verticalSpacer_13">
               <property name="orientation">
-               <enum>Qt::Orientation::Vertical</enum>
+               <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Policy::Fixed</enum>
+               <enum>QSizePolicy::Fixed</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
-                <height>40</height>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
              </spacer>
@@ -1850,7 +1883,7 @@
           <item>
            <spacer name="horizontalSpacer_14">
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -1957,7 +1990,7 @@
         <item>
          <spacer name="verticalSpacer_14">
           <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
+           <enum>Qt::Vertical</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -1972,32 +2005,16 @@
      </widget>
     </item>
     <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Orientation::Vertical</enum>
-      </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Policy::MinimumExpanding</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
      <layout class="QHBoxLayout" name="horizontalLayout_31">
       <item>
        <spacer name="horizontalSpacer_6">
         <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
+         <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>20</width>
-          <height>40</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>

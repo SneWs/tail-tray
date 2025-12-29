@@ -204,9 +204,9 @@ void MainWindow::showAccountsTab() {
 }
 
 void MainWindow::showAboutTab() {
-    auto tabIndex = 3;
+    auto tabIndex = 4;
     if (settings.tailDriveEnabled())
-        tabIndex = 4;
+        tabIndex = 5;
 
     ui->tabWidget->setCurrentIndex(tabIndex);
     showNormal();

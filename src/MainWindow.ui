@@ -528,7 +528,7 @@
         <iconset theme="preferences-system"/>
        </attribute>
        <attribute name="title">
-        <string>Settings</string>
+        <string>&amp;Settings</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
@@ -1608,6 +1608,22 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabDevices">
+       <attribute name="title">
+        <string>&amp;Devices</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_31">
+        <item>
+         <widget class="QTreeWidget" name="tvDevices">
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabNetworkStatus">
        <attribute name="icon">
         <iconset theme="QIcon::ThemeIcon::NetworkWireless"/>
@@ -1654,7 +1670,7 @@
       </widget>
       <widget class="QWidget" name="tabUISettings">
        <attribute name="title">
-        <string>&amp;UI</string>
+        <string>&amp;UI Settings</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_30">
         <item>

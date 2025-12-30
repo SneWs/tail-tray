@@ -12,6 +12,8 @@
 #include <QMessageBox>
 #include <QShowEvent>
 #include <QComboBox>
+#include <QTreeWidget>
+#include <QClipboard>
 #include <memory>
 
 #include "AdvertiseRoutesDlg.h"
@@ -168,6 +170,10 @@ MainWindow::MainWindow(QWidget *parent)
         themeManager.setOverride(preferedTheme);
     }
 
+	ui->tvDevices->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->tvDevices, &QTreeWidget::customContextMenuRequested, this,
+		&MainWindow::onDevicesTreeContextMenuRequested);
+
 #if defined(WINDOWS_BUILD)
     // On windows this looks like crap, so don't use it
     ui->twNetworkStatus->setAlternatingRowColors(false);
@@ -204,9 +210,9 @@ void MainWindow::showAccountsTab() {
 }
 
 void MainWindow::showAboutTab() {
-    auto tabIndex = 4;
+    auto tabIndex = 5;
     if (settings.tailDriveEnabled())
-        tabIndex = 5;
+        tabIndex = 6;
 
     ui->tabWidget->setCurrentIndex(tabIndex);
     showNormal();
@@ -903,6 +909,51 @@ bool MainWindow::shallowCheckForNetworkAvailable() {
     return false;
 }
 
+void MainWindow::onDevicesTreeContextMenuRequested(const QPoint& pos) const {
+    QTreeWidgetItem* selectedItem = ui->tvDevices->itemAt(pos);
+    if (selectedItem == nullptr)
+		return;
+
+	auto peerIndex = selectedItem->data(0, Qt::UserRole);
+	auto peer = pTailStatus.peers[peerIndex.toInt()];
+    
+    QMenu menu(ui->tvDevices);
+
+    QAction* copyIpAction =
+        menu.addAction(tr("Copy IP Address"));
+
+    connect(copyIpAction, &QAction::triggered, this, [this, peer]() {
+        auto ipAddress = peer.tailscaleIPs[0];
+        QClipboard* clipboard = QGuiApplication::clipboard();
+        clipboard->setText(ipAddress);
+        ipAddressCopiedToClipboard(ipAddress, peer.getShortDnsName());
+    });
+
+    auto* sendFileAction = menu.addAction(tr("Send file"));
+    auto name = peer.getShortDnsName();
+    connect(sendFileAction, &QAction::triggered, this, [this, name](bool) {
+        QFileDialog dialog(nullptr, "Send file to " + name, QDir::homePath(),
+            "All files (*)");
+        dialog.setFileMode(QFileDialog::ExistingFiles);
+        dialog.setViewMode(QFileDialog::Detail);
+        auto result = dialog.exec();
+        if (result != QDialog::Accepted)
+            return;
+
+        if (dialog.selectedFiles().count() < 1)
+            return;
+
+        const QString file = dialog.selectedFiles().first();
+        qDebug() << "Will send file " << file << " to " << name;
+
+        // The user data will be cleaned up when the signal is triggered back
+        // to us
+        pCurrentExecution->sendFile(name, file, new QString(file));
+    });
+
+	menu.exec(ui->tvDevices->viewport()->mapToGlobal(pos));
+}
+
 void MainWindow::syncSettingsToUi() const {
     auto themeIcon = themeManager.getConnectedTrayIcon();
     ui->lblUserImage->setPixmap(themeIcon.pixmap(128, 128));
@@ -955,6 +1006,29 @@ void MainWindow::syncSettingsToUi() const {
     configDir.cd("autostart");
     ui->chkStartOnLogin->setChecked(
         QFile::exists(configDir.absolutePath() + "/tail-tray.desktop"));
+
+    // Sync devices to UI as well
+    ui->tvDevices->clear();
+    ui->tvDevices->setHeaderLabels(QStringList() << "Device");
+
+    QTreeWidgetItem* onlineItems = new QTreeWidgetItem(QStringList() << "Online");
+    QTreeWidgetItem* offlineItems = new QTreeWidgetItem(QStringList() << "Offline");
+    ui->tvDevices->addTopLevelItem(onlineItems);
+    ui->tvDevices->addTopLevelItem(offlineItems);
+
+    for (const auto& peer : pTailStatus.peers)
+    {
+        QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << peer.getShortDnsName());
+        if (peer.online) {
+            onlineItems->addChild(item);
+        }
+        else {
+            offlineItems->addChild(item);
+        }
+    }
+
+    onlineItems->setExpanded(true);
+    offlineItems->setExpanded(true);
 }
 
 void MainWindow::syncSettingsFromUi() {

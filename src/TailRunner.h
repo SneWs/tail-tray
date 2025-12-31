@@ -101,7 +101,7 @@ public:
     void getAccounts();
     void switchAccount(const QString& accountId);
 
-    void login();
+    void login(const QString& customLoginUrl = "");
     void logout();
     void cancelLoginFlow();
 

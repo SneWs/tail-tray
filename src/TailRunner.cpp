@@ -168,8 +168,14 @@ void TailRunner::switchAccount(const QString& accountId) {
     runCommand(Command::SwitchAccount, "switch", args);
 }
 
-void TailRunner::login() {
+void TailRunner::login(const QString& customLoginUrl) {
     QStringList args;
+    if (!customLoginUrl.isEmpty())
+    {
+        qDebug() << "Will use custom login server url " << customLoginUrl;
+        args << "--login-server=" << customLoginUrl;
+    }
+
 #if !defined(WINDOWS_BUILD)
     args << "--operator" << qEnvironmentVariable("USER");
 #endif

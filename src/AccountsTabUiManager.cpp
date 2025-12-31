@@ -6,6 +6,8 @@
 
 #include <QDesktopServices>
 #include <QUrl>
+#include <QInputDialog>
+#include <QDir>
 
 #include "./ui_MainWindow.h"
 #include "MainWindow.h"
@@ -14,9 +16,16 @@
 AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner, QObject* parent)
     : QObject(parent)
     , ui(u)
+    , pAddAccountButtonMenu(nullptr)
     , pTailRunner(runner)
     , pTailStatus()
 {
+    // Add account context menu/split button for control server
+    pAddAccountButtonMenu = std::make_unique<QMenu>(ui->btnAddAccount);
+    QAction* addAccount = pAddAccountButtonMenu->addAction(tr("Add account"));
+    QAction* addWithCustomUrl = pAddAccountButtonMenu->addAction(tr("Custom Control Server URL"));
+    ui->btnAddAccount->setMenu(pAddAccountButtonMenu.get());
+
     connect(ui->btnAdminConsole, &QPushButton::clicked, this, [this]() {
             QDesktopServices::openUrl(QUrl("https://login.tailscale.com/admin"));
         }
@@ -30,8 +39,20 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
         }
     );
 
-    connect(ui->btnAddAccount, &QPushButton::clicked, this, [this]() {
+    connect(addAccount, &QAction::triggered, this, [this]() {
             pTailRunner->login();
+        }
+    );
+
+    connect(addWithCustomUrl, &QAction::triggered, this, [this]() {
+            auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+            bool ok = false;
+            QString url = QInputDialog::getText(wnd, tr("Custom Control Server URL"),
+                tr("URL:"), QLineEdit::Normal, "https://", &ok);
+
+            if (ok && !url.isEmpty()) {
+                pTailRunner->login(url);
+            }
         }
     );
 

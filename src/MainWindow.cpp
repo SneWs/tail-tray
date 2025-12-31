@@ -157,6 +157,7 @@ MainWindow::MainWindow(QWidget *parent)
         }
     );
 
+    // Theme Settings / UI Settings
     auto preferedTheme = settings.preferedTheme();
     if (preferedTheme.length() > 1) {
         // We have a override
@@ -170,6 +171,7 @@ MainWindow::MainWindow(QWidget *parent)
         themeManager.setOverride(preferedTheme);
     }
 
+    // Device tab UI
 	ui->tvDevices->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tvDevices, &QTreeWidget::customContextMenuRequested, this,
 		&MainWindow::onDevicesTreeContextMenuRequested);

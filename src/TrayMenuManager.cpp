@@ -50,7 +50,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ThemeManag
   pSysTray = std::make_unique<QSystemTrayIcon>(this);
   pSysTray->setContextMenu(pTrayMenu.get());
   pSysTray->setToolTip("Tailscale");
-  pSysTray->setIcon(themeManager.getDisConnectedTrayIcon());
+  pSysTray->setIcon(themeManager.getDisconnectedTrayIcon());
   pSysTray->setVisible(true);
 
   pQuitAction = std::make_unique<QAction>(tr("Quit"));
@@ -106,7 +106,7 @@ void TrayMenuManager::stateChangedTo(TailState newState, const TailStatus& pTail
 }
 
 void TrayMenuManager::buildNotLoggedInMenu() const {
-  pSysTray->setIcon(themeManager.getDisConnectedTrayIcon());
+  pSysTray->setIcon(themeManager.getDisconnectedTrayIcon());
   pTrayMenu->clear();
   pTrayMenu->addAction(pLoginAction.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
@@ -118,7 +118,7 @@ void TrayMenuManager::buildNotLoggedInMenu() const {
 
 void TrayMenuManager::buildNotConnectedMenu(
     const TailStatus &pTailStatus) const {
-  pSysTray->setIcon(themeManager.getDisConnectedTrayIcon());
+  pSysTray->setIcon(themeManager.getDisconnectedTrayIcon());
   pTrayMenu->clear();
   pTrayMenu->addAction(pConnect.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());

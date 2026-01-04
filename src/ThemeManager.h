@@ -7,12 +7,11 @@
 class ThemeManager : public QObject {
 public:
   ThemeManager();
-  virtual ~ThemeManager();
+  ~ThemeManager() override;
 
-  void activate();
-  bool isDarkMode();
-  QIcon getConnectedTrayIcon();
-  QIcon getDisConnectedTrayIcon();
+  bool isDarkMode() const;
+  QIcon getConnectedTrayIcon() const;
+  QIcon getDisconnectedTrayIcon() const;
 
   void setOverride(const QString& theme);
 

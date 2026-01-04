@@ -28,7 +28,7 @@ DnsSettingsDlg::~DnsSettingsDlg()
     delete ui;
 }
 
-void DnsSettingsDlg::setTailscaleDnsEnabled(bool enabled) { 
+void DnsSettingsDlg::setTailscaleDnsEnabled(const bool enabled) const {
     ui->chkUseTailscaleDns->setChecked(enabled);
 }
 
@@ -36,7 +36,7 @@ bool DnsSettingsDlg::isTailscaleDnsEnabled() const {
     return ui->chkUseTailscaleDns->isChecked();
 }
 
-void DnsSettingsDlg::dnsCheckStateChanged(bool checked) {
+void DnsSettingsDlg::dnsCheckStateChanged(const bool checked) {
     emit dnsEnabledChanged(checked);
 
     ui->grpSearchDomains->setVisible(checked);

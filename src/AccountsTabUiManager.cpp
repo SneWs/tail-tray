@@ -18,7 +18,6 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     , ui(u)
     , pAddAccountButtonMenu(nullptr)
     , pTailRunner(runner)
-    , pTailStatus()
 {
     // Add account context menu/split button for control server
     pAddAccountButtonMenu = std::make_unique<QMenu>(ui->btnAddAccount);

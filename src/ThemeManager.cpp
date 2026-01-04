@@ -5,21 +5,16 @@
 #include <QStyleHints>
 
 ThemeManager::ThemeManager()
-    : QObject()
-    , themeOverride("")
+    : themeOverride("")
 { }
 
-ThemeManager::~ThemeManager() {}
+ThemeManager::~ThemeManager() = default;
 
 void ThemeManager::setOverride(const QString& theme) {
     themeOverride = theme;
 }
 
-void ThemeManager::activate() {
-
-}
-
-bool ThemeManager::isDarkMode() {
+bool ThemeManager::isDarkMode() const {
     if (themeOverride.length() > 1) {
         return !(themeOverride != "dark");
     }
@@ -35,7 +30,7 @@ bool ThemeManager::isDarkMode() {
 #endif // QT_VERSION
 }
 
-QIcon ThemeManager::getConnectedTrayIcon() {
+QIcon ThemeManager::getConnectedTrayIcon() const {
   if (isDarkMode()) {
     return QIcon(":/tray/dark-on");
   }
@@ -43,7 +38,7 @@ QIcon ThemeManager::getConnectedTrayIcon() {
   return QIcon(":/tray/light-on");
 }
 
-QIcon ThemeManager::getDisConnectedTrayIcon() {
+QIcon ThemeManager::getDisconnectedTrayIcon() const {
   if (isDarkMode()) {
     return QIcon(":/tray/dark-off");
   }

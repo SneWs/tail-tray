@@ -93,7 +93,7 @@ private slots:
     // Send file
     void fileSentToDevice(bool success, const QString& errorMsg, void* userData) const;
     void startListeningForIncomingFiles();
-    void onTailnetFileReceived(QString filePath) const;
+    void onTailnetFileReceived(const QString &filePath) const;
     void onShowTailFileSaveLocationPicker();
     void onShowTailScriptFileSaveLocationPicker();
 

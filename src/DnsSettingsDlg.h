@@ -16,7 +16,7 @@ public:
     explicit DnsSettingsDlg(const TailDnsStatus& pDnsStatus, bool dnsEnabled, QWidget* parent = nullptr);
     ~DnsSettingsDlg() override;
 
-    void setTailscaleDnsEnabled(bool enabled);
+    void setTailscaleDnsEnabled(bool enabled) const;
     [[nodiscard]] bool isTailscaleDnsEnabled() const;
 
 signals:

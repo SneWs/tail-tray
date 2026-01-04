@@ -1,7 +1,6 @@
 #include "MainWindow.h"
 #include "Version.h"
 
-#include <QDir>
 #include <QFile>
 
 #include "Paths.h"
@@ -22,9 +21,8 @@
 
 #include "ThemeManager.h"
 
-namespace
-{
-static ThemeManager themeManager = {};
+namespace {
+    ThemeManager themeManager = {};
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -41,7 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
     , isFixingOperator(false) {
 
     ui->setupUi(this);
-    themeManager.activate();
 
     pCurrentExecution = std::make_unique<TailRunner>(settings, this);
     accountsTabUi = std::make_unique<AccountsTabUiManager>(
@@ -540,7 +537,7 @@ void MainWindow::fileSentToDevice(bool success, const QString &errorMsg,
         return;
     }
 
-    auto userDataStr = static_cast<QString *>(userData);
+    const auto userDataStr = static_cast<QString *>(userData);
     QFileInfo fileInfo(*userDataStr);
     pNotificationsManager->showFileNotification(
         tr("File sent"), tr("The file %1 has been sent!").arg(*userDataStr),
@@ -564,7 +561,7 @@ void MainWindow::startListeningForIncomingFiles() {
             });
 }
 
-void MainWindow::onTailnetFileReceived(QString filePath) const {
+void MainWindow::onTailnetFileReceived(const QString& filePath) const {
     const QFileInfo file(filePath);
     pNotificationsManager->showFileNotification(tr("File received"),
                                                 tr("File %1 has been saved in %2")
@@ -597,7 +594,7 @@ void MainWindow::onShowTailScriptFileSaveLocationPicker() {
     dlg.setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
     dlg.setOption(QFileDialog::Option::ShowDirsOnly, true);
 
-    auto result = dlg.exec();
+    const auto result = dlg.exec();
     if (result == QFileDialog::Accepted) {
         const auto &selection = dlg.selectedFiles();
         ui->txtTailScriptFilesSavePath->setText(selection.first().trimmed());
@@ -608,14 +605,14 @@ void MainWindow::onShowTailScriptFileSaveLocationPicker() {
 }
 
 namespace {
-static QList<QTableWidgetItem *> netCheckWidgetItems{};
+    QList<QTableWidgetItem *> netCheckWidgetItems{};
 
-static void cleanupDisposableNetCheckWidgetItems() {
-    for (auto *wi : netCheckWidgetItems) {
-        delete wi;
+    void cleanupDisposableNetCheckWidgetItems() {
+        for (auto *wi : netCheckWidgetItems) {
+            delete wi;
+        }
+        netCheckWidgetItems.clear();
     }
-    netCheckWidgetItems.clear();
-}
 } // namespace
 
 void MainWindow::netCheckCompleted(
@@ -694,12 +691,12 @@ void MainWindow::netCheckCompleted(
 }
 
 void MainWindow::showAdvertiseRoutesDialog() const {
-    auto knownRoutes =
+    const auto knownRoutes =
         pCurrentExecution->currentSettings().getFilteredAdvertiseRoutes();
 
     AdvertiseRoutesDlg dlg(knownRoutes);
     dlg.setWindowIcon(windowIcon());
-    auto result = dlg.exec();
+    const auto result = dlg.exec();
     if (result != QDialog::Accepted)
         return;
 
@@ -803,8 +800,8 @@ bool MainWindow::event(QEvent* event) {
 }
 
 TailState MainWindow::changeToState(TailState newState) {
-    auto retVal = eCurrentState;
-    auto didChangeState = eCurrentState != newState;
+    const auto retVal = eCurrentState;
+    const auto didChangeState = eCurrentState != newState;
     eCurrentState = newState;
 
     if (eCurrentState == TailState::NotLoggedIn) {
@@ -817,7 +814,7 @@ TailState MainWindow::changeToState(TailState newState) {
         setWindowIcon(themeManager.getConnectedTrayIcon());
     }
     else {
-        setWindowIcon(themeManager.getDisConnectedTrayIcon());
+        setWindowIcon(themeManager.getDisconnectedTrayIcon());
     }
 
     if (didChangeState) {
@@ -837,7 +834,7 @@ TailState MainWindow::changeToState(TailState newState) {
             ui->tabTailDrive->setDisabled(true);
             ui->tabWidget->setCurrentIndex(0);
 
-            setWindowIcon(themeManager.getDisConnectedTrayIcon());
+            setWindowIcon(themeManager.getDisconnectedTrayIcon());
         }
     }
 
@@ -849,7 +846,7 @@ TailState MainWindow::changeToState(TailState newState) {
         return retVal;
     }
 
-    auto isOnline = eCurrentState == TailState::Connected;
+    const auto isOnline = eCurrentState == TailState::Connected;
     if (isOnline && retVal != TailState::Connected) {
         startListeningForIncomingFiles();
 
@@ -916,7 +913,7 @@ void MainWindow::onDevicesTreeContextMenuRequested(const QPoint& pos) const {
     if (selectedItem == nullptr)
 		return;
 
-	auto peerIndex = selectedItem->data(0, Qt::UserRole);
+	const auto peerIndex = selectedItem->data(0, Qt::UserRole);
 	auto peer = pTailStatus.peers[peerIndex.toInt()];
     
     QMenu menu(ui->tvDevices);
@@ -1013,14 +1010,14 @@ void MainWindow::syncSettingsToUi() const {
     ui->tvDevices->clear();
     ui->tvDevices->setHeaderLabels(QStringList() << "Device");
 
-    QTreeWidgetItem* onlineItems = new QTreeWidgetItem(QStringList() << "Online");
-    QTreeWidgetItem* offlineItems = new QTreeWidgetItem(QStringList() << "Offline");
+    auto onlineItems = new QTreeWidgetItem(QStringList() << "Online");
+    auto* offlineItems = new QTreeWidgetItem(QStringList() << "Offline");
     ui->tvDevices->addTopLevelItem(onlineItems);
     ui->tvDevices->addTopLevelItem(offlineItems);
 
     for (const auto& peer : pTailStatus.peers)
     {
-        QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << peer.getShortDnsName());
+        auto item = new QTreeWidgetItem(QStringList() << peer.getShortDnsName());
         if (peer.online) {
             onlineItems->addChild(item);
         }
@@ -1060,8 +1057,8 @@ void MainWindow::syncSettingsFromUi() {
     if (scriptPath.isEmpty()) {
         settings.tailScriptFilesSavePath("");
     } else {
-        const QDir dir(scriptPath);
-        if (dir.exists()) {
+        const QDir scriptsDir(scriptPath);
+        if (scriptsDir.exists()) {
             settings.tailScriptFilesSavePath(scriptPath);
         } else {
             settings.tailScriptFilesSavePath("");
@@ -1069,8 +1066,8 @@ void MainWindow::syncSettingsFromUi() {
         }
     }
 
-    auto homeDir = QDir::home();
-    auto targetFile =
+    const auto homeDir = QDir::home();
+    const auto targetFile =
         homeDir.absolutePath() + "/.config/autostart/tail-tray.desktop";
     if (settings.startOnLogin()) {
         if (!QFile::exists(targetFile)) {

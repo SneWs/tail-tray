@@ -67,6 +67,10 @@ To learn more about how to write and use scriptable actions, please read the [Sc
 
 ![Screenshot](screenshots/file-sharing.png)
 
+![Screenshot](screenshots/devices-ui.png)
+
+![Screenshot](screenshots/ui-settings.png)
+
 ![Screenshot](screenshots/tail-drives01.png)
 
 ![Screenshot](screenshots/tail-drives02.png)

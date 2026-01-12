@@ -5,10 +5,14 @@
     <style>
       .st0 {
         fill: #fff;
+        stroke: #444;
+        stroke-miterlimit: 10;
       }
 
       .st1 {
-        fill: #888;
+        fill: #444;
+        stroke: #555;
+        stroke-miterlimit: 10;
       }
     </style>
   </defs>

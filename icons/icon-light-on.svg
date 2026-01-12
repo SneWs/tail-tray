@@ -4,17 +4,25 @@
   <defs>
     <style>
       .st0 {
-        fill: #bcbcbc;
+        fill: #333;
+        stroke: #999;
+        stroke-miterlimit: 10;
+      }
+
+      .st1 {
+        fill: #111;
+        stroke: #333;
+        stroke-miterlimit: 10;
       }
     </style>
   </defs>
   <circle class="st0" cx="114.25" cy="113.43" r="46.87"/>
   <circle class="st0" cx="256" cy="113.43" r="46.87"/>
   <circle class="st0" cx="397.75" cy="113.43" r="46.87"/>
-  <circle cx="114.25" cy="256" r="46.87"/>
-  <circle cx="256" cy="256" r="46.87"/>
-  <circle cx="397.75" cy="256" r="46.87"/>
+  <circle class="st1" cx="114.25" cy="256" r="46.87"/>
+  <circle class="st1" cx="256" cy="256" r="46.87"/>
+  <circle class="st1" cx="397.75" cy="256" r="46.87"/>
   <circle class="st0" cx="114.25" cy="398.57" r="46.87"/>
-  <circle cx="256" cy="398.57" r="46.87"/>
+  <circle class="st1" cx="256" cy="398.57" r="46.87"/>
   <circle class="st0" cx="397.75" cy="398.57" r="46.87"/>
 </svg>

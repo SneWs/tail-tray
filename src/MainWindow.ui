@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>736</width>
+    <width>840</width>
     <height>805</height>
    </rect>
   </property>
@@ -54,7 +54,7 @@
        <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="iconSize">
        <size>
@@ -531,7 +531,7 @@
       </widget>
       <widget class="QWidget" name="tabSettings">
        <attribute name="icon">
-        <iconset theme="preferences-system"/>
+        <iconset theme="preferences-system-network"/>
        </attribute>
        <attribute name="title">
         <string>&amp;Settings</string>
@@ -1714,6 +1714,9 @@
        </layout>
       </widget>
       <widget class="QWidget" name="tabDevices">
+       <attribute name="icon">
+        <iconset theme="network-server"/>
+       </attribute>
        <attribute name="title">
         <string>&amp;Devices</string>
        </attribute>
@@ -1731,7 +1734,7 @@
       </widget>
       <widget class="QWidget" name="tabNetworkStatus">
        <attribute name="icon">
-        <iconset theme="QIcon::ThemeIcon::NetworkWireless"/>
+        <iconset theme="network-wired"/>
        </attribute>
        <attribute name="title">
         <string>Network Status</string>
@@ -1774,6 +1777,9 @@
        </layout>
       </widget>
       <widget class="QWidget" name="tabUISettings">
+       <attribute name="icon">
+        <iconset theme="preferences-other"/>
+       </attribute>
        <attribute name="title">
         <string>&amp;UI Settings</string>
        </attribute>

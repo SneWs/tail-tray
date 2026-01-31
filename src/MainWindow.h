@@ -19,6 +19,7 @@
 #include "PleaseWaitDlg.h"
 #include "NotificationsManager.h"
 #include "ScriptManager.h"
+#include "DevicesTabUiManager.h"
 
 #if defined(DAVFS_ENABLED)
 #include "TailDriveUiManager.h"
@@ -32,7 +33,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget* parent = nullptr);
 
-    void shutdown();
+    void shutdown() const;
 
     void showSettingsTab();
     void showAccountsTab();
@@ -62,6 +63,7 @@ private:
 #endif
     std::unique_ptr<NotificationsManager> pNotificationsManager;
     std::unique_ptr<ScriptManager> pScriptManager;
+    std::unique_ptr<DevicesTabUiManager> pDevicesTabManager;
 
     TailState eCurrentState;
     TailSettings settings;
@@ -84,7 +86,6 @@ private slots:
     void ipAddressCopiedToClipboard(const QString& ipAddress, const QString& hostname) const;
     void onNewPeerDiscovered(const TailDeviceInfo& peer) const;
     void onPeerRemoved(const TailDeviceInfo& peer) const;
-	void onDevicesTreeContextMenuRequested(const QPoint& pos) const;
 
 #if defined(DAVFS_ENABLED)
     void drivesListed(const QList<TailDriveInfo>& drives, bool error, const QString& errorMsg);

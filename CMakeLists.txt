@@ -108,6 +108,8 @@ set(PROJECT_SOURCES
     src/ScriptManager.cpp
     src/ThemeManager.h
     src/ThemeManager.cpp
+    src/DevicesTabUiManager.cpp
+    src/DevicesTabUiManager.h
     src/Version.h
 )
 

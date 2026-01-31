@@ -152,6 +152,11 @@ public:
             return match.captured(0);  // Return the matched hostname part
         }
 
+        if (dnsName.isEmpty())
+        {
+            return hostName;
+        }
+
         return dnsName;
     }
 

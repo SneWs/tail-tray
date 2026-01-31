@@ -1008,16 +1008,17 @@ void MainWindow::syncSettingsToUi() const {
 
     // Sync devices to UI as well
     ui->tvDevices->clear();
-    ui->tvDevices->setHeaderLabels(QStringList() << "Device");
+    ui->tvDevices->setHeaderLabels(QStringList() << "Device" << "Tailscale IPs");
 
     auto onlineItems = new QTreeWidgetItem(QStringList() << "Online");
     auto* offlineItems = new QTreeWidgetItem(QStringList() << "Offline");
     ui->tvDevices->addTopLevelItem(onlineItems);
     ui->tvDevices->addTopLevelItem(offlineItems);
+    ui->tvDevices->setColumnWidth(0, 300);
 
     for (const auto& peer : pTailStatus.peers)
     {
-        auto item = new QTreeWidgetItem(QStringList() << peer.getShortDnsName());
+        auto item = new QTreeWidgetItem(QStringList() << peer.getShortDnsName() << peer.tailscaleIPs.join(", "));
         if (peer.online) {
             onlineItems->addChild(item);
         }

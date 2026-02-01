@@ -31,10 +31,16 @@ void DevicesTabUiManager::syncToUi(const TailStatus& status)
     ui->tvDevices->addTopLevelItem(offlineItems);
     ui->tvDevices->setColumnWidth(0, 300);
 
+    auto currentUserId = status.user.id;
     auto index = 0;
     for (const auto& peer : status.peers)
     {
-        auto* item = new QTreeWidgetItem(QStringList() << peer.getShortDnsName() << peer.tailscaleIPs.join(", "));
+        // If the peer belongs to another user, show full DNS name
+        auto displayName = peer.getShortDnsName();
+        if (peer.userId != currentUserId)
+            displayName = peer.dnsName.endsWith('.') ? peer.dnsName.chopped(1) : peer.dnsName;
+
+        auto* item = new QTreeWidgetItem(QStringList() << displayName << peer.tailscaleIPs.join(", "));
         item->setData(0, Qt::UserRole, index++);
         if (peer.online) {
             onlineItems->addChild(item);

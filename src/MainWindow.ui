@@ -54,7 +54,7 @@
        <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="iconSize">
        <size>
@@ -579,6 +579,9 @@
             <property name="textFormat">
              <enum>Qt::TextFormat::PlainText</enum>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+            </property>
            </widget>
           </item>
           <item>
@@ -750,6 +753,9 @@
             <property name="text">
              <string>Subnet Router</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+            </property>
            </widget>
           </item>
           <item>
@@ -863,6 +869,9 @@
                <property name="text">
                 <string>Auto Update</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
               </widget>
              </item>
             </layout>
@@ -969,6 +978,9 @@
                </property>
                <property name="text">
                 <string>Exit node</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
                </property>
                <property name="buddy">
                 <cstring>chkRunAsExitNode</cstring>
@@ -1107,6 +1119,9 @@
                <property name="text">
                 <string>Tailnet Lock</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
               </widget>
              </item>
             </layout>
@@ -1220,6 +1235,9 @@
                <property name="text">
                 <string>Tail Drive</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
                <property name="buddy">
                 <cstring>chkUseTailDrive</cstring>
                </property>
@@ -1318,6 +1336,9 @@
               <property name="text">
                <string>Tail Drop</string>
               </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+              </property>
               <property name="buddy">
                <cstring>txtTailDriveDefaultMountPath</cstring>
               </property>
@@ -1413,6 +1434,9 @@
               </property>
               <property name="text">
                <string>Tail scripts</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
               </property>
              </widget>
             </item>

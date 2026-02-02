@@ -29,7 +29,8 @@ void DevicesTabUiManager::syncToUi(const TailStatus& status)
 
     ui->tvDevices->addTopLevelItem(onlineItems);
     ui->tvDevices->addTopLevelItem(offlineItems);
-    ui->tvDevices->setColumnWidth(0, 300);
+    ui->tvDevices->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tvDevices->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
     auto currentUserId = status.user.id;
     auto index = 0;
@@ -37,10 +38,20 @@ void DevicesTabUiManager::syncToUi(const TailStatus& status)
     {
         // If the peer belongs to another user, show full DNS name
         auto displayName = peer.getShortDnsName();
-        if (peer.userId != currentUserId)
+        if (peer.userId != currentUserId) {
             displayName = peer.dnsName.endsWith('.') ? peer.dnsName.chopped(1) : peer.dnsName;
+        }
 
-        auto* item = new QTreeWidgetItem(QStringList() << displayName << peer.tailscaleIPs.join(", "));
+        if (displayName.isEmpty()) {
+            displayName = peer.hostName;
+
+            if (displayName.isEmpty())
+            {
+                displayName = tr("<unknown>");
+            }
+        }
+
+        auto* item = new QTreeWidgetItem(QStringList() << displayName << peer.tailscaleIPs[0]);
         item->setData(0, Qt::UserRole, index++);
         if (peer.online) {
             onlineItems->addChild(item);

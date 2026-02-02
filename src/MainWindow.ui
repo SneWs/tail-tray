@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>840</width>
-    <height>805</height>
+    <width>780</width>
+    <height>785</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,7 +22,7 @@
   <property name="minimumSize">
    <size>
     <width>588</width>
-    <height>805</height>
+    <height>785</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -615,6 +615,9 @@
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
               <item>
                <widget class="QCheckBox" name="chkUseTailscaleDns">
                 <property name="text">
@@ -632,8 +635,8 @@
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>40</width>
-                  <height>20</height>
+                  <width>20</width>
+                  <height>40</height>
                  </size>
                 </property>
                </spacer>
@@ -759,7 +762,7 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0,0">
             <property name="spacing">
              <number>0</number>
             </property>
@@ -1496,7 +1499,7 @@
           <property name="sizeHint" stdset="0">
            <size>
             <width>20</width>
-            <height>40</height>
+            <height>10</height>
            </size>
           </property>
          </spacer>

@@ -150,6 +150,11 @@ public:
                 // NOTE: If the created date is way back in time something is off, this has been reported
                 // by users. For more info:
                 // See issue https://github.com/SneWs/tail-tray/issues/106
+                if (dev.dnsName.isEmpty() || dev.dnsName.length() < 2) {
+                    // If no valid dns name, we ignore it...
+                    continue;
+                }
+
                 if (dev.created.date().year() < 2020) {
                     // Don't track expired or invalid devices that should be of no interest to the user
                     // From the issue above we can see some odd dates like 1973-01 so it's not unix epoc either...

@@ -145,7 +145,19 @@ public:
                 if (child.isNull()) {
                     continue;
                 }
-                newStatus.peers.push_back(TailDeviceInfo::parse(child.toObject()));
+                auto dev = TailDeviceInfo::parse(child.toObject());
+
+                // NOTE: If the created date is way back in time something is off, this has been reported
+                // by users. For more info:
+                // See issue https://github.com/SneWs/tail-tray/issues/106
+                if (dev.created.date().year() < 2020) {
+                    // Don't track expired or invalid devices that should be of no interest to the user
+                    // From the issue above we can see some odd dates like 1973-01 so it's not unix epoc either...
+                    // So I just picked a year before Tailscale was funded/started for now... please
+                    // correct this if you can figure out why this happens on some users tailnets.
+                    continue;
+                }
+                newStatus.peers.push_back(dev);
             }
         }
 

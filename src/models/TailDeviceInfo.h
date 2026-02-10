@@ -61,6 +61,8 @@ public:
     QString os{};
     QString curAddr{};
     QString relay{};
+    QDateTime created {};
+    QDateTime lastSeen {};
     QList<QString> tailscaleIPs{};
     QList<QString> allowedIPs{};
     QList<QString> tags{};
@@ -93,6 +95,8 @@ public:
         , addrs(other.addrs)
         , curAddr(other.curAddr)
         , relay(other.relay)
+        , created(other.created)
+        , lastSeen(other.lastSeen)
         , online(other.online)
         , exitNode(other.exitNode)
         , exitNodeOption(other.exitNodeOption)
@@ -120,6 +124,8 @@ public:
         addrs = other.addrs;
         curAddr = other.curAddr;
         relay = other.relay;
+        created = other.created;
+        lastSeen = other.lastSeen;
         online = other.online;
         exitNode = other.exitNode;
         exitNodeOption = other.exitNodeOption;
@@ -173,6 +179,15 @@ public:
         self.exitNodeOption = jsonReadBool(obj, "ExitNodeOption");
         self.online = jsonReadBool(obj, "Online");
         self.active = jsonReadBool(obj, "Active");
+        self.relay = jsonReadString(obj, "Relay");
+
+        // Try to parse created
+        auto createdStr = jsonReadString(obj, "Created");
+        self.created = QDateTime::fromString(createdStr, Qt::DateFormat::ISODateWithMs);
+
+        // And try to parse last seen
+        auto lastSeenStr = jsonReadString(obj, "LastSeen");
+        self.lastSeen = QDateTime::fromString(lastSeenStr, Qt::DateFormat::ISODateWithMs);
 
         if (obj.contains("KeyExpiry") && !obj["KeyExpiry"].isNull()) {
             self.keyExpiry = QDateTime::fromString(obj["KeyExpiry"].toString(), Qt::DateFormat::ISODate);

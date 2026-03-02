@@ -53,11 +53,12 @@ jobs:
 
       - name: Upload DEB for PR builds
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Ubuntu-24.04.deb
           path: ${{ steps.strings.outputs.build-output-dir }}/*.deb
           overwrite: true
+          archive: false
           
       
       - name: Upload DEB files for latest Release

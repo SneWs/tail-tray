@@ -448,7 +448,7 @@ void MainWindow::loginFlowCompleted(bool success) {
     }
 }
 
-void MainWindow::onIpnEvent(const IpnEventData &eventData) {
+void MainWindow::onIpnEvent(const IpnEventData& eventData) {
     if (eventData.Health.Warnings.networkStatus.ImpactsConnectivity) {
         if (eventData.Health.Warnings.networkStatus.WarnableCode ==
             "network-status") {

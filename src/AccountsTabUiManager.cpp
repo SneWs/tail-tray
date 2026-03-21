@@ -72,6 +72,11 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
         if (account.account.endsWith('*')) {
             // This is the active account...
             onTailStatusChanged(pTailStatus);
+
+            ui->btnLogout->setVisible(true);
+            ui->btnReAuthenticate->setVisible(true);
+            ui->btnAdminConsole->setVisible(true);
+            ui->btnSwitchToAccount->setVisible(false);
         }
         else {
             // Secondary account not currently active...
@@ -80,13 +85,29 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
             ui->lblEmail->setText(account.account);
             ui->lblStatus->setText("Not running");
             ui->lblKeyExpiry->setText("");
+
+            ui->btnAdminConsole->setVisible(false);
+			ui->btnLogout->setVisible(false);
+			ui->btnReAuthenticate->setVisible(false);
+            ui->btnSwitchToAccount->setVisible(true);
         }
+    });
+
+    connect(ui->btnSwitchToAccount, &QPushButton::clicked, this, [this]() {
+        auto* item = ui->lstAccounts->currentItem();
+        if (!item) {
+            return;
+        }
+
+        auto accountId = item->data(Qt::UserRole).toString();
+        pTailRunner->switchAccount(accountId);
     });
 }
 
-    void AccountsTabUiManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
+void AccountsTabUiManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
     accounts = foundAccounts;
     ui->lstAccounts->clear();
+	ui->btnSwitchToAccount->setVisible(false);
     for (const auto& account : foundAccounts) {
         auto loginName = account.account;
         bool isActiveAccount = false;
@@ -102,8 +123,9 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
             font.setBold(true);
             pCurrent->setFont(font);
         }
-        ui->lstAccounts->addItem(pCurrent);
+        
         pCurrent->setTextAlignment(Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
+        ui->lstAccounts->addItem(pCurrent);
     }
 }
 
@@ -141,13 +163,14 @@ void AccountsTabUiManager::onTailStatusChanged(const TailStatus& status) {
     showAccountDetails(true);
 
     if (!pTailStatus.user.profilePicUrl.isEmpty()) {
-        // ui->lblUsername->setPixmap(QPixmap(pTailStatus->user->profilePicUrl));
+        //ui->lblUsername->setPixmap(QPixmap(pTailStatus->user->profilePicUrl));
     }
 }
 
 void AccountsTabUiManager::showAccountDetails(bool show) {
     if (!show)
         ui->lblUsername->setText(tr("Select an account in the list to view details"));
+
     ui->lblUsername->setVisible(true);
     
     ui->lblTailnetName->setVisible(show);

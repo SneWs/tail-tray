@@ -113,6 +113,7 @@ void NotificationsManager::showNodeConnectedNotification(const QString& nodeName
         .arg(nodeName, ipAddress, os), QSystemTrayIcon::Information, 8000);
 #endif
 }
+
 void NotificationsManager::showNodeDisconnectedNotification(const QString& nodeName, const QString& ipAddress, const QString& os)
 {
 #if defined(KNOTIFICATIONS_ENABLED)

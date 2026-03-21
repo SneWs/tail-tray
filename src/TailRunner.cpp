@@ -512,10 +512,16 @@ void TailRunner::parseStatusResponse(const QJsonObject& obj) {
     auto oldStatus = lastKnownStatus;
     lastKnownStatus = newStatus;
 
+	bool isDifferentAccount = oldStatus.user.id != newStatus.user.id;
+
     emit statusUpdated(newStatus);
 
     // If this is startup or a full refresh etc. we do not diff
     if (oldStatus.peers.length() < 1) {
+        return;
+    }
+
+    if (isDifferentAccount) {
         return;
     }
 

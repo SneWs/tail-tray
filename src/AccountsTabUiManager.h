@@ -4,7 +4,9 @@
 #include "TailRunner.h"
 
 #include <QMenu>
+#include <QNetworkAccessManager>
 #include <memory>
+#include <map>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -33,6 +35,8 @@ private:
     TailStatus pTailStatus;
     QList<TailAccountInfo> accounts;
     TailSettings settings;
+    std::unique_ptr<QNetworkAccessManager> pNetworkManager;
+    std::map<QString, QPixmap> profilePicCache;
 };
 
 

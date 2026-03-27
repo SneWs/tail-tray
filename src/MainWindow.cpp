@@ -824,7 +824,8 @@ TailState MainWindow::changeToState(TailState newState) {
             if (didChangeState) {
                 seenWarningsAndErrors.clear();
             }
-        } else {
+        }
+        else {
             ui->tabNetworkStatus->setDisabled(true);
             ui->tabSettings->setDisabled(true);
             ui->tabTailDrive->setDisabled(true);
@@ -837,7 +838,8 @@ TailState MainWindow::changeToState(TailState newState) {
     pTrayManager->stateChangedTo(newState, pTailStatus);
     accountsTabUi->onTailStatusChanged(pTailStatus);
 
-    if (eCurrentState == TailState::NotConnected) {
+    if (eCurrentState == TailState::NotConnected ||
+        eCurrentState == TailState::NotLoggedIn) {
         // Nothing more to do
         return retVal;
     }

@@ -4,10 +4,15 @@
 
 #include "AccountsTabUiManager.h"
 
+
 #include <QDesktopServices>
 #include <QUrl>
 #include <QInputDialog>
 #include <QDir>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QPixmap>
+#include <QBuffer>
 
 #include "./ui_MainWindow.h"
 #include "MainWindow.h"
@@ -18,6 +23,8 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     , ui(u)
     , pAddAccountButtonMenu(nullptr)
     , pTailRunner(runner)
+    , pNetworkManager(std::make_unique<QNetworkAccessManager>(this))
+    , profilePicCache()
 {
     // Add account context menu/split button for control server
     pAddAccountButtonMenu = std::make_unique<QMenu>(ui->btnAddAccount);
@@ -32,9 +39,19 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
 
     connect(ui->btnLogout, &QPushButton::clicked, this, [this]() {
             pTailRunner->logout();
-        auto* wnd = dynamic_cast<MainWindow*>(this->parent());
+            if (ui->lstAccounts->selectedItems().count() > 0) {
+                auto* selectedItem = ui->lstAccounts->selectedItems().first();
+                int row = ui->lstAccounts->row(selectedItem);
+                if (row >= 0) {
+                    auto* item = ui->lstAccounts->takeItem(row);
+                    delete item;
+                }
+            }
+
+            showAccountDetails(false);
+            auto* wnd = dynamic_cast<MainWindow*>(this->parent());
             wnd->userLoggedOut();
-            wnd->hide();
+            //wnd->hide();
         }
     );
 
@@ -79,7 +96,7 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
             ui->btnSwitchToAccount->setVisible(false);
         }
         else {
-            // Secondary account not currently active...
+            // Nth account not currently active...
             ui->lblUsername->setText(account.account);
             ui->lblTailnetName->setText(account.tailnet);
             ui->lblEmail->setText(account.account);
@@ -102,6 +119,8 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
         auto accountId = item->data(Qt::UserRole).toString();
         pTailRunner->switchAccount(accountId);
     });
+
+    ui->btnSwitchToAccount->setVisible(false);
 }
 
 void AccountsTabUiManager::onAccountsListed(const QList<TailAccountInfo>& foundAccounts) {
@@ -161,17 +180,13 @@ void AccountsTabUiManager::onTailStatusChanged(const TailStatus& status) {
     }
 
     showAccountDetails(true);
-
-    if (!pTailStatus.user.profilePicUrl.isEmpty()) {
-        //ui->lblUsername->setPixmap(QPixmap(pTailStatus->user->profilePicUrl));
-    }
 }
 
 void AccountsTabUiManager::showAccountDetails(bool show) {
     if (!show)
         ui->lblUsername->setText(tr("Select an account in the list to view details"));
 
-    ui->lblUsername->setVisible(true);
+    ui->lblUsername->setVisible(show);
     
     ui->lblTailnetName->setVisible(show);
     ui->lblTailnetNameTitle->setVisible(show);
@@ -185,4 +200,37 @@ void AccountsTabUiManager::showAccountDetails(bool show) {
     ui->btnLogout->setVisible(show);
     ui->btnAdminConsole->setVisible(show);
     ui->btnReAuthenticate->setVisible(show);
+
+    if (!show) {
+        ui->lblUsername->setPixmap(QPixmap()); // Clear pixmap if no URL
+        return;
+    }
+
+    // Load profile picture if URL is not empty
+    if (!pTailStatus.user.profilePicUrl.isEmpty()) {
+        if (profilePicCache.find(pTailStatus.user.profilePicUrl) != profilePicCache.end()) {
+            // Use cached pixmap
+            ui->lblUsername->setPixmap(profilePicCache[pTailStatus.user.profilePicUrl].scaled(ui->lblUsername->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            return;
+        }
+
+        QUrl imageUrl(pTailStatus.user.profilePicUrl);
+        QNetworkRequest request(imageUrl);
+        QNetworkReply* reply = pNetworkManager->get(request);
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+            if (reply->error() == QNetworkReply::NoError) {
+                QByteArray imageData = reply->readAll();
+                QPixmap pixmap;
+                if (pixmap.loadFromData(imageData)) {
+                    profilePicCache[pTailStatus.user.profilePicUrl] = pixmap; // Cache the pixmap
+                    ui->lblUsername->setPixmap(pixmap.scaled(ui->lblUsername->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                }
+            }
+            reply->deleteLater();
+        });
+    }
+    else {
+        profilePicCache[pTailStatus.user.profilePicUrl] = QPixmap(); // Cache empty pixmap for empty URL
+        ui->lblUsername->setPixmap(QPixmap()); // Clear pixmap if no URL
+    }
 }

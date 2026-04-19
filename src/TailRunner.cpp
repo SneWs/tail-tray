@@ -135,19 +135,18 @@ void TailRunner::applySettings(const TailSettings& s) {
 
     if (settings.advertiseAsExitNode()) {
         args << "--advertise-exit-node";
-
-        // Check if we have an exit node that we should use
-        if (settings.exitNodeAllowLanAccess())
-            args << "--exit-node-allow-lan-access";
-        else
-            args << "--exit-node-allow-lan-access=false";
     }
     else {
         args << "--advertise-exit-node=false";
-        args << "--exit-node-allow-lan-access=false";
     }
 
-    //qDebug() << "TailRunner::applySettings: " << args;
+    // From what I can gather, one should be able to set this even when not running as an exit node
+    if (settings.exitNodeAllowLanAccess())
+        args << "--exit-node-allow-lan-access";
+    else
+        args << "--exit-node-allow-lan-access=false";
+
+    qDebug() << "TailRunner::applySettings: " << args;
 
     runCommand(Command::SetSettings, "set", args, false, false);
 }

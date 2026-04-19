@@ -480,7 +480,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus &pTailStatus) {
 
   exitNodeAllowNwAccess->setCheckable(true);
   exitNodeAllowNwAccess->setChecked(settings.exitNodeAllowLanAccess());
-  exitNodeAllowNwAccess->setEnabled(settings.advertiseAsExitNode());
+  exitNodeAllowNwAccess->setEnabled(true); // This can be set even when not running as exit node
   connect(exitNodeAllowNwAccess, &QAction::triggered, this,
           [this, exitNodeAllowNwAccess](bool) {
             settings.exitNodeAllowLanAccess(exitNodeAllowNwAccess->isChecked());

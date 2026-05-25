@@ -20,7 +20,7 @@ jobs:
     - name: Install Qt - Windows
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.8.2'
+        version: '6.8.7'
         target: 'desktop'
         set-env: 'true'
 
@@ -36,7 +36,7 @@ jobs:
       run: |
         echo "Running Windows build"
         echo "Build output directory: ${{ steps.strings.outputs.build-output-dir }}" 
-        cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DKNOTIFICATIONS_ENABLED=OFF -S ${{ github.workspace }} -G "Visual Studio 17 2022"
+        cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DKNOTIFICATIONS_ENABLED=OFF -S ${{ github.workspace }} -G "Visual Studio 18 2026"
       shell: pwsh
 
     - name: Build on Windows

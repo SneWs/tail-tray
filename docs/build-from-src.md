@@ -3,7 +3,7 @@
    * Git, QT 6, cmake and a c++ compiler, for example:
       * On Ubuntu and Ubuntu based distros
          ```bash
-         sudo apt install git qt6-tools-dev qt6-tools-dev-tools g++ clang cmake davfs2 extra-cmake-modules 
+         sudo apt install git qt6-tools-dev qt6-tools-dev-tools g++ clang cmake davfs2 extra-cmake-modules libkf6notifications-dev
          ```
          **NOTE**:
          If you want to enable rich notifications, you also need to install `libkf6notifications-dev` and be on Ubuntu 25.04 or newer

@@ -2,41 +2,43 @@
 #define SINGLEAPPLICATIONIMPL_H
 
 #include <QApplication>
-#include <QSharedMemory>
+#include <QDir>
+#include <QLockFile>
+#include <QStandardPaths>
 
 class SingleApplicationImpl final : public QApplication {
 Q_OBJECT
 public:
     explicit SingleApplicationImpl(int &argc, char **argv)
         : QApplication(argc, argv)
-        , pSingleGuard(new QSharedMemory("tail-tray.grenangen.se/shm", this))
+        , singleGuard(singleInstanceLockFilePath())
     {
+        singleGuard.setStaleLockTime(0);
     }
 
     ~SingleApplicationImpl() override {
-        if(pSingleGuard != nullptr && pSingleGuard->isAttached())
-            pSingleGuard->detach();
-        delete pSingleGuard;
+        if(singleGuard.isLocked())
+            singleGuard.unlock();
     }
 
     [[nodiscard]] bool isOwningSingleInstance() const {
-        return pSingleGuard != nullptr && pSingleGuard->isAttached();
+        return singleGuard.isLocked();
     }
 
-    [[nodiscard]] bool claimInstance() const {
-        if(pSingleGuard->attach(QSharedMemory::ReadOnly)) {
-            pSingleGuard->detach();
-            return false;
-        }
-
-        if(!pSingleGuard->create(1))
-            return false;
-
-        return true;
+    [[nodiscard]] bool claimInstance() {
+        return singleGuard.tryLock(0);
     }
 
 private:
-    QSharedMemory* pSingleGuard;
+    static QString singleInstanceLockFilePath() {
+        auto lockDir = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+        if (lockDir.isEmpty())
+            lockDir = QDir::tempPath();
+
+        return QDir(lockDir).absoluteFilePath("tail-tray.grenangen.se.lock");
+    }
+
+    QLockFile singleGuard;
 };
 
 #endif

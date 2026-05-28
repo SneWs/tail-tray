@@ -10,6 +10,8 @@ set(CMAKE_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(GNUInstallDirs)
+
 # Use Davfs or not
 option(DAVFS_ENABLED "Enable DAVFS" ON)
 if (DAVFS_ENABLED)
@@ -169,10 +171,6 @@ configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)
 # Generate Version.h from template
 configure_file(src/Version.h.in ${CMAKE_SOURCE_DIR}/src/Version.h @ONLY)
 
-if (UNIX AND NOT APPLE)
-    include(GNUInstallDirs)
-endif ()
-
 install(TARGETS tail-tray
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -220,4 +218,3 @@ if (BUILD_TESTS)
     # Add the tests subdirectory so it is built with the main project
     add_subdirectory(tests)
 endif ()
-

@@ -1,3 +1,35 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=id">Bahasa Indonesia</a>
+        | <a href="https://openaitx.github.io/view.html?user=SneWs&project=tail-tray&lang=as">অসমীয়া</
+      </div>
+    </div>
+  </details>
+</div>
+
 # Tail Tray
 Tailscale tray menu and UI for Plasma Desktop
 

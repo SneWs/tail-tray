@@ -10,6 +10,21 @@ set(CMAKE_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(BUILD_TESTS "Build tests" ON)
+option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
+
+if (UNIX AND NOT APPLE AND KNOTIFICATIONS_ENABLED)
+    # Use KNotifications
+    message("KNotifications has been enabled! This requires Plasma 6")
+
+    find_package(ECM REQUIRED NO_MODULE)
+    set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+    include(KDEInstallDirs)
+    include(KDECMakeSettings)
+
+    add_definitions(-DKNOTIFICATIONS_ENABLED)
+endif()
+
 include(GNUInstallDirs)
 
 # Use Davfs or not
@@ -30,28 +45,13 @@ add_definitions(-DTRANSLATIONS_DIR="${FULL_LIBDIR_PATH}")
 
 message(STATUS "Full path of translations install path: ${FULL_LIBDIR_PATH}")
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
+find_package(OpenGL REQUIRED)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network Gui)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network Gui)
 
-option(BUILD_TESTS "Build tests" ON)
-option(KNOTIFICATIONS_ENABLED "Enable KNotifications" OFF)
-
-if (UNIX AND NOT APPLE)
-    if (KNOTIFICATIONS_ENABLED)
-        # Use KNotifications
-        message("KNotifications has been enabled! This requires Plasma 6")
-
-        find_package(ECM REQUIRED NO_MODULE)
-        set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
-        include(KDEInstallDirs)
-        include(KDECMakeSettings)
-
-        add_definitions(-DKNOTIFICATIONS_ENABLED)
-        find_package(KF6Notifications)
-    else ()
-        message("KNotifications has not been enabled!")
-    endif (KNOTIFICATIONS_ENABLED)
-endif (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE AND KNOTIFICATIONS_ENABLED)
+    find_package(KF6Notifications REQUIRED)
+endif()
 
 set(PROJECT_SOURCES
     src/main.cpp
@@ -152,18 +152,13 @@ else ()
 
 endif ()
 
-qt_add_translations(tail-tray TS_FILES
-        translations/tail_tray_en_US.ts
-        translations/tail_tray_sv_SE.ts
-        translations/tail_tray_de_DE.ts
-        translations/tail_tray_fr_FR.ts
-)
 qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
 target_link_libraries(
     tail-tray PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Gui
 )
 
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)

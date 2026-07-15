@@ -46,8 +46,7 @@ add_definitions(-DTRANSLATIONS_DIR="${FULL_LIBDIR_PATH}")
 message(STATUS "Full path of translations install path: ${FULL_LIBDIR_PATH}")
 
 find_package(OpenGL REQUIRED)
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network Gui)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network Gui)
+find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets Network Gui LinguistTools)
 
 if (UNIX AND NOT APPLE AND KNOTIFICATIONS_ENABLED)
     find_package(KF6Notifications REQUIRED)
@@ -156,9 +155,9 @@ qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES en_US sv_SE de_DE fr_FR)
 
 target_link_libraries(
     tail-tray PRIVATE
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::Gui
+    Qt6::Widgets
+    Qt6::Network
+    Qt6::Gui
 )
 
 configure_file(src/Paths.h.in ${CMAKE_SOURCE_DIR}/src/Paths.h @ONLY)

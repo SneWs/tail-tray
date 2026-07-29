@@ -449,25 +449,55 @@ void MainWindow::loginFlowCompleted(bool success) {
 }
 
 void MainWindow::onIpnEvent(const IpnEventData& eventData) {
-    if (eventData.Health.Warnings.networkStatus.ImpactsConnectivity) {
-        if (eventData.Health.Warnings.networkStatus.WarnableCode ==
-            "network-status") {
-            if (eCurrentState != TailState::Connected) {
-                if (!eventData.Health.Warnings.networkStatus.Text.isEmpty()) {
-                    showWarningMessage(eventData.Health.Warnings.networkStatus.Title,
-                                       eventData.Health.Warnings.networkStatus.Text);
-                }
-            }
+    // Any non-empty ErrMessage from the IPN stream is always an error.
+    if (!eventData.ErrMessage.isEmpty()) {
+        showErrorMessage(tr("Tailscale Error"), eventData.ErrMessage);
+    }
+
+    // Map well-known IPN states to an appropriate notification
+    if (!eventData.State.isEmpty()) {
+        if (eventData.State == "Starting") {
+            pNotificationsManager->showLevelNotification(
+                NotificationLevel::Info,
+                tr("Tailscale"), tr("Tailscale is starting…"));
+        } else if (eventData.State == "Stopped") {
+            pNotificationsManager->showLevelNotification(
+                NotificationLevel::Info,
+                tr("Tailscale"), tr("Tailscale has stopped."));
+        } else if (eventData.State == "NeedsLogin") {
+            pNotificationsManager->showLevelNotification(
+                NotificationLevel::Warning,
+                tr("Tailscale"), tr("Tailscale needs you to log in."));
+        } else if (eventData.State == "NeedsMachineAuth") {
+            pNotificationsManager->showLevelNotification(
+                NotificationLevel::Warning,
+                tr("Tailscale"), tr("This machine is waiting for authorization."));
         }
-    } else {
-        if (eventData.Health.Warnings.networkStatus.Severity == "warning") {
-            if (!eventData.Health.Warnings.networkStatus.Text.isEmpty())
-                showWarningMessage(eventData.Health.Warnings.networkStatus.Title,
-                                   eventData.Health.Warnings.networkStatus.Text);
-        } else if (eventData.Health.Warnings.networkStatus.Severity == "error") {
-            if (!eventData.Health.Warnings.networkStatus.Text.isEmpty())
-                showErrorMessage(eventData.Health.Warnings.networkStatus.Title,
-                                 eventData.Health.Warnings.networkStatus.Text);
+    }
+
+    for (const auto& warning : eventData.Health.Warnings.allWarnings) {
+        if (warning.Text.isEmpty())
+            continue;
+
+        auto level = NotificationLevel::Info;
+        if (warning.ImpactsConnectivity) {
+            // Connectivity-breaking → highest urgency, regardless of Severity string
+            level = NotificationLevel::Critical;
+        } else if (warning.Severity == "high") {
+            level = NotificationLevel::Error;
+        } else if (warning.Severity == "medium" || warning.Severity == "low") {
+            level = NotificationLevel::Warning;
+        } else if (warning.Severity == "info") {
+            level = NotificationLevel::Info;
+        }
+
+        // Use de-dup helper for warning/error/critical to avoid spam
+        if (level == NotificationLevel::Critical || level == NotificationLevel::Error) {
+            showErrorMessage(warning.Title, warning.Text);
+        } else if (level == NotificationLevel::Warning) {
+            showWarningMessage(warning.Title, warning.Text);
+        } else {
+            pNotificationsManager->showLevelNotification(level, warning.Title, warning.Text);
         }
     }
 

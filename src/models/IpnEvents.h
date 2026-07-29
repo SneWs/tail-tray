@@ -46,15 +46,26 @@ struct IpnHealthWarningsNetworkStatusModel {
 };
 
 struct IpnHealthWarningsModel {
+    /*
+     * The well-known "network-status" warning, kept as a named field for
+     * backwards compatibility.  All other warning codes are available via
+     * the generic `allWarnings` map.
+     */
     IpnHealthWarningsNetworkStatusModel networkStatus{};
+
+    // All health warnings keyed by their WarnableCode string
+    QMap<QString, IpnHealthWarningsNetworkStatusModel> allWarnings{};
 
     static IpnHealthWarningsModel parse(const QJsonObject& json) {
         IpnHealthWarningsModel model;
-        if (json.contains("network-status") && !json["network-status"].isNull()) {
-            model.networkStatus = IpnHealthWarningsNetworkStatusModel::parse(json["network-status"].toObject());
-        }
-        else {
-            model.networkStatus = IpnHealthWarningsNetworkStatusModel{};
+        for (const auto& key : json.keys()) {
+            if (json[key].isNull() || !json[key].isObject())
+                continue;
+            auto warning = IpnHealthWarningsNetworkStatusModel::parse(json[key].toObject());
+            model.allWarnings.insert(key, warning);
+            if (key == "network-status") {
+                model.networkStatus = warning;
+            }
         }
         return model;
     }

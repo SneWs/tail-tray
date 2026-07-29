@@ -15,13 +15,8 @@ void NotificationsManager::showNotification(const QString& title, const QString&
     notification->setTitle(title);
     notification->setText(message);
 
-    notification->setUrgency(KNotification::Urgency::DefaultUrgency);
-    if (!iconName.isEmpty()) {
-        notification->setIconName(iconName);
-    }
-    else {
-        notification->setIconName("notification-active");
-    }
+    notification->setUrgency(KNotification::Urgency::LowUrgency);
+    notification->setIconName(iconName.isEmpty() ? QStringLiteral("notification-active") : iconName);
 
     notification->sendEvent();
 #else
@@ -63,17 +58,12 @@ void NotificationsManager::showWarningNotification(const QString& title, const Q
     notification->setTitle(title);
     notification->setText(message);
 
-    notification->setUrgency(KNotification::Urgency::DefaultUrgency);
-    if (!iconName.isEmpty()) {
-        notification->setIconName(iconName);
-    }
-    else {
-        notification->setIconName("dialog-warning");
-    }
+    notification->setUrgency(KNotification::Urgency::NormalUrgency);
+    notification->setIconName(iconName.isEmpty() ? QStringLiteral("dialog-warning") : iconName);
 
     notification->sendEvent();
 #else
-    m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Warning, 5000);
+    m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Warning, 7000);
 #endif
 }
 
@@ -83,17 +73,28 @@ void NotificationsManager::showErrorNotification(const QString& title, const QSt
     notification->setTitle(title);
     notification->setText(message);
 
-    notification->setUrgency(KNotification::Urgency::DefaultUrgency);
-    if (!iconName.isEmpty()) {
-        notification->setIconName(iconName);
-    }
-    else {
-        notification->setIconName("dialog-error");
-    }
+    notification->setUrgency(KNotification::Urgency::HighUrgency);
+    notification->setIconName(iconName.isEmpty() ? QStringLiteral("dialog-error") : iconName);
 
     notification->sendEvent();
 #else
-    m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Critical, 5000);
+    m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Critical, 8000);
+#endif
+}
+
+void NotificationsManager::showCriticalNotification(const QString& title, const QString& message, const QString& iconName) {
+#if defined(KNOTIFICATIONS_ENABLED)
+    // Persistent + CriticalUrgency: stays on screen until dismissed
+    auto* notification = new KNotification("BasicNotification", KNotification::NotificationFlag::Persistent, this);
+    notification->setTitle(title);
+    notification->setText(message);
+
+    notification->setUrgency(KNotification::Urgency::CriticalUrgency);
+    notification->setIconName(iconName.isEmpty() ? QStringLiteral("dialog-error") : iconName);
+
+    notification->sendEvent();
+#else
+    m_pTrayMgr->trayIcon()->showMessage(title, message, QSystemTrayIcon::Critical, 0 /* no timeout */);
 #endif
 }
 
@@ -129,4 +130,23 @@ void NotificationsManager::showNodeDisconnectedNotification(const QString& nodeN
     tr("A device have been removed from your tailnet!\n\nDevice: %1 (%2) - %3")
         .arg(nodeName, ipAddress, os), QSystemTrayIcon::Information, 8000);
 #endif
+}
+
+void NotificationsManager::showLevelNotification(NotificationLevel level,
+    const QString& title, const QString& message)
+{
+    switch (level) {
+    case NotificationLevel::Info:
+        showNotification(title, message);
+        break;
+    case NotificationLevel::Warning:
+        showWarningNotification(title, message);
+        break;
+    case NotificationLevel::Error:
+        showErrorNotification(title, message);
+        break;
+    case NotificationLevel::Critical:
+        showCriticalNotification(title, message);
+        break;
+    }
 }

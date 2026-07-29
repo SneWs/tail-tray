@@ -74,10 +74,24 @@ void IpnWatcher::onProcessCanReadStdOut() {
     IpnEventData eventData = IpnEventData::parse(obj);
     
     if (!eventData.Health.Warnings.networkStatus.Severity.isEmpty()) {
-        qDebug() << "Nw" << (eventData.Health.Warnings.networkStatus.ImpactsConnectivity ? "Connectivity Disruption" : "Connection OK");
-        qDebug() << "Severity: " << eventData.Health.Warnings.networkStatus.Severity;
-        qDebug() << "Text: " << eventData.Health.Warnings.networkStatus.Text;
-        qDebug() << "Title: " << eventData.Health.Warnings.networkStatus.Title;
+        qDebug() << "IPN Health [network-status]"
+                 << (eventData.Health.Warnings.networkStatus.ImpactsConnectivity
+                         ? "- CONNECTIVITY IMPACTED"
+                         : "- ok");
+        qDebug() << "  Severity:" << eventData.Health.Warnings.networkStatus.Severity
+                 << " (high=error, medium/low=warning, info=info)";
+        qDebug() << "  Title:" << eventData.Health.Warnings.networkStatus.Title;
+        qDebug() << "  Text: " << eventData.Health.Warnings.networkStatus.Text;
+    }
+
+    // Log any additional warning codes present in this event
+    for (const auto& key : eventData.Health.Warnings.allWarnings.keys()) {
+        if (key == "network-status")
+            continue; // already logged above
+        const auto& w = eventData.Health.Warnings.allWarnings[key];
+        qDebug() << "IPN Health [" << key << "] severity=" << w.Severity
+                 << "impactsConnectivity=" << w.ImpactsConnectivity
+                 << "title=" << w.Title;
     }
 
     emit eventReceived(eventData);

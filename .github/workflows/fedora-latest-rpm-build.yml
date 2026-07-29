@@ -1,0 +1,91 @@
+name: Build Fedora Latest - RPM
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+          echo "rpm-output-dir=${{ github.workspace }}/build/rpm" >> "$GITHUB_OUTPUT"
+
+      - name: Build RPMs in Fedora latest container
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${{ steps.strings.outputs.rpm-output-dir }}"
+
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/workspace" \
+            -w /workspace \
+            fedora:latest \
+            bash -lc '
+              set -euo pipefail
+              dnf install -y \
+                cmake \
+                extra-cmake-modules \
+                gcc-c++ \
+                git \
+                kf6-knotifications-devel \
+                ninja-build \
+                qt6-qtbase-devel \
+                qt6-qtbase-private-devel \
+                qt6-qttools-devel \
+                rpm-build \
+                rpmdevtools \
+                tar
+
+              VERSION=$(grep -oP "project\\(tail-tray VERSION \\K[0-9.]+" CMakeLists.txt)
+
+              # Required for containerized builds on mounted GitHub workspaces.
+              git config --global --add safe.directory /workspace
+
+              rpmdev-setuptree
+              git archive --format=tar.gz \
+                --prefix="tail-tray-${VERSION}/" \
+                --output="$HOME/rpmbuild/SOURCES/tail-tray-${VERSION}.tar.gz" \
+                HEAD
+
+              cp packaging/rpm/tail-tray.spec "$HOME/rpmbuild/SPECS/"
+
+              rpmbuild -ba "$HOME/rpmbuild/SPECS/tail-tray.spec" \
+                --define "_topdir $HOME/rpmbuild" \
+                --define "version ${VERSION}"
+
+              cp -v "$HOME"/rpmbuild/RPMS/*/*.rpm /workspace/build/rpm/
+              cp -v "$HOME"/rpmbuild/SRPMS/*.src.rpm /workspace/build/rpm/
+            '
+
+      - name: Upload RPM artifact for PR builds
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fedora-latest.rpm
+          path: ${{ steps.strings.outputs.rpm-output-dir }}/*
+          if-no-files-found: error
+          overwrite: true
+
+      - name: Upload RPM files to latest release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mv "${{ steps.strings.outputs.rpm-output-dir }}"/tail-tray-[0-9]*.x86_64.rpm "${{ steps.strings.outputs.rpm-output-dir }}/tail-tray-fedora-latest.x86_64.rpm"
+          gh release upload latest "${{ steps.strings.outputs.rpm-output-dir }}"/*.rpm --clobber
+
+
+
+

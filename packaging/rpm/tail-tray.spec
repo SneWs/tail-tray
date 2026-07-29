@@ -1,4 +1,4 @@
-%global app_version %{?version}%{!?version:0.2.33}
+%global app_version %{?version}%{!?version:0.2.34}
 
 Name:           tail-tray
 Version:        %{app_version}

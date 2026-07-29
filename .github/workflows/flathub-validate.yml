@@ -1,0 +1,65 @@
+name: Validate Flathub Metadata
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - "CMakeLists.txt"
+      - "tail-tray.desktop.in"
+      - "io.github.SneWs.TailTray.metainfo.xml"
+      - "packaging/flatpak/io.github.SneWs.TailTray.yml"
+      - "src/**"
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "CMakeLists.txt"
+      - "tail-tray.desktop.in"
+      - "io.github.SneWs.TailTray.metainfo.xml"
+      - "packaging/flatpak/io.github.SneWs.TailTray.yml"
+      - "src/**"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Flatpak metadata and manifest in Fedora container
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/workspace" \
+            -w /workspace \
+            fedora:latest \
+            bash -lc '
+              set -euo pipefail
+              dnf install -y \
+                appstream \
+                cmake \
+                desktop-file-utils \
+                extra-cmake-modules \
+                flatpak-builder \
+                gcc-c++ \
+                kf6-knotifications-devel \
+                ninja-build \
+                qt6-qtbase-devel \
+                qt6-qtbase-private-devel \
+                qt6-qttools-devel
+
+              cmake -S . -B build-flathub-validate \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DBUILD_TESTS=OFF \
+                -DKNOTIFICATIONS_ENABLED=ON
+
+              cmake --install build-flathub-validate --prefix /tmp/tail-tray-stage
+
+              desktop-file-validate /tmp/tail-tray-stage/share/applications/io.github.SneWs.TailTray.desktop
+              appstreamcli validate --pedantic io.github.SneWs.TailTray.metainfo.xml
+              flatpak-builder --show-manifest packaging/flatpak/io.github.SneWs.TailTray.yml >/dev/null
+            '
+

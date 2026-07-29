@@ -40,12 +40,16 @@ To do that, please see the Getting started section below.
 ### Pre-built packages
  * [Debian / Ubuntu / Mint based distros](https://github.com/SneWs/tail-tray/releases)
  * [OpenSUSE & Fedora RPMs](https://software.opensuse.org/download.html?project=home%3Aayankov&package=tail-tray)
+ * Flatpak (official distribution target: Flathub, app id: `io.github.SneWs.TailTray`)
  * [NixOS](/docs/nix-os.md)
  * [Windows (EXPERIMENTAL! latest unstable only, and not signed)](https://github.com/SneWs/tail-tray/releases/download/latest/Tail-Tray-Windows.zip)
 
 ### Build and install from Source
  * [On Linux](/docs/build-from-src.md)
  * [On Windows](/docs/build-from-src-windows.md)
+
+### Flatpak distribution
+ * [Flathub publishing notes](/docs/flatpak-flathub.md)
 
 ### Scriptable actions
 To learn more about how to write and use scriptable actions, please read the [Scriptable actions Guid](docs/scriptable-actions.md)

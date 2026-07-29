@@ -40,10 +40,11 @@ Tail Tray provides a system tray application and UI for Tailscale on Linux.
 %files
 %license LICENSE
 %{_bindir}/tail-tray
-%{_datadir}/applications/tail-tray.desktop
+%{_datadir}/applications/io.github.SneWs.TailTray.desktop
+%{_datadir}/metainfo/io.github.SneWs.TailTray.metainfo.xml
 %{_datadir}/knotifications5/tail-tray.notifyrc
-%{_datadir}/icons/hicolor/scalable/apps/tail-tray-dark.svg
-%{_datadir}/icons/hicolor/scalable/apps/tail-tray.svg
+%{_datadir}/icons/hicolor/scalable/apps/io.github.SneWs.TailTray-dark.svg
+%{_datadir}/icons/hicolor/scalable/apps/io.github.SneWs.TailTray.svg
 
 %changelog
 * Wed Jul 29 2026 Marcus Grenangen <marcus@grenangen.se> - %{version}-1

@@ -1,20 +1,24 @@
-id: org.flatpak.tail-tray
+id: io.github.SneWs.TailTray
 runtime: org.kde.Platform
 runtime-version: '6.7'
 sdk: org.kde.Sdk
 command: tail-tray
 finish-args:
   - --share=ipc
-  - --socket=x11
-  - --filesystem=host
-  - --socket=fallback-x11
+  - --share=network
   - --socket=wayland
+  - --socket=fallback-x11
   - --device=dri
+  - --filesystem=home
+  - --talk-name=org.freedesktop.Flatpak
+  - --talk-name=org.freedesktop.Notifications
 modules:
   - name: tail-tray
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
+      - -DKNOTIFICATIONS_ENABLED=ON
     sources:
       - type: dir
         path: ../../
+

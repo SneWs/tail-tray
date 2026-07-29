@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.SneWs.TailTray</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <name>Tail Tray</name>
+  <summary>Tailscale tray menu and UI for Plasma Desktop</summary>
+
+  <description>
+    <p>
+      Tail Tray is a desktop tray application for Tailscale on Plasma Desktop.
+      It provides quick access to connection status, device information,
+      network controls, and common actions directly from the system tray.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.SneWs.TailTray.desktop</launchable>
+
+  <url type="homepage">https://github.com/SneWs/tail-tray</url>
+  <url type="bugtracker">https://github.com/SneWs/tail-tray/issues</url>
+
+  <developer id="io.github.SneWs">
+    <name>SneWs</name>
+  </developer>
+
+  <provides>
+    <binary>tail-tray</binary>
+  </provides>
+
+  <categories>
+    <category>Network</category>
+    <category>Utility</category>
+  </categories>
+
+  <releases>
+    <release version="0.2.34" date="2026-07-29" />
+  </releases>
+
+  <content_rating type="oars-1.1" />
+</component>
+

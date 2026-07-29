@@ -36,7 +36,14 @@ void IpnWatcher::start() {
     QStringList args;
     args << "debug";
     args << "watch-ipn";
-    m_process->start("tailscale", args);
+    if (qEnvironmentVariableIsSet("FLATPAK_ID")) {
+        QStringList hostArgs;
+        hostArgs << "--host" << "tailscale";
+        hostArgs << args;
+        m_process->start("flatpak-spawn", hostArgs);
+    } else {
+        m_process->start("tailscale", args);
+    }
 }
 
 void IpnWatcher::stop() {

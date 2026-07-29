@@ -114,10 +114,57 @@ jobs:
               -G "Unix Makefiles"
         buildpackage-opts: --build=binary --no-sign
 
+    - name: Build Fedora latest RPMs
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        docker run --rm \
+          -v "${GITHUB_WORKSPACE}:/workspace" \
+          -w /workspace \
+          fedora:latest \
+          bash -lc '
+            set -euo pipefail
+            dnf install -y \
+              cmake \
+              extra-cmake-modules \
+              gcc-c++ \
+              git \
+              kf6-knotifications-devel \
+              ninja-build \
+              qt6-qtbase-devel \
+              qt6-qtbase-private-devel \
+              qt6-qttools-devel \
+              rpm-build \
+              rpmdevtools \
+              tar
+
+            git config --global --add safe.directory /workspace
+
+            VERSION=$(grep -oP "project\\(tail-tray VERSION \\K[0-9.]+" CMakeLists.txt)
+
+            rpmdev-setuptree
+            git archive --format=tar.gz \
+              --prefix="tail-tray-${VERSION}/" \
+              --output="$HOME/rpmbuild/SOURCES/tail-tray-${VERSION}.tar.gz" \
+              HEAD
+
+            cp packaging/rpm/tail-tray.spec "$HOME/rpmbuild/SPECS/"
+
+            rpmbuild -ba "$HOME/rpmbuild/SPECS/tail-tray.spec" \
+              --define "_topdir $HOME/rpmbuild" \
+              --define "version ${VERSION}"
+
+            cp -v "$HOME"/rpmbuild/RPMS/*/*.rpm /workspace/build/
+            cp -v "$HOME"/rpmbuild/SRPMS/*.src.rpm /workspace/build/
+          '
+
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
             ${{ steps.strings.outputs.build-output-dir }}/*.deb
+            ${{ steps.strings.outputs.build-output-dir }}/*.rpm
+            ${{ steps.strings.outputs.build-output-dir }}/*.src.rpm
     

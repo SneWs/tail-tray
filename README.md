@@ -39,7 +39,7 @@ To do that, please see the Getting started section below.
 
 ### Pre-built packages
  * [Debian / Ubuntu / Mint based distros](https://github.com/SneWs/tail-tray/releases)
- * [OpenSUSE & Fedora RPMs](https://software.opensuse.org/download.html?project=home%3Aayankov&package=tail-tray)
+ * [Fedora & OpenSUSE RPMs](https://github.com/SneWs/tail-tray/releases)
  * [NixOS](/docs/nix-os.md)
  * [Windows (EXPERIMENTAL! latest unstable only, and not signed)](https://github.com/SneWs/tail-tray/releases/download/latest/Tail-Tray-Windows.zip)
 

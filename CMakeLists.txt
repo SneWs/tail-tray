@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.21)
 
 project(tail-tray VERSION 0.2.34 LANGUAGES CXX)
 
+set(TAIL_TRAY_APP_ID "io.github.SneWs.TailTray")
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -188,21 +190,31 @@ if (UNIX AND NOT APPLE)
     endif (KNOTIFICATIONS_ENABLED)
 
     configure_file(tail-tray.desktop.in
-        ${CMAKE_SOURCE_DIR}/tail-tray.desktop
+        ${CMAKE_BINARY_DIR}/${TAIL_TRAY_APP_ID}.desktop
         @ONLY
     )
 
-    install(FILES tail-tray.desktop
+    install(FILES ${CMAKE_BINARY_DIR}/${TAIL_TRAY_APP_ID}.desktop
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
+    )
+
+    install(FILES io.github.SneWs.TailTray.metainfo.xml
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo
     )
 
     if (KNOTIFICATIONS_ENABLED)
         install(FILES "tail-tray.notifyrc" DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
     endif (KNOTIFICATIONS_ENABLED)
 
-    # Icon files...
-    install(FILES icons/tail-tray-dark.svg icons/tail-tray.svg
+    # Icon files aligned with the desktop/appstream app ID.
+    install(FILES icons/tail-tray.svg
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps
+        RENAME ${TAIL_TRAY_APP_ID}.svg
+    )
+
+    install(FILES icons/tail-tray-dark.svg
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps
+        RENAME ${TAIL_TRAY_APP_ID}-dark.svg
     )
 endif ()
 

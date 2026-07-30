@@ -165,6 +165,14 @@ void NetworkStateMonitor::startProcess() {
     connect(pProcess.get(), &QProcess::readyReadStandardError,
         this, &NetworkStateMonitor::onProcessCanReadStandardError);
 
-    pProcess->start("tailscale", QStringList() << "netcheck");
+    const QStringList args = QStringList() << "netcheck";
+    if (qEnvironmentVariableIsSet("FLATPAK_ID")) {
+        QStringList hostArgs;
+        hostArgs << "--host" << "tailscale";
+        hostArgs << args;
+        pProcess->start("flatpak-spawn", hostArgs);
+    } else {
+        pProcess->start("tailscale", args);
+    }
 }
 

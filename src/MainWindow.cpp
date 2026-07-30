@@ -986,7 +986,10 @@ void MainWindow::syncSettingsToUi() const {
     }
 
     configDir.cd("autostart");
-    ui->chkStartOnLogin->setChecked(QFile::exists(configDir.absolutePath() + "/tail-tray.desktop"));
+    const auto desktopEntryPath = configDir.absolutePath() + "/io.github.SneWs.TailTray.desktop";
+    const auto legacyDesktopEntryPath = configDir.absolutePath() + "/tail-tray.desktop";
+    ui->chkStartOnLogin->setChecked(
+        QFile::exists(desktopEntryPath) || QFile::exists(legacyDesktopEntryPath));
 
     // Sync devices to UI as well
     if (eCurrentState == TailState::Connected)
@@ -1031,16 +1034,23 @@ void MainWindow::syncSettingsFromUi() {
 
     const auto homeDir = QDir::home();
     const auto targetFile =
+        homeDir.absolutePath() + "/.config/autostart/io.github.SneWs.TailTray.desktop";
+    const auto legacyTargetFile =
         homeDir.absolutePath() + "/.config/autostart/tail-tray.desktop";
     if (settings.startOnLogin()) {
         if (!QFile::exists(targetFile)) {
             (void)homeDir.mkpath(".config/autostart");
             QFile::copy(QString(DATAROOTDIR) +
-                            QString("/applications/tail-tray.desktop"),
+                            QString("/applications/io.github.SneWs.TailTray.desktop"),
                         targetFile);
+        }
+
+        if (QFile::exists(legacyTargetFile)) {
+            QFile::remove(legacyTargetFile);
         }
     } else {
         QFile::remove(targetFile);
+        QFile::remove(legacyTargetFile);
     }
 
     settings.save();

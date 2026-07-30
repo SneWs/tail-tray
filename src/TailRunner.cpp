@@ -586,12 +586,25 @@ void BufferedProcessWrapper::start(const QString& cmd, QStringList args, const b
     args.insert(0, cmd);
 
 #if !defined(WINDOWS_BUILD)
-    if (usePkExec) {
-        args.insert(0, "tailscale");
-        proc->start("/usr/bin/pkexec", args);
-    }
-    else {
-        proc->start("tailscale", args);
+    if (qEnvironmentVariableIsSet("FLATPAK_ID")) {
+        QStringList hostArgs;
+        hostArgs << "--host";
+
+        if (usePkExec) {
+            hostArgs << "pkexec";
+        }
+
+        hostArgs << "tailscale";
+        hostArgs << args;
+        proc->start("flatpak-spawn", hostArgs);
+    } else {
+        if (usePkExec) {
+            args.insert(0, "tailscale");
+            proc->start("/usr/bin/pkexec", args);
+        }
+        else {
+            proc->start("tailscale", args);
+        }
     }
 #else
     // Windows don't have pkexec etc and we don't need to set operator

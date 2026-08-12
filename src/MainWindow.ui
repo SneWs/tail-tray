@@ -1307,7 +1307,7 @@
                 <item>
                  <widget class="QCheckBox" name="chkUseTailDrive">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows this machine to act as a gateway for your network. Other devices can then opt-in to routing all their traffic through it. &lt;span style=&quot; font-weight:700;&quot;&gt;Exit nodes&lt;/span&gt; must be &lt;span style=&quot; font-weight:700;&quot;&gt;approved in the admin console&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Taildrive lets you persistently share folders with other users and devices on your Tailscale network.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="text">
                    <string>Use Tail drive from this machine</string>

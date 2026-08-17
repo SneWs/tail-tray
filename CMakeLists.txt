@@ -19,7 +19,8 @@ if (UNIX AND NOT APPLE AND KNOTIFICATIONS_ENABLED)
 
     find_package(ECM REQUIRED NO_MODULE)
     set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
-    include(KDEInstallDirs)
+    set(QT_MAJOR_VERSION 6)
+    include(KDEInstallDirs6)
     include(KDECMakeSettings)
 
     add_definitions(-DKNOTIFICATIONS_ENABLED)

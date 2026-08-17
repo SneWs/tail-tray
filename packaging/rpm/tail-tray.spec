@@ -41,7 +41,7 @@ Tail Tray provides a system tray application and UI for Tailscale on Linux.
 %license LICENSE
 %{_bindir}/tail-tray
 %{_datadir}/applications/tail-tray.desktop
-%{_datadir}/knotifications5/tail-tray.notifyrc
+%{_datadir}/knotifications6/tail-tray.notifyrc
 %{_datadir}/icons/hicolor/scalable/apps/tail-tray-dark.svg
 %{_datadir}/icons/hicolor/scalable/apps/tail-tray.svg
 

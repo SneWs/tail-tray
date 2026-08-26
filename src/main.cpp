@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
 
     SingleApplicationImpl a(argc, argv);
     if (!a.claimInstance()) {
-        qDebug() << "Secondary instance not allowed, will quite this instance";
+        qDebug() << "Secondary instance not allowed, will quit this instance";
         return -1;
     }
 

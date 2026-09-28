@@ -56,7 +56,7 @@ QString SysCommand::readFile(const QString &filePath, bool usePkExec) {
     pProcess = std::make_unique<QProcess>(this);
     if (usePkExec) {
         args.insert(0, "cat");
-        pProcess->start("/usr/bin/pkexec", args);
+        pProcess->start("pkexec", args);
     }
     else {
         pProcess->start("cat", args);
@@ -83,7 +83,7 @@ void SysCommand::runCommand(const QString& cmd, QStringList args, bool jsonResul
         // NOTE: Windows 11 24H2 comes with sudo command and needs to be enabled under System > Developer Settings
         pProcess->start("sudo", args);
 #else
-        pProcess->start("/usr/bin/pkexec", args);
+        pProcess->start("pkexec", args);
 #endif
     }
     else {

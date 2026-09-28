@@ -588,7 +588,7 @@ void BufferedProcessWrapper::start(const QString& cmd, QStringList args, const b
 #if !defined(WINDOWS_BUILD)
     if (usePkExec) {
         args.insert(0, "tailscale");
-        proc->start("/usr/bin/pkexec", args);
+        proc->start("pkexec", args);
     }
     else {
         proc->start("tailscale", args);

@@ -69,6 +69,20 @@ void IpnWatcher::onProcessCanReadStdOut() {
     }
 
     QJsonObject obj = doc.object();
+
+    // Events with only Engine stats are traffic counters, sent every few seconds while
+    // peers are active. Nothing reads them, and handling one rebuilds the tray menu.
+    bool hasMoreThanEngineStats = false;
+    for (auto it = obj.constBegin(); it != obj.constEnd(); ++it) {
+        if (it.key() != "Version" && it.key() != "Engine" && !it.value().isNull()) {
+            hasMoreThanEngineStats = true;
+            break;
+        }
+    }
+    if (!hasMoreThanEngineStats) {
+        return;
+    }
+
     qDebug() << "IPN Event received";
 
     IpnEventData eventData = IpnEventData::parse(obj);

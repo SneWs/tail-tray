@@ -2,6 +2,11 @@
 
 #include <QDesktopServices>
 
+#if defined(KNOTIFICATIONS_ENABLED)
+// The app icon (as in tail-tray.desktop), so notifications read as Tail Tray's
+static const QString appIconName = QStringLiteral("tail-tray");
+#endif
+
 NotificationsManager::NotificationsManager(TrayMenuManager const* pTrayMgr, QObject* parent)
     : QObject(parent)
     , m_pTrayMgr(pTrayMgr)
@@ -16,7 +21,7 @@ void NotificationsManager::showNotification(const QString& title, const QString&
     notification->setText(message);
 
     notification->setUrgency(KNotification::Urgency::LowUrgency);
-    notification->setIconName(iconName.isEmpty() ? QStringLiteral("notification-active") : iconName);
+    notification->setIconName(iconName.isEmpty() ? appIconName : iconName);
 
     notification->sendEvent();
 #else
@@ -38,12 +43,7 @@ void NotificationsManager::showFileNotification(const QString& title, const QStr
     notification->setUrls(QList{fileUrl});
 
     notification->setUrgency(KNotification::Urgency::DefaultUrgency);
-    if (!iconName.isEmpty()) {
-        notification->setIconName(iconName);
-    }
-    else {
-        notification->setIconName("edit-image");
-    }
+    notification->setIconName(iconName.isEmpty() ? appIconName : iconName);
 
     notification->sendEvent();
 #else
@@ -59,7 +59,7 @@ void NotificationsManager::showWarningNotification(const QString& title, const Q
     notification->setText(message);
 
     notification->setUrgency(KNotification::Urgency::NormalUrgency);
-    notification->setIconName(iconName.isEmpty() ? QStringLiteral("dialog-warning") : iconName);
+    notification->setIconName(iconName.isEmpty() ? appIconName : iconName);
 
     notification->sendEvent();
 #else
@@ -74,7 +74,7 @@ void NotificationsManager::showErrorNotification(const QString& title, const QSt
     notification->setText(message);
 
     notification->setUrgency(KNotification::Urgency::HighUrgency);
-    notification->setIconName(iconName.isEmpty() ? QStringLiteral("dialog-error") : iconName);
+    notification->setIconName(iconName.isEmpty() ? appIconName : iconName);
 
     notification->sendEvent();
 #else
@@ -90,7 +90,7 @@ void NotificationsManager::showCriticalNotification(const QString& title, const 
     notification->setText(message);
 
     notification->setUrgency(KNotification::Urgency::CriticalUrgency);
-    notification->setIconName(iconName.isEmpty() ? QStringLiteral("dialog-error") : iconName);
+    notification->setIconName(iconName.isEmpty() ? appIconName : iconName);
 
     notification->sendEvent();
 #else
@@ -106,7 +106,7 @@ void NotificationsManager::showNodeConnectedNotification(const QString& nodeName
     notification->setText(tr("A new device have been discovered on your tailnet!\n\nDevice: %1 (%2) - %3")
         .arg(nodeName, ipAddress, os));
 
-    notification->setIconName("online");
+    notification->setIconName(appIconName);
     notification->sendEvent();
 #else
     m_pTrayMgr->trayIcon()->showMessage(tr("Tailnet Devices"),
@@ -123,7 +123,7 @@ void NotificationsManager::showNodeDisconnectedNotification(const QString& nodeN
     notification->setText(tr("A device have been removed from your tailnet!\n\nDevice: %1 (%2) - %3")
         .arg(nodeName, ipAddress, os));
 
-    notification->setIconName("offline");
+    notification->setIconName(appIconName);
     notification->sendEvent();
 #else
     m_pTrayMgr->trayIcon()->showMessage(tr("Tailnet Devices"),

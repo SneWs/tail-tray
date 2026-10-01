@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
     }
 
     MainWindow w;
-    QObject::connect(&a, &SingleApplicationImpl::activationRequested, &w, &QWidget::showNormal);
+    QObject::connect(&a, &SingleApplicationImpl::activationRequested, &w, &MainWindow::showWindow);
 
 	// HACK: Workaround to make sure that the tray icon is updated correctly when style/theme changes
     {

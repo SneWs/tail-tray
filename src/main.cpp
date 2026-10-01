@@ -70,13 +70,9 @@ int main(int argc, char** argv) {
 
     MainWindow w;
 
-	// HACK: Workaround to make sure that the tray icon is updated correctly when style/theme changes
-    {
-        w.show();
-        QTimer::singleShot(100, &w, [&w]() {
-            w.hide();
-        });
-    }
+    // Theme changes only reach widgets with a native window, and the tray icon swaps its
+    // light/dark variant on StyleChange. Create the window without showing it.
+    w.winId();
 
     auto ec = a.exec();
     return ec;

@@ -38,7 +38,15 @@ AccountsTabUiManager::AccountsTabUiManager(Ui::MainWindow* u, TailRunner* runner
     );
 
     connect(ui->btnLogout, &QPushButton::clicked, this, [this]() {
-            pTailRunner->logout();
+            // The active account is the one marked with '*'; any other is where to go next
+            QString nextAccountId;
+            for (const auto& acc : accounts) {
+                if (!acc.account.endsWith('*')) {
+                    nextAccountId = acc.id;
+                    break;
+                }
+            }
+            pTailRunner->logout(nextAccountId);
             if (ui->lstAccounts->selectedItems().count() > 0) {
                 auto* selectedItem = ui->lstAccounts->selectedItems().first();
                 int row = ui->lstAccounts->row(selectedItem);

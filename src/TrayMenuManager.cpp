@@ -56,8 +56,7 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ThemeManag
   pQuitAction = std::make_unique<QAction>(tr("Quit"));
   pLoginAction = std::make_unique<QAction>(tr("Login"));
   pLogoutAction = std::make_unique<QAction>(tr("Logout"));
-  pPreferences = std::make_unique<QAction>(tr("Preferences"));
-  pAbout = std::make_unique<QAction>(tr("About..."));
+  pShowHideWindow = std::make_unique<QAction>(tr("Show Window"));
   pConnected = std::make_unique<QAction>(tr("Connected"));
   pConnected->setEnabled(false);
   pConnect = std::make_unique<QAction>(tr("Connect"));
@@ -72,6 +71,10 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ThemeManag
 
   setupWellKnownActions();
   stateChangedTo(TailState::NotLoggedIn, TailStatus{});
+}
+
+void TrayMenuManager::windowVisibilityChanged(bool visible) {
+  pShowHideWindow->setText(visible ? tr("Hide Window") : tr("Show Window"));
 }
 
 void TrayMenuManager::onAccountsListed(
@@ -110,8 +113,7 @@ void TrayMenuManager::buildNotLoggedInMenu() const {
   pTrayMenu->clear();
   pTrayMenu->addAction(pLoginAction.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
-  pTrayMenu->addAction(pPreferences.get());
-  pTrayMenu->addAction(pAbout.get());
+  pTrayMenu->addAction(pShowHideWindow.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
   pTrayMenu->addAction(pQuitAction.get());
 }
@@ -132,8 +134,7 @@ void TrayMenuManager::buildNotConnectedMenu(
   actions->addAction(pRestartTailscale.get());
   actions->addAction(pRefreshLocalDns.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
-  pTrayMenu->addAction(pPreferences.get());
-  pTrayMenu->addAction(pAbout.get());
+  pTrayMenu->addAction(pShowHideWindow.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
   pTrayMenu->addAction(pQuitAction.get());
 
@@ -489,8 +490,7 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus &pTailStatus) {
           });
 
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
-  pTrayMenu->addAction(pPreferences.get());
-  pTrayMenu->addAction(pAbout.get());
+  pTrayMenu->addAction(pShowHideWindow.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
   pTrayMenu->addAction(pQuitAction.get());
 
@@ -535,14 +535,13 @@ void TrayMenuManager::setupWellKnownActions() const {
   connect(pDisconnect.get(), &QAction::triggered, this,
           [this](bool) { pTailRunner->stop(); });
 
-  connect(pPreferences.get(), &QAction::triggered, this, [this](bool) {
+  // Opens the window on whichever tab it was left on, or hides it when it's open
+  connect(pShowHideWindow.get(), &QAction::triggered, this, [this](bool) {
     auto *wnd = dynamic_cast<MainWindow *>(this->parent());
-    wnd->showSettingsTab();
-  });
-
-  connect(pAbout.get(), &QAction::triggered, this, [this](bool) {
-    auto *wnd = dynamic_cast<MainWindow *>(this->parent());
-    wnd->showAboutTab();
+    if (wnd->isVisible())
+      wnd->hide();
+    else
+      wnd->showNormal();
   });
 
   connect(pThisDevice.get(), &QAction::triggered, this, [this](bool) {

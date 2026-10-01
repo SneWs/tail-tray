@@ -204,15 +204,6 @@ void MainWindow::showAccountsTab() {
     showNormal();
 }
 
-void MainWindow::showAboutTab() {
-    auto tabIndex = 5;
-    if (settings.tailDriveEnabled())
-        tabIndex = 6;
-
-    ui->tabWidget->setCurrentIndex(tabIndex);
-    showNormal();
-}
-
 void MainWindow::showNetworkStatusTab() {
     ui->tabWidget->setCurrentIndex(2);
     showNormal();
@@ -807,6 +798,14 @@ void MainWindow::showEvent(QShowEvent *event) {
 
     // Read settings, and it will be synced to UI once read
     pCurrentExecution->readSettings();
+    pTrayManager->windowVisibilityChanged(isVisible());
+}
+
+void MainWindow::hideEvent(QHideEvent *event) {
+    QMainWindow::hideEvent(event);
+
+    // A minimize also sends a hide event but leaves isVisible() true, as the tray item expects
+    pTrayManager->windowVisibilityChanged(isVisible());
 }
 
 void MainWindow::refreshThemebasedItems()

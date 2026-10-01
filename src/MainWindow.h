@@ -37,7 +37,6 @@ public:
 
     void showSettingsTab();
     void showAccountsTab();
-    void showAboutTab();
     void showNetworkStatusTab();
 
     void syncSettingsToUi() const;
@@ -122,6 +121,7 @@ private:
 
 protected:
     void showEvent(QShowEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
     bool event(QEvent* event) override;
 };
 

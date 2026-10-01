@@ -40,6 +40,9 @@ namespace
     }
 
     static BufferedProcessWrapper* pActiveLoginFlow = nullptr;
+
+    // Where a finished logout moves on to; empty when no other account is left
+    static QString accountAfterLogout;
 }
 
 TailRunner::TailRunner(const TailSettings& s, QObject* parent)
@@ -182,8 +185,10 @@ void TailRunner::login(const QString& customLoginUrl) {
     runCommand(Command::Login, "login", args, false, true);
 }
 
-void TailRunner::logout() {
-    runCommand(Command::Logout, "logout", QStringList(), false, true);
+// Being the account's operator is enough to log out, so no pkexec here
+void TailRunner::logout(const QString& nextAccountId) {
+    accountAfterLogout = nextAccountId;
+    runCommand(Command::Logout, "logout", QStringList());
 }
 
 void TailRunner::cancelLoginFlow() {
@@ -502,6 +507,14 @@ void TailRunner::onProcessFinished(BufferedProcessWrapper* process, int exitCode
         }
         else if (commandInfo == Command::SendFile) {
             emit fileSent(true, QString{}, process->userData());
+        }
+        else if (commandInfo == Command::Logout) {
+            // Tailscale is now on a blank account with no operator: only root can switch away,
+            // and the account list can't be read until a login sets the operator again
+            if (accountAfterLogout.isEmpty())
+                emit accountsListed({});
+            else
+                runCommand(Command::SwitchAccount, "switch", QStringList{accountAfterLogout}, false, true);
         }
     }
 }

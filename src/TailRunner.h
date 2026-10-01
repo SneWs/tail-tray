@@ -102,7 +102,7 @@ public:
     void switchAccount(const QString& accountId);
 
     void login(const QString& customLoginUrl = "");
-    void logout();
+    void logout(const QString& nextAccountId);
     void cancelLoginFlow();
 
     void start(bool usePkExec = false);

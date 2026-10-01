@@ -21,6 +21,7 @@ public:
     explicit TrayMenuManager(TailSettings& s, TailRunner* runner, ThemeManager& tm,
                              ScriptManager* scriptManager, QObject* parent = nullptr);
 
+    void windowVisibilityChanged(bool visible);
     void onAccountsListed(const QList<TailAccountInfo>& foundAccounts);
     void stateChangedTo(TailState newState, const TailStatus& pTailStatus);
 
@@ -43,8 +44,7 @@ private:
     std::unique_ptr<QAction> pConnected;
     std::unique_ptr<QAction> pConnect;
     std::unique_ptr<QAction> pDisconnect;
-    std::unique_ptr<QAction> pPreferences;
-    std::unique_ptr<QAction> pAbout;
+    std::unique_ptr<QAction> pShowHideWindow;
     std::unique_ptr<QAction> pThisDevice;
     std::unique_ptr<QAction> pExitNodeNone;
     std::unique_ptr<QAction> pRefreshLocalDns;

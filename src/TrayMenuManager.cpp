@@ -61,6 +61,8 @@ TrayMenuManager::TrayMenuManager(TailSettings& s, TailRunner* runner, ThemeManag
   pConnected = std::make_unique<QAction>(tr("Connected"));
   pConnected->setEnabled(false);
   pConnect = std::make_unique<QAction>(tr("Connect"));
+  pConnecting = std::make_unique<QAction>(tr("Connecting..."));
+  pConnecting->setEnabled(false);
   pDisconnect = std::make_unique<QAction>(tr("Disconnect"));
   pThisDevice = std::make_unique<QAction>(tr("This device"));
   pExitNodeNone = std::make_unique<QAction>(tr("None"));
@@ -120,7 +122,9 @@ void TrayMenuManager::buildNotConnectedMenu(
     const TailStatus &pTailStatus) const {
   pSysTray->setIcon(themeManager.getDisconnectedTrayIcon());
   pTrayMenu->clear();
-  pTrayMenu->addAction(pConnect.get());
+  // Tailscale is already bringing the connection up, so Connect would do nothing
+  const bool connecting = pTailStatus.backendState == "Starting" || pTailStatus.backendState == "Running";
+  pTrayMenu->addAction(connecting ? pConnecting.get() : pConnect.get());
   disposableConnectedMenuActions.push_back(pTrayMenu->addSeparator());
 
   if (pTailStatus.user.id > 0)

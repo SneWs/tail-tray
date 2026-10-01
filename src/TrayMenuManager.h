@@ -42,6 +42,7 @@ private:
     std::unique_ptr<QAction> pLogoutAction;
     std::unique_ptr<QAction> pConnected;
     std::unique_ptr<QAction> pConnect;
+    std::unique_ptr<QAction> pConnecting;
     std::unique_ptr<QAction> pDisconnect;
     std::unique_ptr<QAction> pPreferences;
     std::unique_ptr<QAction> pAbout;

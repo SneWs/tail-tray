@@ -3,6 +3,8 @@
 
 #include <QApplication>
 #include <QDir>
+#include <QLocalServer>
+#include <QLocalSocket>
 #include <QLockFile>
 #include <QStandardPaths>
 
@@ -11,7 +13,7 @@ Q_OBJECT
 public:
     explicit SingleApplicationImpl(int &argc, char **argv)
         : QApplication(argc, argv)
-        , singleGuard(singleInstanceLockFilePath())
+        , singleGuard(runtimeFilePath("tail-tray.grenangen.se.lock"))
     {
         singleGuard.setStaleLockTime(0);
     }
@@ -26,19 +28,45 @@ public:
     }
 
     [[nodiscard]] bool claimInstance() {
-        return singleGuard.tryLock(0);
+        if (!singleGuard.tryLock(0))
+            return false;
+
+        // Later launches connect here to ask this instance to show its window. Holding the lock
+        // means an existing socket is a crashed instance's leftover, which would fail listen().
+        QLocalServer::removeServer(activationSocketPath());
+        activationServer.listen(activationSocketPath());
+        connect(&activationServer, &QLocalServer::newConnection, this, [this]() {
+            activationServer.nextPendingConnection()->deleteLater();
+            emit activationRequested();
+        });
+
+        return true;
     }
 
-private:
-    static QString singleInstanceLockFilePath() {
-        auto lockDir = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
-        if (lockDir.isEmpty())
-            lockDir = QDir::tempPath();
+    static void activateRunningInstance() {
+        QLocalSocket socket;
+        socket.connectToServer(activationSocketPath());
+        socket.waitForConnected(1000);
+    }
 
-        return QDir(lockDir).absoluteFilePath("tail-tray.grenangen.se.lock");
+signals:
+    void activationRequested();
+
+private:
+    static QString runtimeFilePath(const QString& fileName) {
+        auto runtimeDir = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+        if (runtimeDir.isEmpty())
+            runtimeDir = QDir::tempPath();
+
+        return QDir(runtimeDir).absoluteFilePath(fileName);
+    }
+
+    static QString activationSocketPath() {
+        return runtimeFilePath("tail-tray.grenangen.se.socket");
     }
 
     QLockFile singleGuard;
+    QLocalServer activationServer;
 };
 
 #endif

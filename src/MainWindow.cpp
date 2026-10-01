@@ -436,8 +436,8 @@ void MainWindow::loginFlowCompleted(bool success) {
     pLoginInProgressDlg.reset();
 
     if (success) {
-        // And bring the settings tab front and center
-        showSettingsTab();
+        // Stay on the current tab: the login flow opened the Account tab, where the new account shows up
+        show();
 
         pCurrentExecution->start();
     } else {

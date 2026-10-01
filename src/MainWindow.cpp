@@ -922,6 +922,8 @@ void MainWindow::onTailStatusChanged(const TailStatus &pNewStatus) {
     }
 
     accountsTabUi->onTailStatusChanged(pTailStatus);
+    if (eCurrentState == TailState::Connected)
+        pDevicesTabManager->syncToUi(pTailStatus);
 #if defined(DAVFS_ENABLED)
     pTailDriveUiManager->stateChangedTo(eCurrentState, pTailStatus);
 #endif

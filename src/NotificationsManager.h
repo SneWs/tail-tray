@@ -28,9 +28,9 @@ public:
     void showFileNotification(const QString& title, const QString& message, const QFileInfo& fileInfo,
         const QString& iconName = QString());
 
-    void showWarningNotification(const QString& title, const QString& message, const QString& iconName = QString("dialog-warning"));
-    void showErrorNotification(const QString& title, const QString& message, const QString& iconName = QString("dialog-error"));
-    void showCriticalNotification(const QString& title, const QString& message, const QString& iconName = QString("dialog-error"));
+    void showWarningNotification(const QString& title, const QString& message, const QString& iconName = QString());
+    void showErrorNotification(const QString& title, const QString& message, const QString& iconName = QString());
+    void showCriticalNotification(const QString& title, const QString& message, const QString& iconName = QString());
 
     void showNodeConnectedNotification(const QString& nodeName, const QString& ipAddress, const QString& os);
     void showNodeDisconnectedNotification(const QString& nodeName, const QString& ipAddress, const QString& os);

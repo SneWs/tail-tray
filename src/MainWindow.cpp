@@ -846,7 +846,6 @@ TailState MainWindow::changeToState(TailState newState) {
     if (didChangeState) {
         // If we're not connected, don't allow showing/changing tabs etc
         if (newState == TailState::Connected) {
-            ui->tabWidget->setCurrentIndex(1);
             ui->tabNetworkStatus->setDisabled(false);
             ui->tabSettings->setDisabled(false);
             ui->tabTailDrive->setDisabled(false);

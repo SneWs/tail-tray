@@ -14,8 +14,12 @@ int main(int argc, char** argv) {
 
     SingleApplicationImpl a(argc, argv);
     if (!a.claimInstance()) {
-        qDebug() << "Secondary instance not allowed, will quit this instance";
-        return -1;
+        // --background (for autostart) only makes sure tail-tray runs, so the window stays put
+        if (!QCoreApplication::arguments().contains("--background")) {
+            qDebug() << "Already running, asking that instance to show its window";
+            SingleApplicationImpl::activateRunningInstance();
+        }
+        return 0;
     }
 
     QApplication::setQuitOnLastWindowClosed(false);
@@ -69,6 +73,7 @@ int main(int argc, char** argv) {
     }
 
     MainWindow w;
+    QObject::connect(&a, &SingleApplicationImpl::activationRequested, &w, &QWidget::showNormal);
 
 	// HACK: Workaround to make sure that the tray icon is updated correctly when style/theme changes
     {

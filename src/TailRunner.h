@@ -49,16 +49,6 @@ public:
     [[nodiscard]] void* userData() const { return pUserData; }
     [[nodiscard]] bool isRunning() const { return proc != nullptr && proc->state() == QProcess::Running; }
 
-    void cancel(const bool raiseEvents = true) {
-        if (proc != nullptr) {
-            proc->terminate();
-        }
-
-        if (raiseEvents) {
-            emit processFinished(this, 0, QProcess::NormalExit);
-        }
-    }
-
 signals:
     void processErrorOccurred(BufferedProcessWrapper* wrapper, QProcess::ProcessError error);
     void processCanReadStdOut(BufferedProcessWrapper* process);

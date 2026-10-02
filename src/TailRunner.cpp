@@ -41,6 +41,9 @@ namespace
 
     static BufferedProcessWrapper* pActiveLoginFlow = nullptr;
 
+    // `tailscale login` first moves to a new, empty profile; this is where a cancel goes back to
+    static QString accountBeforeLogin;
+
     // Where a finished logout moves on to; empty when no other account is left
     static QString accountAfterLogout;
 }
@@ -182,6 +185,9 @@ void TailRunner::login(const QString& customLoginUrl) {
     args << "--operator" << qEnvironmentVariable("USER");
 #endif
 
+    if (pActiveLoginFlow == nullptr)
+        accountBeforeLogin = lastKnownStatus.user.loginName;
+
     runCommand(Command::Login, "login", args, false, true);
 }
 
@@ -196,7 +202,16 @@ void TailRunner::cancelLoginFlow() {
         return;
     }
 
-    pActiveLoginFlow->cancel();
+    // The login runs as root through pkexec, so it can't be killed from here, and deleting its
+    // QProcess while it runs blocks the UI for 30s. Going back to the previous profile puts
+    // tailscaled in Running again, which ends `tailscale login`; its output is ignored from now.
+    auto* flow = pActiveLoginFlow;
+    pActiveLoginFlow = nullptr;
+    disconnect(flow, nullptr, this, nullptr);
+    connect(flow->process(), &QProcess::finished, flow, &QObject::deleteLater);
+
+    if (!accountBeforeLogin.isEmpty())
+        switchAccount(accountBeforeLogin);
 }
 
 void TailRunner::start(const bool usePkExec) {

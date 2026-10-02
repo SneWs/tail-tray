@@ -545,7 +545,7 @@ void TrayMenuManager::setupWellKnownActions() const {
     if (wnd->isVisible())
       wnd->hide();
     else
-      wnd->showNormal();
+      wnd->showWindow();
   });
 
   connect(pThisDevice.get(), &QAction::triggered, this, [this](bool) {

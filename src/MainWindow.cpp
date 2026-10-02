@@ -194,19 +194,26 @@ void MainWindow::shutdown() const {
         pCurrentExecution->shutdown();
 }
 
+// Not showNormal(): on a visible window it asks to un-maximize, and compositors that treat
+// that request as a toggle (Hyprland) maximize the window instead.
+void MainWindow::showWindow() {
+    setWindowState(windowState() & ~Qt::WindowMinimized);
+    show();
+}
+
 void MainWindow::showSettingsTab() {
     ui->tabWidget->setCurrentIndex(1);
-    showNormal();
+    showWindow();
 }
 
 void MainWindow::showAccountsTab() {
     ui->tabWidget->setCurrentIndex(0);
-    showNormal();
+    showWindow();
 }
 
 void MainWindow::showNetworkStatusTab() {
     ui->tabWidget->setCurrentIndex(2);
-    showNormal();
+    showWindow();
 }
 
 void MainWindow::tailscaleIsInstalled(bool installed) {

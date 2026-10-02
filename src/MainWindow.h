@@ -35,6 +35,7 @@ public:
 
     void shutdown() const;
 
+    void showWindow();
     void showSettingsTab();
     void showAccountsTab();
     void showNetworkStatusTab();

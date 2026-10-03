@@ -566,7 +566,7 @@ void TrayMenuManager::setupWellKnownActions() const {
 
   connect(pSysTray.get(), &QSystemTrayIcon::activated, this,
           [this](QSystemTrayIcon::ActivationReason reason) {
-            auto *wnd = dynamic_cast<MainWindow *>(this->parent());
+            auto *wnd = dynamic_cast<MainWindow*>(this->parent());
             if (reason == QSystemTrayIcon::ActivationReason::Trigger) {
               if (wnd->isVisible())
                 wnd->hide();
@@ -574,7 +574,7 @@ void TrayMenuManager::setupWellKnownActions() const {
                 // NOTE: When settings are read, they will call settings to UI
                 // so will be in sync on show
                 pTailRunner->readSettings();
-                wnd->showSettingsTab();
+                wnd->showWindow();
               }
             }
             else if (reason == QSystemTrayIcon::ActivationReason::MiddleClick) {

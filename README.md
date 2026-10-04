@@ -4,7 +4,7 @@ Tailscale tray menu and UI for Plasma Desktop
 **Disclaimer** Please note that I have _no_ association whatsoever with Tailscale Inc. 
 
 This is a personal project and is not endorsed by Tailscale Inc. in any shape or form.
-<script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#7f54d1', 'X5B8286GKY');kofiwidget2.draw();</script> 
+If you like this project you can support me over at https://ko-fi.com/grenis
 
 ### Features
 - [X] Control your Tailscale connection from the tray

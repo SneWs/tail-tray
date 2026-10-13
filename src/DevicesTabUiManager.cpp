@@ -2,6 +2,7 @@
 
 #include <QClipboard>
 #include <QFileDialog>
+#include <QGuiApplication>
 #include <QMenu>
 #include <QStringList>
 #include <QTreeWidgetItem>
@@ -71,19 +72,13 @@ void DevicesTabUiManager::onDevicesTreeContextMenuRequested(const QPoint& pos) {
         return;
 
     const auto peerIndex = selectedItem->data(0, Qt::UserRole);
+    if (!peerIndex.isValid() || peerIndex.toInt() < 0 ||
+        peerIndex.toInt() >= pTailStatus.peers.size()) {
+        return;
+    }
     auto peer = pTailStatus.peers[peerIndex.toInt()];
 
     QMenu menu(ui->tvDevices);
-
-    QAction* copyIpAction =
-        menu.addAction(tr("Copy IP Address"));
-
-    connect(copyIpAction, &QAction::triggered, this, [this, peer]() {
-        auto ipAddress = peer.tailscaleIPs[0];
-        QClipboard* clipboard = QGuiApplication::clipboard();
-        clipboard->setText(ipAddress);
-        emit ipAddressCopiedToClipboard(ipAddress, peer.getShortDnsName());
-    });
 
     auto* sendFileAction = menu.addAction(tr("Send file"));
     auto name = peer.getShortDnsName();
@@ -105,6 +100,38 @@ void DevicesTabUiManager::onDevicesTreeContextMenuRequested(const QPoint& pos) {
         // The user data will be cleaned up when the signal is triggered back to us
         pCurrentExecution->sendFile(name, file, new QString(file));
     });
+
+    menu.addSeparator();
+
+    auto* copyMenu = menu.addMenu(tr("Copy"));
+    const auto addCopyMenu = [this, copyMenu, name](const QString& value,
+                                                    bool isIpAddress) {
+        auto* valueMenu = copyMenu->addAction(value);
+        connect(valueMenu, &QAction::triggered, this,
+            [this, value, name, isIpAddress](bool) {
+                QClipboard* clipboard = QGuiApplication::clipboard();
+                clipboard->setText(value);
+                if (isIpAddress) {
+                    emit ipAddressCopiedToClipboard(value, name);
+                }
+            });
+    };
+
+    for (const auto& ip : peer.tailscaleIPs) {
+        addCopyMenu(ip, true);
+    }
+
+    addCopyMenu(name, false);
+    auto fullHostname = peer.dnsName;
+    if (fullHostname.endsWith('.')) {
+        fullHostname.chop(1);
+    }
+    if (fullHostname.isEmpty()) {
+        fullHostname = peer.hostName;
+    }
+    if (fullHostname != name) {
+        addCopyMenu(fullHostname, false);
+    }
 
     menu.exec(ui->tvDevices->viewport()->mapToGlobal(pos));
 }

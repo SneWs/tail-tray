@@ -172,10 +172,10 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus &pTailStatus) {
 
     if (dev.id != pTailStatus.self.id) {
       auto name = dev.getShortDnsName();
-      QAction *action;
       if (!dev.online) {
-        action = netDevs->addAction(name + tr(" (offline)"));
+        auto *action = netDevs->addAction(name + tr(" (offline)"));
         action->setEnabled(false);
+        disposableConnectedMenuActions.push_back(action);
       } else {
         const auto &ipAddresses = dev.tailscaleIPs;
         QString ipStr;
@@ -186,18 +186,6 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus &pTailStatus) {
 
         auto *deviceMenu = netDevs->addMenu(name + ipStr);
         disposableMenus.push_back(deviceMenu);
-        action = deviceMenu->addAction(tr("Copy IP address"));
-        connect(action, &QAction::triggered, this, [this, dev, name](bool) {
-          QClipboard *clipboard = QApplication::clipboard();
-          const auto &str = dev.tailscaleIPs.first();
-          qDebug() << str;
-          clipboard->setText(str, QClipboard::Clipboard);
-
-          emit ipAddressCopiedToClipboard(str, name);
-        });
-
-        disposableConnectedMenuActions.push_back(deviceMenu->addSeparator());
-
         auto *sendFileAction = deviceMenu->addAction(tr("Send file"));
         disposableConnectedMenuActions.push_back(sendFileAction);
         connect(sendFileAction, &QAction::triggered, this, [this, name](bool) {
@@ -220,7 +208,43 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus &pTailStatus) {
           pTailRunner->sendFile(name, file, new QString(file));
         });
 
-        if (!scripts.isEmpty()) {
+        disposableConnectedMenuActions.push_back(deviceMenu->addSeparator());
+
+        auto *copyWithMenu = deviceMenu->addMenu(tr("Copy"));
+        disposableMenus.push_back(copyWithMenu);
+
+        const auto addCopyAction =
+            [this, copyWithMenu, name](const QString &value,
+                                       bool isIpAddress) {
+              auto *valueMenu = copyWithMenu->addAction(value);
+              disposableConnectedMenuActions.push_back(valueMenu);
+              connect(valueMenu, &QAction::triggered, this,
+                      [this, value, name, isIpAddress](bool) {
+                QClipboard *clipboard = QApplication::clipboard();
+                clipboard->setText(value, QClipboard::Clipboard);
+                if (isIpAddress) {
+                  emit ipAddressCopiedToClipboard(value, name);
+                }
+              });
+            };
+
+        for (const auto &ip : dev.tailscaleIPs) {
+          addCopyAction(ip, true);
+        }
+
+        addCopyAction(name, false);
+        auto fullHostname = dev.dnsName;
+        if (fullHostname.endsWith('.')) {
+          fullHostname.chop(1);
+        }
+        if (fullHostname.isEmpty()) {
+          fullHostname = dev.hostName;
+        }
+        if (fullHostname != name) {
+          addCopyAction(fullHostname, false);
+        }
+
+        if (!scripts.isEmpty() && !dev.tailscaleIPs.isEmpty()) {
 
           auto *scriptsMenu = deviceMenu->addMenu(tr("Scriptable Actions"));
           disposableMenus.push_back(scriptsMenu);
@@ -251,7 +275,6 @@ void TrayMenuManager::buildConnectedMenu(const TailStatus &pTailStatus) {
           }
         }
       }
-      disposableConnectedMenuActions.push_back(action);
     }
   }
 

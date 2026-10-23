@@ -5,10 +5,14 @@
 
 #include "Paths.h"
 
+#include <QByteArray>
+#include <QCoreApplication>
 #include <QDesktopServices>
+#include <QDir>
 #include <QFileDialog>
 #include <QList>
 #include <QMessageBox>
+#include <QSettings>
 #include <QShowEvent>
 #include <QComboBox>
 #include <QTreeWidget>
@@ -23,6 +27,65 @@
 
 namespace {
     ThemeManager themeManager = {};
+
+#if defined(WINDOWS_BUILD)
+    // Per-user startup. Task Manager disables an entry by writing StartupApproved
+    // and leaving the Run value in place, so both keys have to agree.
+    const QString windowsRunKey = QStringLiteral(
+        "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run");
+    const QString windowsStartupApprovedKey = QStringLiteral(
+        "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run");
+    const QString windowsStartupName = QStringLiteral("Tail Tray");
+
+    [[nodiscard]] bool isWindowsStartupEntryEnabled() {
+        QSettings runKey(windowsRunKey, QSettings::NativeFormat);
+        if (runKey.status() != QSettings::NoError)
+            return false;
+
+        if (runKey.value(windowsStartupName).toString().isEmpty())
+            return false;
+
+        QSettings approved(windowsStartupApprovedKey, QSettings::NativeFormat);
+        const auto state = approved.value(windowsStartupName).toByteArray();
+        if (state.isEmpty())
+            return true;
+
+        // The low bit is the disabled flag. 0x02 is enabled, 0x03 is disabled.
+        const auto flag = static_cast<unsigned char>(state.at(0));
+        return (flag & 0x01) == 0;
+    }
+
+    void setWindowsStartupEntryEnabled(bool enabled) {
+        QSettings runKey(windowsRunKey, QSettings::NativeFormat);
+        QSettings approved(windowsStartupApprovedKey, QSettings::NativeFormat);
+
+        if (enabled) {
+            const auto exePath = QDir::toNativeSeparators(
+                QCoreApplication::applicationFilePath());
+            // --background is the autostart flag: if tail-tray is already
+            // running, this launch must not raise the window.
+            runKey.setValue(
+                windowsStartupName,
+                QString("\"%1\" --background").arg(exePath));
+
+            // 12-byte blob Task Manager writes for an enabled startup entry.
+            QByteArray enabledState(12, '\0');
+            enabledState[0] = static_cast<char>(0x02);
+            approved.setValue(windowsStartupName, enabledState);
+        } else {
+            runKey.remove(windowsStartupName);
+            approved.remove(windowsStartupName);
+        }
+
+        runKey.sync();
+        approved.sync();
+
+        if (runKey.status() != QSettings::NoError ||
+            approved.status() != QSettings::NoError) {
+            qDebug() << "Failed to update the Windows start on login entry";
+        }
+    }
+#endif
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -982,6 +1045,10 @@ void MainWindow::syncSettingsToUi() const {
         ui->lblAdvertisingNumRoutes->setText(tr("No routes advertised"));
     }
 
+#if defined(WINDOWS_BUILD)
+    // The Run key is what actually starts the app at login
+    ui->chkStartOnLogin->setChecked(isWindowsStartupEntryEnabled());
+#else
     // Do we have a startup entry?
     auto configDir = QDir::home();
     if (!configDir.cd(".config"))
@@ -994,6 +1061,7 @@ void MainWindow::syncSettingsToUi() const {
 
     configDir.cd("autostart");
     ui->chkStartOnLogin->setChecked(QFile::exists(configDir.absolutePath() + "/tail-tray.desktop"));
+#endif
 
     // Sync devices to UI as well
     if (eCurrentState == TailState::Connected)
@@ -1036,6 +1104,9 @@ void MainWindow::syncSettingsFromUi() {
         }
     }
 
+#if defined(WINDOWS_BUILD)
+    setWindowsStartupEntryEnabled(settings.startOnLogin());
+#else
     const auto homeDir = QDir::home();
     const auto targetFile =
         homeDir.absolutePath() + "/.config/autostart/tail-tray.desktop";
@@ -1049,6 +1120,7 @@ void MainWindow::syncSettingsFromUi() {
     } else {
         QFile::remove(targetFile);
     }
+#endif
 
     settings.save();
 }
